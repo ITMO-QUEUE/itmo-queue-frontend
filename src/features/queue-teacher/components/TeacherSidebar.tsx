@@ -1,7 +1,7 @@
 import ProfileIcon from '@/assets/Profile.svg'
 
 import { Sidebar } from '../../../components/common/Sidebar'
-import { SidebarOption } from '../../../components/ui/SidebarOption'
+import { SidebarOption } from '../../../components/common/SidebarOption'
 
 // TODO: добавить иконки для каждой страницы
 // TODO: добавить страницы для каждой ссылки в сайдбаре
