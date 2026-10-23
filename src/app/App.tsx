@@ -1,12 +1,14 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import type { JSX } from 'react/jsx-runtime'
+import { RouterProvider } from 'react-router'
+import { router } from './router'
 
 const queryClient = new QueryClient()
 
 export function App(): JSX.Element {
 	return (
-		<QueryClientProvider client={queryClient}>
-			<p className='text-3xl font-bold text-sky-500'>Hello World!</p>
+		<QueryClientProvider client={ queryClient }>
+			<RouterProvider router={ router } />
 		</QueryClientProvider>
 	)
 }
