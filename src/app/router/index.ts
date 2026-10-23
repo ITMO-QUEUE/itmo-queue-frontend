@@ -7,8 +7,12 @@ import { StudentHistoryPage } from '../../pages/student/StudentHistoryPage'
 import { StudentProfilePage } from '../../pages/student/StudentProfilePage'
 import { StudentQueuesPage } from '../../pages/student/StudentQueuesPage'
 import { TeacherDashboard } from '../../pages/teacher/TeacherDashboard'
+import { TeacherHistoryPage } from '../../pages/teacher/TeacherHistoryPage'
+import { TeacherProfilePage } from '../../pages/teacher/TeacherProfilePage'
+import { TeacherQueuesPage } from '../../pages/teacher/TeacherQueuesPage'
+import { TeacherSubjectsPage } from '../../pages/teacher/TeacherSubjectsPage'
 
-export const router = createBrowserRouter( [
+export const router = createBrowserRouter([
 	{
 		path: '/',
 		Component: LoginPage
@@ -46,6 +50,22 @@ export const router = createBrowserRouter( [
 			{
 				index: true,
 				Component: TeacherDashboard
+			},
+			{
+				path: 'queues',
+				Component: TeacherQueuesPage
+			},
+			{
+				path: 'profile',
+				Component: TeacherProfilePage
+			},
+			{
+				path: 'history',
+				Component: TeacherHistoryPage
+			},
+			{
+				path: 'subjects',
+				Component: TeacherSubjectsPage
 			}
 		]
 	},
@@ -53,4 +73,4 @@ export const router = createBrowserRouter( [
 		path: '*',
 		Component: NotFoundPage
 	}
-] )
+])
