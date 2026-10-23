@@ -4,28 +4,28 @@ import ProfileIcon from '@/assets/Profile.svg'
 import QueueIcon from '@/assets/Queue.svg'
 
 import { Sidebar } from '../../../components/common/Sidebar'
-import { SidebarOption } from '../../../components/ui/SidebarOption'
+import { SidebarOption } from '../../../components/common/SidebarOption'
 
 export const StudentSidebar = () => {
 	return (
 		<Sidebar>
 			<SidebarOption
-				icon={ HomeIcon }
+				icon={HomeIcon}
 				to='/student'
 				text='Главная'
 			/>
 			<SidebarOption
-				icon={ QueueIcon }
+				icon={QueueIcon}
 				to='/student/queues'
 				text='Мои очереди'
 			/>
 			<SidebarOption
-				icon={ HistoryIcon }
+				icon={HistoryIcon}
 				to='/student/history'
 				text='История'
 			/>
 			<SidebarOption
-				icon={ ProfileIcon }
+				icon={ProfileIcon}
 				to='/student/profile'
 				text='Личный кабинет'
 			/>
