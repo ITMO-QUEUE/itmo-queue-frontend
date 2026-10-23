@@ -27,7 +27,9 @@
 			"preset": "recommended",
 			"a11y": "error",
 			"complexity": "warn",
-			"correctness": "error",
+			"correctness": {
+				"noGlobalDirnameFilename": "off"
+			},
 			"nursery": {
 				"useConsistentFunctionStyle": "off"
 			},
@@ -63,6 +65,11 @@
 			"source": {
 				"organizeImports": "on"
 			}
+		}
+	},
+	"css": {
+		"parser": {
+			"tailwindDirectives": true
 		}
 	}
 }
