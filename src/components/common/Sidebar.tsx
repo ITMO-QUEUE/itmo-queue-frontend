@@ -5,15 +5,16 @@ interface SidebarProps {
 	children: ReactNode[]
 }
 
-export const Sidebar = ( { children }: SidebarProps ) => {
+export const Sidebar = ({ children }: SidebarProps) => {
 	return (
-		<div className='flex flex-col gap-7 align-center w-full h-full  bg-white border-r border-c-border p-6'>
+		<div className='select-none flex flex-col gap-7 align-center w-full h-full  bg-white border-r border-c-border p-6'>
 			<img
-				src={ logo }
+				draggable={false}
+				src={logo}
 				alt='logo'
 			/>
 
-			<div className='width-full flex flex-col gap-2'>{ children }</div>
+			<div className='width-full flex flex-col gap-2'>{children}</div>
 		</div>
 	)
 }

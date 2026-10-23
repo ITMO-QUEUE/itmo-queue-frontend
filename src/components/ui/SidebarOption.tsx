@@ -7,29 +7,26 @@ interface SidebarOptionProps {
 	alt?: string
 }
 
-export const SidebarOption = ( {
-	icon,
-	text,
-	alt,
-	to
-}: SidebarOptionProps ) => {
+export const SidebarOption = ({ icon, text, alt, to }: SidebarOptionProps) => {
 	const location = useLocation()
 	const isActive = location.pathname === to
 
 	return (
 		<Link
-			to={ to }
-			className={ `flex gap-2 items-center w-full h-auto  justify-start   p-3 cursor-pointer ${
+			to={to}
+			draggable={false}
+			className={`flex gap-2 items-center w-full h-auto  justify-start   p-3 cursor-pointer ${
 				isActive ? 'bg-c-bg-foam rounded-lg text-c-accent' : 'text-c-text-muted'
-			}` }
+			}`}
 		>
 			<img
-				src={ icon }
-				alt={ alt ?? text }
-				className='w-4 h-4 shrink-0'
+				src={icon}
+				alt={alt ?? text}
+				className='w-4 h-4 shrink-0 select-none'
+				draggable={false}
 			/>
 			<span className='font-bold font-nunito text-sm whitespace-nowrap'>
-				{ text }
+				{text}
 			</span>
 		</Link>
 	)
