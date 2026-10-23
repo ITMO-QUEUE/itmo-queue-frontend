@@ -7,8 +7,8 @@ const queryClient = new QueryClient()
 
 export function App(): JSX.Element {
 	return (
-		<QueryClientProvider client={queryClient}>
-			<RouterProvider router={router} />
+		<QueryClientProvider client={ queryClient }>
+			<RouterProvider router={ router } />
 		</QueryClientProvider>
 	)
 }

@@ -3,9 +3,12 @@ import { CommonLayout } from '../../components/layout/CommonLayout'
 import { LoginPage } from '../../pages/LoginPage'
 import { NotFoundPage } from '../../pages/NotFoundPage'
 import { StudentDashboard } from '../../pages/student/StudentDashboard'
+import { StudentHistoryPage } from '../../pages/student/StudentHistoryPage'
+import { StudentProfilePage } from '../../pages/student/StudentProfilePage'
+import { StudentQueuesPage } from '../../pages/student/StudentQueuesPage'
 import { TeacherDashboard } from '../../pages/teacher/TeacherDashboard'
 
-export const router = createBrowserRouter([
+export const router = createBrowserRouter( [
 	{
 		path: '/',
 		Component: LoginPage
@@ -21,6 +24,18 @@ export const router = createBrowserRouter([
 			{
 				index: true,
 				Component: StudentDashboard
+			},
+			{
+				path: 'queues',
+				Component: StudentQueuesPage
+			},
+			{
+				path: 'profile',
+				Component: StudentProfilePage
+			},
+			{
+				path: 'history',
+				Component: StudentHistoryPage
 			}
 		]
 	},
@@ -38,4 +53,4 @@ export const router = createBrowserRouter([
 		path: '*',
 		Component: NotFoundPage
 	}
-])
+] )

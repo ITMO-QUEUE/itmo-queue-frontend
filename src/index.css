@@ -1,1 +1,44 @@
-@import 'tailwindcss';
+@import url( "https://fonts.googleapis.com/css2?family=Nunito+Sans:ital,opsz,wght@0,6..12,200..1000;1,6..12,200..1000&display=swap" );
+@import "tailwindcss";
+
+@theme {
+	--color-c-text-ink: #25283d;
+	--color-c-text-muted: #657083;
+	--color-c-text-foam: #4967a9;
+
+	--color-c-bg-foam: #eef2fc;
+	--color-c-bg-primary: #f5f7f9;
+
+	--color-c-border: #e2e7eb;
+
+	--color-c-accent: #4967a9;
+
+	--font-nunito: "Nunito Sans", ui-sans-serif, system-ui, sans-serif;
+}
+
+/* Глобальные стили для удаления скролла */
+*,
+*::before,
+*::after {
+	box-sizing: border-box;
+}
+
+html,
+body {
+	margin: 0;
+	padding: 0;
+	height: 100%;
+	width: 100%;
+	overflow: hidden;
+	position: fixed; /* Важно! Фиксируем body */
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+}
+
+#root {
+	height: 100%;
+	width: 100%;
+	overflow: hidden;
+}
