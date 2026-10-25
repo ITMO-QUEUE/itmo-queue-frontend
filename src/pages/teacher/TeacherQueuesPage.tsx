@@ -27,6 +27,7 @@ export const TeacherQueuesPage = () => {
 	const students = getQueueStudents()
 	const queue = getQueue()
 
+	//блок реализации логики кнопок
 	const handleCreateQueue = () => {
 		// Заглушка: создание очереди будет подключено позже.
 	}
