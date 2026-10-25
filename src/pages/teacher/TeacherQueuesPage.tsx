@@ -28,8 +28,9 @@ const getQueue = (): Queue => ({discipline: 'Программирование', 
 export const TeacherQueuesPage = () => {
 	const students = getQueueStudents()
 	const queue = getQueue()
+	const currentStudent = students.find(student => student.status === 'На защите')
 
-	//динаимчески дорисовывающиеся при изменении на страницу элементы
+	//динаvbчески дорисовывающиеся при изменении на страницу элементы
 	const [studentCount, setStudentCount] = useState(1)
 	const [duration, setDuration] = useState(90)
 
@@ -133,8 +134,8 @@ export const TeacherQueuesPage = () => {
 					<h2 className='text-base font-normal text-c-text-muted'>
 						Текущая защита
 					</h2>
-					<p className='mt-5 text-2xl font-extrabold'>Студент А.</p>
-					<p className='mt-4 text-xl'>Лабораторная № 2</p>
+					<p className='mt-5 text-2xl font-extrabold'>{ currentStudent.Name }</p>
+					<p className='mt-4 text-xl'>Лабораторная работа №2</p> 
 					<p className='mt-5 leading-6 text-c-text-muted'>
 						После завершения будет вызван следующий участник.
 					</p>
