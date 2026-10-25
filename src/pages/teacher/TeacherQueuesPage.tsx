@@ -4,17 +4,29 @@ type QueueStudent = {
 	task: string
 	status: 'На защите' | 'Закончил' | 'Ожидает'
 }
+//прототип типа Queue для описания очереди
+type Queue = {
+	discipline: string
+	name: string
+	date: string
+	place: string
+}
 
 // временная функция для реализации масштабируемой очереди
 const getQueueStudents = (): QueueStudent[] => [
-	{ Id: 000000, Name: 'Студент А.', task: 'ЛР № 2', status: 'Закончил' },
-	{ Id: 000001, Name: 'Студент Б.', task: 'ЛР № 2', status: 'На защите' },
-	{ Id: 000002, Name: 'Студент В.', task: 'ЛР № 3', status: 'Ожидает' },
-	{ Id: 000003, Name: 'Студент Г.', task: 'ЛР № 3', status: 'Ожидает' }
+	{ Id: 111111, Name: 'Студент А.', task: 'ЛР № 2', status: 'Закончил' },
+	{ Id: 122222, Name: 'Студент Б.', task: 'ЛР № 2', status: 'На защите' },
+	{ Id: 111113, Name: 'Студент В.', task: 'ЛР № 3', status: 'Ожидает' },
+	{ Id: 144444, Name: 'Студент Г.', task: 'ЛР № 3', status: 'Ожидает' }
 ]
+
+// временная функция для реализации описания очереди
+const getQueue = (): Queue => ({discipline: 'Программирование', name: 'ЛР № 3', date: 'сегодня, 14:00–15:30', place: 'аудитория 305'})
 
 export const TeacherQueuesPage = () => {
 	const students = getQueueStudents()
+	const queue = getQueue()
+
 	const handleCreateQueue = () => {
 		// Заглушка: создание очереди будет подключено позже.
 	}
@@ -30,20 +42,16 @@ export const TeacherQueuesPage = () => {
 	const handleChangeDuration = ( _change: number ) => {
 		// Заглушка: изменение общего времени в минутах.
 	}
-	const discipline: string = 'Программирование'
-	const queueName: string = 'ЛР № 3'
-	const date: string = 'сегодня, 14:00–15:30'
-	const place: string = 'аудитория 305'
 
 	return (
 		<div className='min-h-full bg-c-bg-primary px-4 pt-5 pb-14 font-nunito text-base text-c-text-ink sm:px-6'>
 			<div className='mb-7 flex flex-wrap items-center justify-between gap-4'>
 				<div>
 					<h1 className='text-3xl leading-tight font-extrabold sm:text-[40px]'>
-						{ discipline }
+						{ queue.discipline }
 					</h1>
 					<p className='mt-3 text-c-text-muted'>
-						{ queueName } · { date } · { place }
+						{ queue.name } · { queue.date } · { queue.place }
 					</p>
 				</div>
 				<button
