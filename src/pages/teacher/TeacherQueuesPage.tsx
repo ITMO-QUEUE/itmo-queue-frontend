@@ -1,3 +1,5 @@
+import { useState } from 'react'
+
 type QueueStudent = {
 	Id: int
 	Name: string
@@ -27,6 +29,10 @@ export const TeacherQueuesPage = () => {
 	const students = getQueueStudents()
 	const queue = getQueue()
 
+	//динаимчески дорисовывающиеся при изменении на страницу элементы
+	const [studentCount, setStudentCount] = useState(1)
+	const [duration, setDuration] = useState(90)
+
 	//блок реализации логики кнопок
 	const handleCreateQueue = () => {
 		// Заглушка: создание очереди будет подключено позже.
@@ -37,11 +43,11 @@ export const TeacherQueuesPage = () => {
 	const handlePauseQueue = () => {
 		// Заглушка: приостановка очереди.
 	}
-	const handleChangeStudentCount = ( _change: number ) => {
-		// Заглушка: изменение количества одновременно защищающихся студентов.
+	const handleChangeStudentCount = (change: number ) => {
+		setStudentCount(current => current + change)
 	}
-	const handleChangeDuration = ( _change: number ) => {
-		// Заглушка: изменение общего времени в минутах.
+	const handleChangeDuration = (change: number ) => {
+		setDuration(current =>  current + change)
 	}
 
 	return (
@@ -60,7 +66,7 @@ export const TeacherQueuesPage = () => {
 					onClick={ handleCreateQueue }
 					className='cursor-pointer rounded-lg px-4 py-3 font-bold transition-colors hover:bg-c-bg-foam focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-c-accent active:bg-c-border'
 				>
-					Создать очередь
+					Создать очередь 	
 				</button>
 			</div>
 
@@ -153,11 +159,12 @@ export const TeacherQueuesPage = () => {
 								type='button'
 								aria-label='Уменьшить количество студентов'
 								onClick={ () => handleChangeStudentCount( -1 ) }
+								disabled={ studentCount <= 1 }
 								className='h-9 w-8 cursor-pointer rounded-md hover:bg-c-bg-foam focus-visible:outline-2 focus-visible:outline-c-accent active:bg-c-border'
 							>
 								−
 							</button>
-							<span>1</span>
+							<span>{ studentCount }</span>
 							<button
 								type='button'
 								aria-label='Увеличить количество студентов'
@@ -173,11 +180,12 @@ export const TeacherQueuesPage = () => {
 								type='button'
 								aria-label='Уменьшить общее время'
 								onClick={ () => handleChangeDuration( -5 ) }
+								disabled={ duration <= 5 }
 								className='h-9 w-8 cursor-pointer rounded-md hover:bg-c-bg-foam focus-visible:outline-2 focus-visible:outline-c-accent active:bg-c-border'
 							>
 								−
 							</button>
-							<span>90 мин</span>
+							<span>{ duration }</span>
 							<button
 								type='button'
 								aria-label='Увеличить общее время'
