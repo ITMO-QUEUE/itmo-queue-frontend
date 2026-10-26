@@ -11,21 +11,6 @@
 	--font-nunito: 'Nunito Sans', ui-sans-serif, system-ui, sans-serif;
 
 	/* Color palette */
-
-	/* Outdated colors */
-	--color-c-text-ink: #25283d;
-	--color-c-text-muted: #657083;
-	--color-c-text-foam: #4967a9;
-
-	--color-c-bg-foam: #eef2fc;
-	--color-c-bg-primary: #f5f7f9;
-
-	--color-c-border: #e2e7eb;
-
-	--color-c-accent: #4967a9;
-
-	/* New colors */
-
 	--color-action-primary: #4967a9;
 	--color-action-hover: #3d5896;
 	--color-action-pressed: #30477d;
@@ -100,17 +85,6 @@
 	--text-caption--font-weight: 400;
 	--text-caption--font-family: var(--font-nunito);
 
-	/* Spacing */
-	--spacing-4: 0.25rem;
-	--spacing-8: 0.5rem;
-	--spacing-12: 0.75rem;
-	--spacing-16: 1rem;
-	--spacing-24: 1.5rem;
-	--spacing-32: 2rem;
-	--spacing-40: 2.5rem;
-	--spacing-48: 3rem;
-	--spacing-64: 4rem;
-
 	/* Border radius */
 	--radius-control: 0.5rem;
 	--radius-card: 0.75rem;
@@ -123,6 +97,9 @@
 	--margin-content: 2rem;
 	--margin-content-mobile: 1rem;
 	--margin-cards: 1rem;
+
+	/* Size */
+	--size-icon: 1.25rem;
 }
 
 /* Глобальные стили для удаления скролла */
