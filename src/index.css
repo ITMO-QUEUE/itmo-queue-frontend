@@ -7,6 +7,12 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme {
+	/* Font families */
+	--font-nunito: 'Nunito Sans', ui-sans-serif, system-ui, sans-serif;
+
+	/* Color palette */
+
+	/* Outdated colors */
 	--color-c-text-ink: #25283d;
 	--color-c-text-muted: #657083;
 	--color-c-text-foam: #4967a9;
@@ -18,7 +24,7 @@
 
 	--color-c-accent: #4967a9;
 
-	--font-nunito: 'Nunito Sans', ui-sans-serif, system-ui, sans-serif;
+	/* New colors */
 
 	--color-action-primary: #4967a9;
 	--color-action-hover: #3d5896;
@@ -52,6 +58,71 @@
 
 	--color-disabled-bg: #e9edf2;
 	--color-disabled-text: #7d8796;
+
+	/* Typography */
+	--text-display: 2.625rem;
+	--text-display--line-height: 3rem;
+	--text-display--font-weight: 900;
+	--text-display--font-family: var(--font-nunito);
+
+	--text-heading: 2rem;
+	--text-heading--line-height: 2.625rem;
+	--text-heading--font-weight: 900;
+	--text-heading--font-family: var(--font-nunito);
+
+	--text-section: 1.5rem;
+	--text-section--line-height: 2rem;
+	--text-section--font-weight: 700;
+	--text-section--font-family: var(--font-nunito);
+
+	--text-subheading: 1.25rem;
+	--text-subheading--line-height: 1.75rem;
+	--text-subheading--font-weight: 700;
+	--text-subheading--font-family: var(--font-nunito);
+
+	--text-body: 1rem;
+	--text-body--line-height: 1.5rem;
+	--text-body--font-weight: 400;
+	--text-body--font-family: var(--font-nunito);
+
+	--text-label: 0.875rem;
+	--text-label--line-height: 1.25rem;
+	--text-label--font-weight: 700;
+	--text-label--font-family: var(--font-nunito);
+
+	--text-small: 0.875rem;
+	--text-small--line-height: 1.25rem;
+	--text-small--font-weight: 400;
+	--text-small--font-family: var(--font-nunito);
+
+	--text-caption: 0.75rem;
+	--text-caption--line-height: 1rem;
+	--text-caption--font-weight: 400;
+	--text-caption--font-family: var(--font-nunito);
+
+	/* Spacing */
+	--spacing-4: 0.25rem;
+	--spacing-8: 0.5rem;
+	--spacing-12: 0.75rem;
+	--spacing-16: 1rem;
+	--spacing-24: 1.5rem;
+	--spacing-32: 2rem;
+	--spacing-40: 2.5rem;
+	--spacing-48: 3rem;
+	--spacing-64: 4rem;
+
+	/* Border radius */
+	--radius-control: 0.5rem;
+	--radius-card: 0.75rem;
+	--radius-dialog: 1rem;
+
+	/* Widths */
+	--width-sidebar-default: 15rem;
+
+	/* Margins */
+	--margin-content: 2rem;
+	--margin-content-mobile: 1rem;
+	--margin-cards: 1rem;
 }
 
 /* Глобальные стили для удаления скролла */
