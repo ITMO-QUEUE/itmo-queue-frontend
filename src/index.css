@@ -1,24 +1,105 @@
-@import url( "https://fonts.googleapis.com/css2?family=Nunito+Sans:ital,opsz,wght@0,6..12,200..1000;1,6..12,200..1000&display=swap" );
-@import "tailwindcss";
-@import "tw-animate-css";
-@import "shadcn/tailwind.css";
-@import "@fontsource-variable/geist";
+@import url('https://fonts.googleapis.com/css2?family=Nunito+Sans:ital,opsz,wght@0,6..12,200..1000;1,6..12,200..1000&display=swap');
+@import 'tailwindcss';
+@import 'tw-animate-css';
+@import 'shadcn/tailwind.css';
+@import '@fontsource-variable/geist';
 
 @custom-variant dark (&:is(.dark *));
 
 @theme {
-	--color-c-text-ink: #25283d;
-	--color-c-text-muted: #657083;
-	--color-c-text-foam: #4967a9;
+	/* Font families */
+	--font-nunito: 'Nunito Sans', ui-sans-serif, system-ui, sans-serif;
 
-	--color-c-bg-foam: #eef2fc;
-	--color-c-bg-primary: #f5f7f9;
+	/* Color palette */
+	--color-action-primary: #4967a9;
+	--color-action-hover: #3d5896;
+	--color-action-pressed: #30477d;
+	--color-action-subtle-hover: #e4eaf8;
+	--color-action-subtle-pressed: #d5dff3;
 
-	--color-c-border: #e2e7eb;
+	--color-bg-page: #f5f7f9;
+	--color-bg-surface: #ffffff;
+	--color-bg-selected: #eef2fc;
 
-	--color-c-accent: #4967a9;
+	--color-text-primary: #25283d;
+	--color-text-secondary: #657083;
+	--color-text-inverse: #ffffff;
 
-	--font-nunito: "Nunito Sans", ui-sans-serif, system-ui, sans-serif;
+	--color-border-subtle: #e2e7eb;
+	--color-border-control: #8b95a6;
+	--color-border-focus: #4967a9;
+
+	--color-status-danger: #b0164b;
+	--color-status-danger-hover: #991341;
+	--color-status-danger-pressed: #800f36;
+
+	--color-status-danger-bg: #fff0f5;
+	--color-status-success: #217449;
+	--color-status-success-bg: #eaf5ee;
+	--color-status-warning: #805600;
+	--color-status-warning-bg: #fff6dd;
+
+	--color-brand-accent: #f90057;
+
+	--color-disabled-bg: #e9edf2;
+	--color-disabled-text: #7d8796;
+
+	/* Typography */
+	--text-display: 2.5rem;
+	--text-display--line-height: 3rem;
+	--text-display--font-weight: 900;
+	--text-display--font-family: var(--font-nunito);
+
+	--text-heading: 2rem;
+	--text-heading--line-height: 2.5rem;
+	--text-heading--font-weight: 900;
+	--text-heading--font-family: var(--font-nunito);
+
+	--text-section: 1.5rem;
+	--text-section--line-height: 2rem;
+	--text-section--font-weight: 700;
+	--text-section--font-family: var(--font-nunito);
+
+	--text-subheading: 1.25rem;
+	--text-subheading--line-height: 1.75rem;
+	--text-subheading--font-weight: 700;
+	--text-subheading--font-family: var(--font-nunito);
+
+	--text-body: 1rem;
+	--text-body--line-height: 1.5rem;
+	--text-body--font-weight: 400;
+	--text-body--font-family: var(--font-nunito);
+
+	--text-label: 0.875rem;
+	--text-label--line-height: 1.25rem;
+	--text-label--font-weight: 700;
+	--text-label--font-family: var(--font-nunito);
+
+	--text-small: 0.875rem;
+	--text-small--line-height: 1.25rem;
+	--text-small--font-weight: 400;
+	--text-small--font-family: var(--font-nunito);
+
+	--text-caption: 0.75rem;
+	--text-caption--line-height: 1rem;
+	--text-caption--font-weight: 400;
+	--text-caption--font-family: var(--font-nunito);
+
+	/* Border radius */
+	--radius-control: 0.5rem;
+	--radius-card: 0.75rem;
+	--radius-dialog: 1rem;
+
+	/* Widths */
+	--width-sidebar-default: 15rem;
+
+	/* Margins */
+	--margin-content: 2rem;
+	--margin-content-mobile: 1rem;
+	--margin-cards: 1rem;
+
+	/* Size */
+	--size-icon: 1.25rem;
 }
 
 /* Глобальные стили для удаления скролла */
@@ -161,13 +242,13 @@ body {
 }
 
 @layer base {
-  * {
-    @apply border-border outline-ring/50;
+	* {
+		@apply border-border outline-ring/50;
 	}
-  body {
-    @apply bg-background text-foreground;
+	body {
+		@apply bg-background text-foreground;
 	}
-  html {
-    @apply font-sans;
+	html {
+		@apply font-sans;
 	}
 }

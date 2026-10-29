@@ -16,9 +16,9 @@ export const Header = () => {
 			<div className='flex justify-start'>
 				<MyBreadcrumb />
 			</div>
-			<div className='flex gap-6 justify-end align-center text-c-text-ink text-sm'>
+			<div className='flex gap-6 justify-end align-center text-text-primary text-sm'>
 				<button className='cursor-pointer'>Уведомления</button>
-				<div className='p-2 rounded-full bg-c-bg-foam flex justify-center items-center text-c-text-ink font-bold'>
+				<div className='p-2 rounded-full bg-bg-selected flex justify-center items-center text-text-primary font-bold'>
 					{initials}
 				</div>
 				<span className='h-full flex items-center'>

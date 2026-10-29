@@ -7,7 +7,7 @@ interface SidebarProps {
 
 export const Sidebar = ({ children }: SidebarProps) => {
 	return (
-		<div className='select-none flex flex-col gap-7 align-center w-full h-full  bg-white border-r border-c-border p-6'>
+		<div className='select-none flex flex-col gap-7 align-center w-full h-full  bg-white border-r border-border-subtle p-6'>
 			<img
 				draggable={false}
 				src={logo}
