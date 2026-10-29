@@ -1,4 +1,4 @@
-import ProfileIcon from '@/assets/Profile.svg'
+import ProfileIcon from '@/assets/icons/Profile.svg'
 
 import { Sidebar } from '../../../components/common/Sidebar'
 import { SidebarOption } from '../../../components/common/SidebarOption'
