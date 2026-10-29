@@ -1,7 +1,7 @@
-import HistoryIcon from '@/assets/History.svg'
-import HomeIcon from '@/assets/Home.svg'
-import ProfileIcon from '@/assets/Profile.svg'
-import QueueIcon from '@/assets/Queue.svg'
+import HistoryIcon from '@/assets/icons/History.svg'
+import HomeIcon from '@/assets/icons/Home.svg'
+import ProfileIcon from '@/assets/icons/Profile.svg'
+import QueueIcon from '@/assets/icons/Queue.svg'
 
 import { Sidebar } from '../../../components/common/Sidebar'
 import { SidebarOption } from '../../../components/common/SidebarOption'
