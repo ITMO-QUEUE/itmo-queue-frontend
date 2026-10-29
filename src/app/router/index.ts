@@ -11,6 +11,7 @@ import { TeacherHistoryPage } from '../../pages/teacher/TeacherHistoryPage'
 import { TeacherProfilePage } from '../../pages/teacher/TeacherProfilePage'
 import { TeacherQueuesPage } from '../../pages/teacher/TeacherQueuesPage'
 import { TeacherSubjectsPage } from '../../pages/teacher/TeacherSubjectsPage'
+import { TestButtonPage } from '../../pages/test/TestButtonPage'
 
 export const router = createBrowserRouter([
 	{
@@ -66,6 +67,15 @@ export const router = createBrowserRouter([
 			{
 				path: 'subjects',
 				Component: TeacherSubjectsPage
+			}
+		]
+	},
+	{
+		path: 'test',
+		children: [
+			{
+				path: 'button',
+				Component: TestButtonPage
 			}
 		]
 	},
