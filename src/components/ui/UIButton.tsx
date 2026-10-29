@@ -59,7 +59,7 @@ export const UIButton = ({
 	label,
 	onClick,
 	tone,
-	loading: disabled = false,
+	disabled = false,
 	loading = false
 }: UIButtonProps) => {
 	const isDisabled = disabled || loading
