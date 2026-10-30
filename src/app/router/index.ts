@@ -12,6 +12,7 @@ import { TeacherProfilePage } from '../../pages/teacher/TeacherProfilePage'
 import { TeacherQueuesPage } from '../../pages/teacher/TeacherQueuesPage'
 import { TeacherSubjectsPage } from '../../pages/teacher/TeacherSubjectsPage'
 import { TestButtonPage } from '../../pages/test/TestButtonPage'
+import { TestCheckboxPage } from '../../pages/test/TestCheckboxPage'
 
 export const router = createBrowserRouter([
 	{
@@ -76,6 +77,10 @@ export const router = createBrowserRouter([
 			{
 				path: 'button',
 				Component: TestButtonPage
+			},
+			{
+				path: 'checkbox',
+				Component: TestCheckboxPage
 			}
 		]
 	},
