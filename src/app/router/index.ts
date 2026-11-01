@@ -13,6 +13,9 @@ import { TeacherQueuesPage } from '../../pages/teacher/TeacherQueuesPage'
 import { TeacherSubjectsPage } from '../../pages/teacher/TeacherSubjectsPage'
 import { TestButtonPage } from '../../pages/test/TestButtonPage'
 import { TestCheckboxPage } from '../../pages/test/TestCheckboxPage'
+import { TestInputPage } from '../../pages/test/TestInputPage'
+import { TestSelectPage } from '../../pages/test/TestSelectPage'
+import { TestAlertPage } from '../../pages/test/TestAlertPage'
 import { TestNumberfieldPage } from '../../pages/test/TestNumberfieldPage'
 
 export const router = createBrowserRouter([
@@ -84,9 +87,22 @@ export const router = createBrowserRouter([
 				Component: TestCheckboxPage
 			},
 			{
+				path: 'input',
+				Component: TestInputPage
+			},
+			{
+				path: 'select',
+				Component: TestSelectPage
+			},
+			{
+				path: 'alert',
+				Component: TestAlertPage
+			},
+			{
 				path: 'numberfield',
 				Component: TestNumberfieldPage
 			}
+
 		]
 	},
 	{
