@@ -16,6 +16,7 @@ import { TestCheckboxPage } from '../../pages/test/TestCheckboxPage'
 import { TestInputPage } from '../../pages/test/TestInputPage'
 import { TestSelectPage } from '../../pages/test/TestSelectPage'
 import { TestAlertPage } from '../../pages/test/TestAlertPage'
+import { TestNumberfieldPage } from '../../pages/test/TestNumberfieldPage'
 
 export const router = createBrowserRouter([
 	{
@@ -96,6 +97,10 @@ export const router = createBrowserRouter([
 			{
 				path: 'alert',
 				Component: TestAlertPage
+			},
+			{
+				path: 'numberfield',
+				Component: TestNumberfieldPage
 			}
 
 		]
