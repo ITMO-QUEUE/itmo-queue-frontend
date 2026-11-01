@@ -1,0 +1,55 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="160" height="160" viewBox="0 0 160 160" fill="none">
+  <title>Золотистый навесной замок</title>
+  <desc>Векторный замок с серебристой дужкой и рифлёным латунным корпусом на прозрачном фоне.</desc>
+  <defs>
+    <linearGradient id="steel" x1="34" y1="38" x2="125" y2="60" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#64757B"/>
+      <stop offset=".08" stop-color="#D7E7EF"/>
+      <stop offset=".19" stop-color="#F7FAFC"/>
+      <stop offset=".35" stop-color="#A6BAC9"/>
+      <stop offset=".58" stop-color="#728995"/>
+      <stop offset=".77" stop-color="#D6E4EF"/>
+      <stop offset=".91" stop-color="#AFC7D9"/>
+      <stop offset="1" stop-color="#627B89"/>
+    </linearGradient>
+    <linearGradient id="brass" x1="23" y1="97" x2="137" y2="107" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#D5D390"/>
+      <stop offset=".12" stop-color="#DAD79A"/>
+      <stop offset=".43" stop-color="#BCB974"/>
+      <stop offset=".51" stop-color="#AEAA62"/>
+      <stop offset=".7" stop-color="#A8A25F"/>
+      <stop offset="1" stop-color="#928B50"/>
+    </linearGradient>
+    <linearGradient id="faceLight" x1="80" y1="70" x2="80" y2="150" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFFDD0" stop-opacity=".37"/>
+      <stop offset=".2" stop-color="#FFFDD0" stop-opacity="0"/>
+      <stop offset=".84" stop-color="#594F23" stop-opacity=".04"/>
+      <stop offset="1" stop-color="#594F23" stop-opacity=".3"/>
+    </linearGradient>
+    <linearGradient id="top" x1="23" y1="72" x2="137" y2="73" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#F8F5CA"/>
+      <stop offset=".5" stop-color="#D8D49C"/>
+      <stop offset="1" stop-color="#AAA575"/>
+    </linearGradient>
+    <clipPath id="bodyClip"><rect x="23" y="70" width="114" height="80" rx="1"/></clipPath>
+  </defs>
+  <!-- Closed shackle, drawn as a compound silhouette. -->
+  <path d="M33 71V62C33 32 50 11 79 11C108 11 126 32 126 62V71H113V62C113 40 101 25 79 25C58 25 46 40 46 62V71Z" fill="url(#steel)" stroke="#59665D" stroke-width="1.2"/>
+  <path d="M34.5 69V62C34.5 32.5 51 12.5 79 12.5C107 12.5 124.5 33 124.5 62V69" stroke="#E7EFF3" stroke-width="1.2"/>
+  <path d="M45 69V62C45 39 57 23.5 79 23.5C102 23.5 114.5 39 114.5 62V69" stroke="#F2EBC6" stroke-width="1.1"/>
+  <path d="M47.5 69V62C47.5 40 59 27 79 27C99 27 111.5 40 111.5 62V69" stroke="#423E27" stroke-width="1.2"/>
+  <path d="M38 61C38 41 45 26 58 19" stroke="#FFFFFF" stroke-opacity=".65" stroke-width="2" stroke-linecap="round"/>
+  <rect x="23" y="70" width="114" height="80" rx="1" fill="url(#brass)" stroke="#827E4D"/>
+  <g clip-path="url(#bodyClip)">
+    <path d="M24 83H137M24 96H137M24 110H137M24 123H137M24 137H137" stroke="#7D783E" stroke-opacity=".25" stroke-width="1.4"/>
+    <path d="M24 84.5H137M24 97.5H137M24 111.5H137M24 124.5H137M24 138.5H137" stroke="#F3EFB5" stroke-opacity=".28" stroke-width="1.4"/>
+    <path d="M27 78H133M26 89H134M26 102H133M26 116H134M26 129H133M27 143H133" stroke="#FFF5B9" stroke-opacity=".08"/>
+    <rect x="23" y="70" width="114" height="80" fill="url(#faceLight)"/>
+    <path d="M24 71L29 76H131L136 71" fill="url(#top)"/>
+    <path d="M24 72L28 77V144L24 149Z" fill="#F7F5BA" fill-opacity=".32"/>
+    <path d="M24 149L30 145H130L136 149Z" fill="#736B34" fill-opacity=".4"/>
+  </g>
+  <path d="M24 149V71H136" stroke="#F2EFC0" stroke-width="1" stroke-linecap="round"/>
+  <path d="M137 71V150H24" stroke="#686339" stroke-opacity=".7"/>
+  <path d="M26 147H134" stroke="#D5CA83" stroke-opacity=".75"/>
+</svg>
