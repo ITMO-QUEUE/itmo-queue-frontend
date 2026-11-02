@@ -7,6 +7,7 @@ interface UIButtonProps {
 	tone: UIButtonTone
 	loading?: boolean
 	disabled?: boolean
+	fullWidth?: boolean
 }
 
 export enum UIButtonTone {
@@ -18,7 +19,7 @@ export enum UIButtonTone {
 
 const BASE_CLASSES = tw(
 	'inline-flex items-center justify-center gap-2',
-	'text-label px-3 py-2 h-11 w-56',
+	'text-label px-3 py-2 h-11',
 	'rounded-control',
 	'focus:outline-2 focus:outline-offset-2',
 	'focus:outline-border-focus focus:border-0.5 focus:border-white',
@@ -60,7 +61,8 @@ export const UIButton = ({
 	onClick,
 	tone,
 	disabled = false,
-	loading = false
+	loading = false,
+	fullWidth = false
 }: UIButtonProps) => {
 	const isDisabled = disabled || loading
 
@@ -70,7 +72,11 @@ export const UIButton = ({
 			onClick={onClick}
 			disabled={isDisabled}
 			aria-busy={loading}
-			className={tw(BASE_CLASSES, TONE_CLASSES[tone])}
+			className={tw(
+				BASE_CLASSES,
+				fullWidth ? 'w-full' : 'w-56',
+				TONE_CLASSES[tone]
+			)}
 		>
 			{loading && (
 				<span
