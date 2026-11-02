@@ -11,14 +11,16 @@ import { TeacherHistoryPage } from '../../pages/teacher/TeacherHistoryPage'
 import { TeacherProfilePage } from '../../pages/teacher/TeacherProfilePage'
 import { TeacherQueuesPage } from '../../pages/teacher/TeacherQueuesPage'
 import { TeacherSubjectsPage } from '../../pages/teacher/TeacherSubjectsPage'
+
+import { TestAlertPage } from '../../pages/test/TestAlertPage'
 import { TestButtonPage } from '../../pages/test/TestButtonPage'
-import { TestQueueRowPage } from '../../pages/test/TestQueueRowPage'
 import { TestCheckboxPage } from '../../pages/test/TestCheckboxPage'
 import { TestInputPage } from '../../pages/test/TestInputPage'
-import { TestSelectPage } from '../../pages/test/TestSelectPage'
-import { TestAlertPage } from '../../pages/test/TestAlertPage'
 import { TestNumberfieldPage } from '../../pages/test/TestNumberfieldPage'
 import { TestDialogPage } from '../../pages/test/TestDialogPage'
+import { TestQueueCardPage } from '../../pages/test/TestQueueCardPage'
+import { TestQueueRowPage } from '../../pages/test/TestQueueRowPage'
+import { TestSelectPage } from '../../pages/test/TestSelectPage'
 
 export const router = createBrowserRouter([
 	{
@@ -88,10 +90,10 @@ export const router = createBrowserRouter([
 				path: 'queue-row',
 				Component: TestQueueRowPage
 			},
-      {
-        path: 'checkbox',
+			{
+				path: 'checkbox',
 				Component: TestCheckboxPage
-      },
+			},
 			{
 				path: 'input',
 				Component: TestInputPage
@@ -111,8 +113,11 @@ export const router = createBrowserRouter([
 			{
 				path: 'dialog',
 				Component: TestDialogPage
-			}
-
+			},
+      {
+      path: 'queue-card',
+			Component: TestQueueCardPage
+      }
 		]
 	},
 	{
