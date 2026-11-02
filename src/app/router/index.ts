@@ -17,6 +17,7 @@ import { TestButtonPage } from '../../pages/test/TestButtonPage'
 import { TestCheckboxPage } from '../../pages/test/TestCheckboxPage'
 import { TestInputPage } from '../../pages/test/TestInputPage'
 import { TestNumberfieldPage } from '../../pages/test/TestNumberfieldPage'
+import { TestDialogPage } from '../../pages/test/TestDialogPage'
 import { TestQueueCardPage } from '../../pages/test/TestQueueCardPage'
 import { TestQueueRowPage } from '../../pages/test/TestQueueRowPage'
 import { TestSelectPage } from '../../pages/test/TestSelectPage'
@@ -110,9 +111,13 @@ export const router = createBrowserRouter([
 				Component: TestNumberfieldPage
 			},
 			{
-				path: 'queue-card',
-				Component: TestQueueCardPage
-			}
+				path: 'dialog',
+				Component: TestDialogPage
+			},
+      {
+      path: 'queue-card',
+			Component: TestQueueCardPage
+      }
 		]
 	},
 	{
