@@ -12,6 +12,17 @@ import { TeacherProfilePage } from '../../pages/teacher/TeacherProfilePage'
 import { TeacherQueuesPage } from '../../pages/teacher/TeacherQueuesPage'
 import { TeacherSubjectsPage } from '../../pages/teacher/TeacherSubjectsPage'
 
+import { TestAlertPage } from '../../pages/test/TestAlertPage'
+import { TestButtonPage } from '../../pages/test/TestButtonPage'
+import { TestCheckboxPage } from '../../pages/test/TestCheckboxPage'
+import { TestInputPage } from '../../pages/test/TestInputPage'
+import { TestNumberfieldPage } from '../../pages/test/TestNumberfieldPage'
+import { TestDialogPage } from '../../pages/test/TestDialogPage'
+import { TestQueueCardPage } from '../../pages/test/TestQueueCardPage'
+import { TestQueueRowPage } from '../../pages/test/TestQueueRowPage'
+import { TestSelectPage } from '../../pages/test/TestSelectPage'
+import { TestTeacherParametersPage } from '../../pages/test/TestTeacherParametersPage'
+
 export const router = createBrowserRouter([
 	{
 		path: '/',
@@ -67,6 +78,51 @@ export const router = createBrowserRouter([
 				path: 'subjects',
 				Component: TeacherSubjectsPage
 			}
+		]
+	},
+	{
+		path: 'test',
+		children: [
+			{
+				path: 'button',
+				Component: TestButtonPage
+			},
+			{
+				path: 'queue-row',
+				Component: TestQueueRowPage
+			},
+			{
+				path: 'checkbox',
+				Component: TestCheckboxPage
+			},
+			{
+				path: 'input',
+				Component: TestInputPage
+			},
+			{
+				path: 'select',
+				Component: TestSelectPage
+			},
+			{
+				path: 'alert',
+				Component: TestAlertPage
+			},
+			{
+				path: 'numberfield',
+				Component: TestNumberfieldPage
+			},
+			{
+				path: 'dialog',
+				Component: TestDialogPage
+			},
+			{
+				path: 'parameters',
+				Component: TestTeacherParametersPage
+			},
+      		{
+      			path: 'queue-card',
+				Component: TestQueueCardPage
+      		}
 		]
 	},
 	{

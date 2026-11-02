@@ -1,33 +1,33 @@
-import HistoryIcon from '@/assets/History.svg'
-import HomeIcon from '@/assets/Home.svg'
-import ProfileIcon from '@/assets/Profile.svg'
-import QueueIcon from '@/assets/Queue.svg'
+import HistoryIcon from '@/assets/icons/History.svg'
+import HomeIcon from '@/assets/icons/Home.svg'
+import ProfileIcon from '@/assets/icons/Profile.svg'
+import QueueIcon from '@/assets/icons/Queue.svg'
 
 import { Sidebar } from '../../../components/common/Sidebar'
-import { SidebarOption } from '../../../components/common/SidebarOption'
+import { UINavigationItem } from '../../../components/ui/UINavigationItem'
 
 export const StudentSidebar = () => {
 	return (
 		<Sidebar>
-			<SidebarOption
+			<UINavigationItem
+				label='Мои записи'
+				path='/student'
 				icon={HomeIcon}
-				to='/student'
-				text='Главная'
 			/>
-			<SidebarOption
+			<UINavigationItem
+				label='Найти очередь'
+				path='/student/queues'
 				icon={QueueIcon}
-				to='/student/queues'
-				text='Мои очереди'
 			/>
-			<SidebarOption
+			<UINavigationItem
+				label='История'
+				path='/student/history'
 				icon={HistoryIcon}
-				to='/student/history'
-				text='История'
 			/>
-			<SidebarOption
+			<UINavigationItem
+				label='Профиль'
+				path='/student/profile'
 				icon={ProfileIcon}
-				to='/student/profile'
-				text='Личный кабинет'
 			/>
 		</Sidebar>
 	)
