@@ -21,6 +21,7 @@ import { TestDialogPage } from '../../pages/test/TestDialogPage'
 import { TestQueueCardPage } from '../../pages/test/TestQueueCardPage'
 import { TestQueueRowPage } from '../../pages/test/TestQueueRowPage'
 import { TestSelectPage } from '../../pages/test/TestSelectPage'
+import { TestTeacherParametersPage } from '../../pages/test/TestTeacherParametersPage'
 
 export const router = createBrowserRouter([
 	{
@@ -114,10 +115,14 @@ export const router = createBrowserRouter([
 				path: 'dialog',
 				Component: TestDialogPage
 			},
-      {
-      path: 'queue-card',
-			Component: TestQueueCardPage
-      }
+			{
+				path: 'parameters',
+				Component: TestTeacherParametersPage
+			},
+      		{
+      			path: 'queue-card',
+				Component: TestQueueCardPage
+      		}
 		]
 	},
 	{
