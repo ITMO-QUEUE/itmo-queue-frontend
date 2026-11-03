@@ -22,6 +22,7 @@ import { TestQueueCardPage } from '../../pages/test/TestQueueCardPage'
 import { TestQueueRowPage } from '../../pages/test/TestQueueRowPage'
 import { TestSelectPage } from '../../pages/test/TestSelectPage'
 import { TestTeacherParametersPage } from '../../pages/test/TestTeacherParametersPage'
+import { TestQueueStatus } from '../../pages/test/TestQueueStatus'
 
 export const router = createBrowserRouter([
 	{
@@ -122,6 +123,10 @@ export const router = createBrowserRouter([
       		{
       			path: 'queue-card',
 				Component: TestQueueCardPage
+      		},
+			{
+      			path: 'queue-status',
+				Component: TestQueueStatus
       		}
 		]
 	},
