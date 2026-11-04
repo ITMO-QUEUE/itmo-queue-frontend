@@ -1,37 +1,38 @@
-import { createBrowserRouter } from 'react-router'
+import { createBrowserRouter, type RouteObject } from 'react-router'
+
+import { AuthPage } from '@/pages/AuthPage'
 import { CommonLayout } from '../../components/layout/CommonLayout'
-import { LoginPage } from '../../pages/LoginPage'
 import { NotFoundPage } from '../../pages/NotFoundPage'
 import { StudentDashboard } from '../../pages/student/StudentDashboard'
 import { StudentHistoryPage } from '../../pages/student/StudentHistoryPage'
 import { StudentProfilePage } from '../../pages/student/StudentProfilePage'
+import { StudentQueuePage } from '../../pages/student/StudentQueuePage'
 import { StudentQueuesPage } from '../../pages/student/StudentQueuesPage'
 import { TeacherDashboard } from '../../pages/teacher/TeacherDashboard'
-import { TeacherHistoryPage } from '../../pages/teacher/TeacherHistoryPage'
 import { TeacherProfilePage } from '../../pages/teacher/TeacherProfilePage'
+import { TeacherQueuePage } from '../../pages/teacher/TeacherQueuePage'
 import { TeacherQueuesPage } from '../../pages/teacher/TeacherQueuesPage'
 import { TeacherSubjectsPage } from '../../pages/teacher/TeacherSubjectsPage'
-
 import { TestAlertPage } from '../../pages/test/TestAlertPage'
 import { TestButtonPage } from '../../pages/test/TestButtonPage'
 import { TestCheckboxPage } from '../../pages/test/TestCheckboxPage'
+import { TestDialogPage } from '../../pages/test/TestDialogPage'
 import { TestInputPage } from '../../pages/test/TestInputPage'
 import { TestNumberfieldPage } from '../../pages/test/TestNumberfieldPage'
-import { TestDialogPage } from '../../pages/test/TestDialogPage'
 import { TestQueueCardPage } from '../../pages/test/TestQueueCardPage'
 import { TestQueueRowPage } from '../../pages/test/TestQueueRowPage'
+import { TestQueueStatus } from '../../pages/test/TestQueueStatus'
 import { TestSelectPage } from '../../pages/test/TestSelectPage'
 import { TestTeacherParametersPage } from '../../pages/test/TestTeacherParametersPage'
-import { TestQueueStatus } from '../../pages/test/TestQueueStatus'
 
-export const router = createBrowserRouter([
+const routes: RouteObject[] = [
 	{
 		path: '/',
-		Component: LoginPage
+		Component: AuthPage
 	},
 	{
-		path: 'login',
-		Component: LoginPage
+		path: 'auth',
+		Component: AuthPage
 	},
 	{
 		path: 'student',
@@ -43,7 +44,13 @@ export const router = createBrowserRouter([
 			},
 			{
 				path: 'queues',
-				Component: StudentQueuesPage
+				Component: StudentQueuesPage,
+				children: [
+					{
+						path: ':queueId',
+						Component: StudentQueuePage
+					}
+				]
 			},
 			{
 				path: 'profile',
@@ -65,73 +72,88 @@ export const router = createBrowserRouter([
 			},
 			{
 				path: 'queues',
-				Component: TeacherQueuesPage
+				Component: TeacherQueuesPage,
+				children: [
+					{
+						path: ':queueId',
+						Component: TeacherQueuePage
+					}
+				]
 			},
 			{
 				path: 'profile',
 				Component: TeacherProfilePage
 			},
 			{
-				path: 'history',
-				Component: TeacherHistoryPage
-			},
-			{
 				path: 'subjects',
 				Component: TeacherSubjectsPage
 			}
 		]
-	},
-	{
-		path: 'test',
-		children: [
-			{
-				path: 'button',
-				Component: TestButtonPage
-			},
-			{
-				path: 'queue-row',
-				Component: TestQueueRowPage
-			},
-			{
-				path: 'checkbox',
-				Component: TestCheckboxPage
-			},
-			{
-				path: 'input',
-				Component: TestInputPage
-			},
-			{
-				path: 'select',
-				Component: TestSelectPage
-			},
-			{
-				path: 'alert',
-				Component: TestAlertPage
-			},
-			{
-				path: 'numberfield',
-				Component: TestNumberfieldPage
-			},
-			{
-				path: 'dialog',
-				Component: TestDialogPage
-			},
-			{
-				path: 'parameters',
-				Component: TestTeacherParametersPage
-			},
-      		{
-      			path: 'queue-card',
-				Component: TestQueueCardPage
-      		},
-			{
-      			path: 'queue-status',
-				Component: TestQueueStatus
-      		}
-		]
-	},
-	{
-		path: '*',
-		Component: NotFoundPage
 	}
-])
+]
+
+const testRoutes: RouteObject[] | null =
+	import.meta.env.DEV ?
+		[
+			{
+				path: 'test',
+				children: [
+					{
+						path: 'button',
+						Component: TestButtonPage
+					},
+					{
+						path: 'queue-row',
+						Component: TestQueueRowPage
+					},
+					{
+						path: 'checkbox',
+						Component: TestCheckboxPage
+					},
+					{
+						path: 'input',
+						Component: TestInputPage
+					},
+					{
+						path: 'select',
+						Component: TestSelectPage
+					},
+					{
+						path: 'alert',
+						Component: TestAlertPage
+					},
+					{
+						path: 'numberfield',
+						Component: TestNumberfieldPage
+					},
+					{
+						path: 'dialog',
+						Component: TestDialogPage
+					},
+					{
+						path: 'parameters',
+						Component: TestTeacherParametersPage
+					},
+					{
+						path: 'queue-card',
+						Component: TestQueueCardPage
+					},
+					{
+						path: 'queue-status',
+						Component: TestQueueStatus
+					}
+				]
+			}
+		]
+	:	null
+
+if (testRoutes) {
+	routes.push(...testRoutes)
+}
+
+routes.push({
+	path: '*',
+	Component: NotFoundPage
+})
+
+export const router = createBrowserRouter(routes)
