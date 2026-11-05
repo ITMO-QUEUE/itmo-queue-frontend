@@ -10,6 +10,5 @@ export const TeacherProfilePage = () => {
 			login = 'e.ivanova'
 			id = {112233}
 		/>
-		
 	)
 }
