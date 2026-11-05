@@ -98,6 +98,9 @@
 	--margin-content-mobile: 1rem;
 	--margin-cards: 1rem;
 
+	/* Paddings */
+	--padding-content: 2rem;
+
 	/* Size */
 	--size-icon: 1.25rem;
 	--size-control: 2.75rem;
