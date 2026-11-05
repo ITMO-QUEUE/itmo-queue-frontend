@@ -1,7 +1,15 @@
+import { Page } from '../../components/common/Page.tsx'; 
+import { Profile } from '../../components/common/Profile.tsx'
+
+
 export const TeacherProfilePage = () => {
 	return (
-		<div className='flex h-screen items-center justify-center'>
-			<h1 className='text-2xl font-bold'>Hello TeacherProfilePage</h1>
-		</div>
+		<Profile
+			name = 'Елена Ивановна'
+			role = 'Преподаватель'
+			login = 'e.ivanova'
+			id = {112233}
+		/>
+		
 	)
 }

@@ -4,4 +4,5 @@ export const TeacherQueuesPage = () => {
 			<h1 className='text-2xl font-bold'>Hello TeacherQueuesPage</h1>
 		</div>
 	)
+	
 }
