@@ -4,6 +4,7 @@ import { UIInput } from '../../components/ui/UIInput'
 export const TestInputPage = () => {
 	const [login, setLogin] = useState('')
 	const [password, setPassword] = useState('')
+	const [artifact, setArtifact] = useState('') 
 
 	return (
 		<main className='h-full w-full overflow-auto bg-bg-page p-6 md:p-10'>
@@ -24,6 +25,7 @@ export const TestInputPage = () => {
 						value={login}
 						onChange={setLogin}
 						placeholder='Например, 123456'
+						hint='Подпись поля остаётся видимой'
 					/>
 					<UIInput
 						label='Password'
@@ -31,6 +33,14 @@ export const TestInputPage = () => {
 						value={password}
 						onChange={setPassword}
 						placeholder='Введите пароль'
+					/>
+										<UIInput
+						label='Ссылка на код / артефакт'
+						value={artifact}
+						onChange={setArtifact}
+						placeholder='https://...'
+						hint='Ссылка обязательна для каждой выбранной работы.'
+						required
 					/>
 					<UIInput
 						label='Error'

@@ -1,6 +1,7 @@
 import { useId } from 'react'
 import ChevronDownIcon from '@/assets/icons/ChevronDown.svg'
 import { tw } from '../../libs/utils'
+import { getHelperId, UIFieldHelper, UIFieldLabel } from './UIField'
 
 export interface UISelectOption {
 	value: string
@@ -13,11 +14,11 @@ interface UISelectProps {
 	onChange: (value: string) => void
 	options: UISelectOption[]
 	placeholder?: string
+	hint?: string
 	error?: string
+	required?: boolean
 	disabled?: boolean
 }
-
-const LABEL_CLASSES = tw('text-label text-text-primary')
 
 const SELECT_CLASSES = tw(
 	'h-11 w-full appearance-none pl-3 pr-11',
@@ -35,7 +36,10 @@ const ERROR_SELECT_CLASSES = tw(
 	'focus:border-status-danger focus:ring-status-danger/20'
 )
 
-const ERROR_TEXT_CLASSES = tw('text-caption text-status-danger')
+const CHEVRON_CLASSES = tw(
+	'pointer-events-none absolute top-1/2 right-3',
+	'size-icon -translate-y-1/2 select-none'
+)
 
 export const UISelect = ({
 	label,
@@ -43,32 +47,34 @@ export const UISelect = ({
 	onChange,
 	options,
 	placeholder = 'Выберите вариант',
+	hint,
 	error,
+	required = false,
 	disabled = false
 }: UISelectProps) => {
 	const id = useId()
-	const isEmpty = value === ''
+	const helperId = getHelperId(id, error, hint)
 
 	return (
 		<div className='flex w-full flex-col gap-1.5'>
-			<label
+			<UIFieldLabel
 				htmlFor={id}
-				className={LABEL_CLASSES}
-			>
-				{label}
-			</label>
+				label={label}
+				required={required}
+			/>
 
 			<div className='relative'>
 				<select
 					id={id}
 					value={value}
 					onChange={event => onChange(event.currentTarget.value)}
+					required={required}
 					disabled={disabled}
 					aria-invalid={Boolean(error)}
-					aria-describedby={error ? `${id}-error` : undefined}
+					aria-describedby={helperId}
 					className={tw(
 						SELECT_CLASSES,
-						isEmpty ? 'text-text-secondary' : 'text-text-primary',
+						value === '' ? 'text-text-secondary' : 'text-text-primary',
 						error ? ERROR_SELECT_CLASSES : ''
 					)}
 				>
@@ -93,19 +99,16 @@ export const UISelect = ({
 					src={ChevronDownIcon}
 					alt=''
 					aria-hidden='true'
-					className='pointer-events-none absolute top-1/2 right-3 size-icon -translate-y-1/2 select-none'
+					className={CHEVRON_CLASSES}
 					draggable={false}
 				/>
 			</div>
 
-			{error && (
-				<p
-					id={`${id}-error`}
-					className={ERROR_TEXT_CLASSES}
-				>
-					{error}
-				</p>
-			)}
+			<UIFieldHelper
+				id={`${id}-helper`}
+				error={error}
+				hint={hint}
+			/>
 		</div>
 	)
 }
