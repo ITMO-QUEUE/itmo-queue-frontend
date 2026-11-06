@@ -23,6 +23,7 @@ import { TestQueueCardPage } from '../../pages/test/TestQueueCardPage'
 import { TestQueueRowPage } from '../../pages/test/TestQueueRowPage'
 import { TestQueueStatus } from '../../pages/test/TestQueueStatus'
 import { TestSelectPage } from '../../pages/test/TestSelectPage'
+import { TestTabPage } from '../../pages/test/TestTabPage'
 import { TestTeacherParametersPage } from '../../pages/test/TestTeacherParametersPage'
 
 const routes: RouteObject[] = [
@@ -141,6 +142,10 @@ const testRoutes: RouteObject[] | null =
 					{
 						path: 'queue-status',
 						Component: TestQueueStatus
+					},
+					{
+						path: 'tab',
+						Component: TestTabPage
 					}
 				]
 			}
