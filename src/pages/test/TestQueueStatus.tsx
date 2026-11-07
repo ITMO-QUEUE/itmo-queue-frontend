@@ -1,28 +1,28 @@
 import {
+	QueueStatus,
 	UIQueueStatus,
-	type UIQueueStatusProps,
-	UIQueueStatusStatus
+	type UIQueueStatusProps
 } from '../../components/ui/UIQueueStatus'
 
 const STATUSES = [
 	{
-		status: UIQueueStatusStatus.PREREGISTRATION,
+		status: QueueStatus.PREREGISTRATION,
 		label: 'Предварительная запись'
 	},
 	{
-		status: UIQueueStatusStatus.REGISTRATION_CLOSED,
+		status: QueueStatus.REGISTRATION_CLOSED,
 		label: 'Запись закрыта'
 	},
 	{
-		status: UIQueueStatusStatus.ACTIVE,
+		status: QueueStatus.ACTIVE,
 		label: 'Активная защита'
 	},
 	{
-		status: UIQueueStatusStatus.PAUSED,
+		status: QueueStatus.PAUSED,
 		label: 'Пауза · резерв'
 	},
 	{
-		status: UIQueueStatusStatus.COMPLETED,
+		status: QueueStatus.COMPLETED,
 		label: 'Защита завершена'
 	}
 ] satisfies UIQueueStatusProps[]
@@ -48,11 +48,15 @@ export const TestQueueStatus = () => (
 				<h2 className='text-subheading text-text-primary'>Status variants</h2>
 				<div className='flex flex-wrap gap-6'>
 					{STATUSES.map(({ status, label }) => (
-						<article key={status} className='flex flex-col gap-3'>
-							<p className='text-small text-text-secondary'>
-								Status={status}
-							</p>
-							<UIQueueStatus status={status} label={label} />
+						<article
+							key={status}
+							className='flex flex-col gap-3'
+						>
+							<p className='text-small text-text-secondary'>Status={status}</p>
+							<UIQueueStatus
+								status={status}
+								label={label}
+							/>
 						</article>
 					))}
 				</div>
