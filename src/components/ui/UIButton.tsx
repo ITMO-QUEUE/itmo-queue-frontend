@@ -1,9 +1,9 @@
 import Spinner from '@/assets/icons/Spinner.svg'
 import { tw } from '../../libs/utils'
 
-interface UIButtonProps {
+export interface UIButtonProps {
 	label: string
-	onClick: () => void
+	onClick: () => void | Promise<void>
 	tone: UIButtonTone
 	loading?: boolean
 	disabled?: boolean
@@ -24,7 +24,8 @@ const BASE_CLASSES = tw(
 	'focus:outline-2 focus:outline-offset-2',
 	'focus:outline-border-focus focus:border-0.5 focus:border-white',
 	'disabled:cursor-not-allowed',
-	'disabled:bg-disabled-bg disabled:text-disabled-text'
+	'disabled:bg-disabled-bg disabled:text-disabled-text',
+	'cursor-pointer'
 )
 
 const TONE_CLASSES: Record<UIButtonTone, string> = {
