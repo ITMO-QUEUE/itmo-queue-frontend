@@ -1,3 +1,5 @@
+import { useMatch } from 'react-router'
+import { RegisterForm } from '@/features/auth/components/RegisterForm'
 import Logo from '@/assets/Logo.svg'
 import { LoginForm } from '@/features/auth/components/LoginForm'
 
@@ -8,6 +10,7 @@ const BENEFITS = [
 ] as const
 
 export const AuthPage = () => {
+	const isRegister = Boolean(useMatch('/register'))
 	return (
 		<main className='h-full w-full overflow-auto bg-bg-page font-nunito'>
 			<div className='grid min-h-full lg:grid-cols-[40%_60%]'>
@@ -19,24 +22,33 @@ export const AuthPage = () => {
 			className='mb-7 h-auto w-[11.6875rem]'
 		/>
 
-		<h1 className='text-section text-text-primary'>Вход</h1>
-
+		{isRegister ? (
+    <h1 className='text-section text-text-primary'>Регистрация</h1>
+) : (
+    <h1 className='text-section text-text-primary'>Вход</h1>
+)}
 		<p className='mt-6 text-small text-text-secondary'>
-			Войдите в учётную запись, подготовленную администратором.
-		</p>
+    {isRegister ? (
+        <>Создайте учётную запись для работы с очередями.</>
+    ) : (
+        <>Войдите в учётную запись, подготовленную администратором.</>
+    )}
+</p>
 
 		<div className='mt-7'>
-			<LoginForm />
+			{isRegister ? <RegisterForm /> : <LoginForm />}
 		</div>
 
-		<p className='mt-6 text-center text-small font-bold text-text-primary'>
-			Не получается войти?
-		</p>
-
-		<p className='mt-5 text-caption text-text-secondary'>
-			Роль назначает администратор. Самостоятельная регистрация не
-			требуется.
-		</p>
+		{!isRegister && (
+    <>
+        <p className='mt-6 text-center text-small font-bold text-text-primary'>
+            Не получается войти?
+        </p>
+        <p className='mt-5 text-caption text-text-secondary'>
+            Роль назначает администратор. Самостоятельная регистрация не требуется.
+        </p>
+    </>
+)}
 	</div>
 </section>
 
