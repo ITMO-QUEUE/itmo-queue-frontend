@@ -1,4 +1,4 @@
-import { useMatch } from 'react-router'
+import { Link, useMatch } from 'react-router'
 import { RegisterForm } from '@/features/auth/components/RegisterForm'
 import Logo from '@/assets/Logo.svg'
 import { LoginForm } from '@/features/auth/components/LoginForm'
@@ -15,7 +15,7 @@ export const AuthPage = () => {
 		<main className='h-full w-full overflow-auto bg-bg-page font-nunito'>
 			<div className='grid min-h-full lg:grid-cols-[40%_60%]'>
 				<section className='flex items-center justify-center px-4 py-10 sm:px-8 lg:order-2'>
-	<div className='w-full max-w-[30rem] rounded-card bg-bg-surface p-6 sm:p-8'>
+	<div className='w-full max-w-[30rem] rounded-card border border-border-subtle bg-bg-surface p-6 sm:p-8'>
 		<img
 			src={Logo}
 			alt='ITMO.Queue'
@@ -38,7 +38,16 @@ export const AuthPage = () => {
 		<div className='mt-7'>
 			{isRegister ? <RegisterForm /> : <LoginForm />}
 		</div>
-
+{isRegister && (
+    <>
+        <p className='mt-6 text-center text-small font-bold text-text-primary'>
+            Уже есть аккаунт? <Link to='/auth'>Войти</Link>
+        </p>
+        <p className='mt-6 text-caption text-text-secondary'>
+            Экран на будущее. В текущей версии аккаунт создаёт администратор.
+        </p>
+    </>
+)}
 		{!isRegister && (
     <>
         <p className='mt-6 text-center text-small font-bold text-text-primary'>
