@@ -1,9 +1,9 @@
+import { LockKeyhole } from 'lucide-react'
 import { tw } from '../../libs/utils'
 import {
 	UIParticipantStatus,
 	type UIParticipantStatusProps
 } from './UIParticipantStatus'
-import { UIButton, UIButtonTone} from './UIButtn'
 
 export interface UIQueueRowProps {
 	position: number
@@ -15,10 +15,11 @@ export interface UIQueueRowProps {
 	isMe?: boolean
 	group?: string
 	linkLabel?: string
+	role?: 'student' | 'teacher'
 }
 
 const BASE_CLASSES = tw(
-	'flex items-center gap-4 w-full p-4',
+	'flex min-w-0 w-full items-center gap-4 p-4',
 	'font-nunito border border-border-subtle rounded-control'
 )
 const DETAILS_CLASSES = tw( 'flex min-w-0 basis-2/5 flex-col gap-1' )
@@ -46,9 +47,11 @@ export const UIQueueRow = ( {
 	participantStatus,
 	group = 'Основная группа',
 	linkLabel = 'Открыть артефакты',
-	isMe = false
+	isMe = false,
+	role = 'student'
 }: UIQueueRowProps ) => {
 	const isTop3 = position >= 1 && position <= 3
+	const isTeacher = role === 'teacher'
 	const participantWorks = works ?? ( workname ? [ workname ] : [] )
 	const workCount = participantWorks.length
 	const workLabel = WORK_LABELS[ WORK_PLURALS.select( workCount ) ]
@@ -73,7 +76,7 @@ export const UIQueueRow = ( {
 					{ workCount } { workLabel }
 					{ workCount > 0 && ` · ${ participantWorks.join( ', ' ) }` }
 				</span>
-				{ isMe && (
+				{ ( isMe || isTeacher ) && (
 					<a
 						className={ LINK_CLASSES }
 						href={ link }
@@ -90,7 +93,19 @@ export const UIQueueRow = ( {
 				<UIParticipantStatus { ...participantStatus } />
 			</div>
 			<span className='w-36 shrink-0 text-right text-small text-text-secondary break-words'>
-				{ isTop3 ? 'Топ-3' : group }
+				{ isTop3 ? (
+					<span className='inline-flex items-center gap-1'>
+						Топ-3
+						{ ! isTeacher && (
+							<LockKeyhole
+								className='size-3'
+								aria-hidden='true'
+							/>
+						) }
+					</span>
+				) : (
+					group
+				) }
 			</span>
 		</div>
 	)

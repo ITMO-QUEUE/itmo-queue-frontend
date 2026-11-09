@@ -1,4 +1,3 @@
-import { useState } from 'react'
 import { UIParticipantStatusStatus } from '../../components/ui/UIParticipantStatus'
 import {
 	UIQueueRow,
@@ -116,8 +115,6 @@ const EXAMPLES: {
 ]
 
 export const TestQueueRowPage = () => {
-	const [ previewWidth, setPreviewWidth ] = useState( 1000 )
-
 	return (
 		<main className='h-full w-full overflow-auto bg-bg-page p-6 md:p-10'>
 			<div className='mx-auto flex max-w-6xl flex-col gap-8'>
@@ -133,32 +130,6 @@ export const TestQueueRowPage = () => {
 					</p>
 				</header>
 
-				<div className='space-y-3 rounded-card border border-border-subtle bg-bg-surface p-6'>
-					<label
-						className='block text-label text-text-primary'
-						htmlFor='queue-row-width'
-					>
-						Ширина примеров: { previewWidth } px
-					</label>
-					<input
-						id='queue-row-width'
-						type='range'
-						min={ 640 }
-						max={ 1100 }
-						step={ 20 }
-						value={ previewWidth }
-						onChange={ event =>
-							setPreviewWidth( Number( event.target.value ) )
-						}
-						className='w-full accent-action-primary'
-					/>
-					<p className='text-small text-text-secondary'>
-						Меняйте ширину, чтобы проверить свободное пространство и положение
-						правых колонок. На небольшом экране примеры можно прокручивать по
-						горизонтали.
-					</p>
-				</div>
-
 				{ EXAMPLES.map( ( { title, description, rows } ) => (
 					<section
 						key={ title }
@@ -168,18 +139,13 @@ export const TestQueueRowPage = () => {
 							<h2 className='text-subheading text-text-primary'>{ title }</h2>
 							<p className='text-small text-text-secondary'>{ description }</p>
 						</div>
-						<div className='overflow-x-auto pb-2'>
-							<div
-								className='flex flex-col gap-3'
-								style={ { width: previewWidth } }
-							>
-								{ rows.map( row => (
-									<UIQueueRow
-										key={ row.position }
-										{ ...row }
-									/>
-								) ) }
-							</div>
+						<div className='flex flex-col gap-3'>
+							{ rows.map( row => (
+								<UIQueueRow
+									key={ row.position }
+									{ ...row }
+								/>
+							) ) }
 						</div>
 					</section>
 				) ) }
