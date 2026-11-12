@@ -1,40 +1,21 @@
+import type { StudentQueue } from '../../features/queue-student/types/queue'
 import { tw } from '../../libs/utils'
 import { UIButton, UIButtonTone } from './UIButton'
 
-type QueueCardLocation =
-	| {
-			place: string
-			onlineLink?: never
-	  }
-	| {
-			place?: never
-			onlineLink: string
-	  }
-
-type UIQueueCardBaseProps = {
+export type UIQueueCardProps = {
 	isNearest?: boolean
 	isMoveUsed?: boolean
 
-	subject: string
-	name: string
-
-	queueNumber: number
-	totalQueueNumber?: number
-
-	dateStart: Date
-	dateEnd: Date
+	studentQueue: StudentQueue
 
 	onOpenQueue: () => void
 	onMoveToEnd: () => void
 }
 
-export type UIQueueCardProps = UIQueueCardBaseProps & QueueCardLocation
-
 export type UIQueueCardScenarioProps = Omit<
-	UIQueueCardBaseProps,
+	UIQueueCardProps,
 	'onOpenQueue' | 'onMoveToEnd'
-> &
-	QueueCardLocation
+>
 
 const formatDateTime = (dateStart: Date, dateEnd: Date) => {
 	const now = new Date()
@@ -65,19 +46,12 @@ const formatDateTime = (dateStart: Date, dateEnd: Date) => {
 export const UIQueueCard = ({
 	isNearest = false,
 	isMoveUsed = false,
-	subject,
-	name,
-	queueNumber,
-	dateStart,
-	dateEnd,
-	onlineLink,
-	place,
-	totalQueueNumber,
+	studentQueue,
 	onOpenQueue,
 	onMoveToEnd
 }: UIQueueCardProps) => {
-	const dateTime = formatDateTime(dateStart, dateEnd)
-	const isTop3 = queueNumber >= 1 && queueNumber <= 3
+	const dateTime = formatDateTime(studentQueue.startsAt, studentQueue.endsAt)
+	const isTop3 = studentQueue.queueNumber >= 1 && studentQueue.queueNumber <= 3
 	const isMoveDisabled = isTop3 || isMoveUsed
 	const isDark = isNearest
 	const description =
@@ -101,31 +75,34 @@ export const UIQueueCard = ({
 			</div>
 
 			<h3 className='text-subheading font-bold'>
-				{subject} · {name}
+				{studentQueue.subject} ·{' '}
+				{studentQueue.works.map(work => `ЛР №${work.number}`).join(' · ')}
 			</h3>
 
 			<div className='text-body'>
-				Ваше место: {queueNumber}
-				{totalQueueNumber !== null &&
-					totalQueueNumber !== undefined &&
-					` из ${totalQueueNumber}`}
+				Ваше место: {studentQueue.queueNumber}
+				{studentQueue.studentsMax !== null &&
+					studentQueue.studentsMax !== undefined &&
+					` из ${studentQueue.studentsMax}`}
 			</div>
 
 			<div className='text-small'>
 				{dateTime} ·{' '}
-				{onlineLink ?
+				{studentQueue.onlineLink ?
 					<a
-						href={onlineLink}
+						href={studentQueue.onlineLink}
 						target='_blank'
 						rel='noopener noreferrer'
 						aria-label='Ссылка на онлайн-защиту'
 					>
 						Контур Толк
 					</a>
-				: place ?
-					`аудитория ${place}`
+				: studentQueue.auditorium ?
+					`аудитория ${studentQueue.auditorium}`
 				:	'Место проведения не указано'}
 			</div>
+
+			<div className='text-small'>{studentQueue.teachers.join(' · ')}</div>
 
 			<div className='flex flex-wrap gap-2'>
 				<UIButton
