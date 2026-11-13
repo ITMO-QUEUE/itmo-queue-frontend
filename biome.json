@@ -26,7 +26,15 @@
 		"rules": {
 			"preset": "recommended",
 			"a11y": "error",
-			"complexity": "warn",
+			"complexity": {
+				"noExcessiveLinesPerFunction": {
+					"level": "warn",
+					"options": {
+						"maxLines": 70,
+						"skipBlankLines": true
+					}
+				}
+			},
 			"correctness": {
 				"noGlobalDirnameFilename": "off"
 			},

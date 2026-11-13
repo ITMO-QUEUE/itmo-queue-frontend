@@ -1,7 +1,13 @@
+import { Page } from '../../components/common/Page.tsx'; 
+import { Profile } from '../../components/common/Profile.tsx'
+
 export const StudentProfilePage = () => {
 	return (
-		<div className='flex h-screen items-center justify-center'>
-			<h1 className='text-2xl font-bold'>Hello StudentProfilePage</h1>
-		</div>
+		<Profile
+			name = 'Максим Ковзик'
+			role = 'Студент'
+			login = 'm.kovzik	'
+			id = {123456}
+		/>
 	)
 }
