@@ -63,7 +63,7 @@ export function validateTeacherQueueCreate(
 		'date',
 		'startTime',
 		'endTime',
-		'location',
+		'place',
 		'teachers'
 	] as const
 	for ( const field of required ) {
@@ -120,7 +120,7 @@ export const TeacherQueueCreate = ( {
 		date: '',
 		startTime: '',
 		endTime: '',
-		location: '',
+		place: '',
 		teachers: accountName,
 		description: '',
 		works: {},
@@ -197,7 +197,7 @@ export const TeacherQueueCreate = ( {
 				{ field( 'startTime', 'Начало', 'ЧЧ:ММ' ) }
 				{ field( 'endTime', 'Плановое окончание', 'ЧЧ:ММ' ) }
 			</div>
-			{ field( 'location', 'Место или ссылка', 'Аудитория 305' ) }
+			{ field( 'place', 'Место или ссылка', 'Аудитория 305' ) }
 			{ field( 'teachers', 'Преподаватели' ) }
 			{ field( 'description', 'Описание' ) }
 			<section

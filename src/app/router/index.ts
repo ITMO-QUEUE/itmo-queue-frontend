@@ -25,6 +25,7 @@ import { TestQueueStatus } from '../../pages/test/TestQueueStatus'
 import { TestSelectPage } from '../../pages/test/TestSelectPage'
 import { TestTabPage } from '../../pages/test/TestTabPage'
 import { TestTeacherParametersPage } from '../../pages/test/TestTeacherParametersPage'
+import { TestQueueCreate } from '../../pages/test/TestQueueCreate'
 
 const routes: RouteObject[] = [
 	{
@@ -93,9 +94,8 @@ const routes: RouteObject[] = [
 	}
 ]
 
-const testRoutes: RouteObject[] | null =
-	import.meta.env.DEV ?
-		[
+const testRoutes: RouteObject[] | null = import.meta.env.DEV
+	? [
 			{
 				path: 'test',
 				children: [
@@ -139,6 +139,10 @@ const testRoutes: RouteObject[] | null =
 						path: 'queue-card',
 						Component: TestQueueCardPage
 					},
+					{ 
+						path: 'queue-create', 
+						Component: TestQueueCreate 
+					},
 					{
 						path: 'queue-status',
 						Component: TestQueueStatus
@@ -150,15 +154,15 @@ const testRoutes: RouteObject[] | null =
 				]
 			}
 		]
-	:	null
+	: null
 
-if (testRoutes) {
-	routes.push(...testRoutes)
+if ( testRoutes ) {
+	routes.push( ...testRoutes )
 }
 
-routes.push({
+routes.push( {
 	path: '*',
 	Component: NotFoundPage
-})
+} )
 
-export const router = createBrowserRouter(routes)
+export const router = createBrowserRouter( routes )
