@@ -96,7 +96,7 @@ export const TestTabPage = () => {
 									{/* Hover */}
 									<td className='px-6 py-8'>
 										<div className='[&>button]:bg-bg-selected'>
-											<UITab label='Очердь' />
+											<UITab label='Очередь' />
 										</div>
 									</td>
 
