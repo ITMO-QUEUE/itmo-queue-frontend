@@ -1,135 +1,167 @@
-import { useState } from 'react'
 import { UIParticipantStatusStatus } from '../../components/ui/UIParticipantStatus'
-import { UIQueueRow } from '../../components/ui/UIQueueRow'
+import {
+	UIQueueRow,
+	type UIQueueRowProps
+} from '../../components/ui/UIQueueRow'
 
-const STATUSES = [
-	{
-		status: UIParticipantStatusStatus.WAITING,
-		label: 'Ожидает',
-		title: 'Waiting'
-	},
-	{
-		status: UIParticipantStatusStatus.CALLED,
-		label: 'Вызван',
-		title: 'Called'
-	},
-	{
-		status: UIParticipantStatusStatus.DEFENDING,
-		label: 'На защите',
-		title: 'Defending'
-	},
-	{
-		status: UIParticipantStatusStatus.ACCEPTED,
-		label: 'Принято',
-		title: 'Accepted'
-	},
-	{
-		status: UIParticipantStatusStatus.NO_SHOW,
-		label: 'Неявка',
-		title: 'NoShow'
-	}
-] as const
-
+const WAITING = {
+	status: UIParticipantStatusStatus.WAITING,
+	label: 'Ожидает'
+}
 const PARTICIPANT = {
 	name: 'Алексей Смирнов',
-	workname: 'ЛР № 3',
-	priority: 1,
-	link: 'https://github.com/octocat/Hello-World'
-} as const
+	works: [ 'ЛР № 3' ],
+	link: '#queue-row-artifacts',
+	participantStatus: WAITING
+} satisfies Omit< UIQueueRowProps, 'position' >
+
+const EXAMPLES: {
+	title: string
+	description: string
+	rows: UIQueueRowProps[]
+}[] = [
+	{
+		title: 'Участники очереди',
+		description:
+			'Первые три места, основная группа и ваша запись со ссылкой на артефакты.',
+		rows: [
+			{ ...PARTICIPANT, position: 1, name: 'Анна Иванова' },
+			{
+				...PARTICIPANT,
+				position: 2,
+				name: 'Илья Соколов',
+				works: [ 'ЛР № 1', 'ЛР № 2' ]
+			},
+			{ ...PARTICIPANT, position: 3, name: 'Даниил Петров' },
+			{
+				...PARTICIPANT,
+				position: 4,
+				name: 'София Волкова',
+				works: [ 'ЛР № 4' ]
+			},
+			{
+				...PARTICIPANT,
+				position: 7,
+				name: 'Максим Козвик',
+				works: [ 'ЛР № 3', 'ЛР № 4' ],
+				isMe: true
+			}
+		]
+	},
+	{
+		title: 'Статусы и своя запись в топ-3',
+		description:
+			'Статус меняет бейдж. Подсветка строки и ссылка появляются у вашей записи.',
+		rows: [
+			{
+				...PARTICIPANT,
+				position: 1,
+				isMe: true,
+				participantStatus: {
+					status: UIParticipantStatusStatus.DEFENDING,
+					label: 'На защите'
+				}
+			},
+			{
+				...PARTICIPANT,
+				position: 2,
+				participantStatus: {
+					status: UIParticipantStatusStatus.CALLED,
+					label: 'Вызван'
+				}
+			},
+			{ ...PARTICIPANT, position: 4 },
+			{
+				...PARTICIPANT,
+				position: 5,
+				participantStatus: {
+					status: UIParticipantStatusStatus.ACCEPTED,
+					label: 'Принято'
+				}
+			},
+			{
+				...PARTICIPANT,
+				position: 6,
+				participantStatus: {
+					status: UIParticipantStatusStatus.NO_SHOW,
+					label: 'Неявка'
+				}
+			}
+		]
+	},
+	{
+		title: 'Разное наполнение',
+		description:
+			'Пустой список, пять работ, длинное имя и название группы для проверки переноса текста.',
+		rows: [
+			{ ...PARTICIPANT, position: 8, works: [] },
+			{
+				...PARTICIPANT,
+				position: 12,
+				works: [ 'ЛР № 1', 'ЛР № 2', 'ЛР № 3', 'ЛР № 4', 'ЛР № 5' ],
+				isMe: true
+			},
+			{
+				...PARTICIPANT,
+				position: 123,
+				name: 'Александра Константинова-Рождественская',
+				works: [
+					'Лабораторная работа № 6 — проектирование информационной системы'
+				],
+				group: 'Дополнительная группа'
+			}
+		]
+	}
+]
 
 export const TestQueueRowPage = () => {
-	const [ clickCount, setClickCount ] = useState( 0 )
-	const [ lastClicked, setLastClicked ] = useState< string | null >( null )
-
-	const handleMoreClick = ( label: string ) => {
-		setClickCount( prev => prev + 1 )
-		setLastClicked( label )
-	}
-
 	return (
 		<main className='h-full w-full overflow-auto bg-bg-page p-6 md:p-10'>
 			<div className='mx-auto flex max-w-6xl flex-col gap-8'>
-				<header className='flex flex-wrap items-end justify-between gap-4'>
-					<div className='space-y-2'>
-						<p className='text-small text-text-secondary'>
-							Design System / Components
-						</p>
-						<h1 className='text-heading text-text-primary'>
-							QueueRow Playground
-						</h1>
-						<p className='text-body text-text-secondary'>
-							Статусы участников очереди и вариант «Топ-3». Данные
-							демонстрационные.
-						</p>
-					</div>
-					<div
-						className='rounded-card border border-border-subtle bg-bg-surface px-5 py-3'
-						role='status'
-					>
-						<p className='text-small text-text-secondary'>
-							Нажатия на многоточие
-						</p>
-						<p className='text-section text-text-primary'>{ clickCount }</p>
-						<p className='text-caption text-text-secondary'>
-							Последний статус: { lastClicked ?? 'Нет' }
-						</p>
-					</div>
+				<header className='space-y-2'>
+					<p className='text-small text-text-secondary'>
+						Design System / Components
+					</p>
+					<h1 className='text-heading text-text-primary'>
+						QueueRow Playground
+					</h1>
+					<p className='text-body text-text-secondary'>
+						Новый элемент очереди. Все данные демонстрационные.
+					</p>
 				</header>
 
-				<section className='overflow-hidden rounded-card border border-border-subtle bg-bg-surface'>
-					<div className='border-b border-border-subtle px-6 py-5'>
-						<h2 className='text-subheading text-text-primary'>
-							Варианты QueueRow
-						</h2>
-						<p className='mt-1 text-small text-text-secondary'>
-							Сравните оформление всех статусов. Вызванный участник выделен
-							фоном.
-						</p>
-					</div>
-					<div className='grid grid-cols-1 gap-6 p-6 xl'>
-						{ STATUSES.map( ( { status, label, title } ) => (
-							<div
-								key={ status }
-								className='min-w-0 space-y-3'
-							>
-								<h3 className='text-small text-text-secondary'>
-									State={ title }
-								</h3>
-								<UIQueueRow
-									{ ...PARTICIPANT }
-									position={ 5 }
-									participantStatus={ { status, label } }
-									onMoreClick={ () => handleMoreClick( label ) }
-								/>
-							</div>
-						) ) }
-						<div className='min-w-0 space-y-3'>
-							<h3 className='text-small text-text-secondary'>State=Top3</h3>
-							<UIQueueRow
-								{ ...PARTICIPANT }
-								position={ 2 }
-								participantStatus={ {
-									status: UIParticipantStatusStatus.WAITING,
-									label: 'Ожидает'
-								} }
-							/>
+				{ EXAMPLES.map( ( { title, description, rows } ) => (
+					<section
+						key={ title }
+						className='min-w-0 space-y-4'
+					>
+						<div className='space-y-1'>
+							<h2 className='text-subheading text-text-primary'>{ title }</h2>
+							<p className='text-small text-text-secondary'>{ description }</p>
 						</div>
-					</div>
-				</section>
+						<div className='flex flex-col gap-3'>
+							{ rows.map( row => (
+								<UIQueueRow
+									key={ row.position }
+									{ ...row }
+								/>
+							) ) }
+						</div>
+					</section>
+				) ) }
 
-				<section className='rounded-card border border-border-subtle bg-bg-surface p-6'>
+				<section
+					id='queue-row-artifacts'
+					className='space-y-2 rounded-card border border-border-subtle bg-bg-surface p-6'
+				>
 					<h2 className='text-subheading text-text-primary'>
-						Проверка взаимодействий
+						Демонстрационные артефакты
 					</h2>
-					<p className='mt-2 text-small text-text-secondary'>
-						Нажмите на многоточие, чтобы обновить счётчик. Ссылка на код
-						открывает демонстрационный репозиторий. Используйте Tab для проверки
-						фокуса на ссылках и кнопках.
+					<p className='text-small text-text-secondary'>
+						Ссылки «Открыть артефакты» ведут к этому блоку. Используйте Tab и
+						Enter для проверки перехода с клавиатуры.
 					</p>
 				</section>
-				<footer className='text-caption text-text-secondary'>
-					UIQueueRow · 5 статусов · Топ-3 · Проверка взаимодействий
-				</footer>
 			</div>
 		</main>
 	)
