@@ -25,7 +25,6 @@ import { TestQueueStatus } from '../../pages/test/TestQueueStatus'
 import { TestSelectPage } from '../../pages/test/TestSelectPage'
 import { TestTabPage } from '../../pages/test/TestTabPage'
 import { TestTeacherParametersPage } from '../../pages/test/TestTeacherParametersPage'
-import { TestQueueCreate } from '../../pages/test/TestQueueCreate'
 
 const routes: RouteObject[] = [
 	{
@@ -138,10 +137,6 @@ const testRoutes: RouteObject[] | null = import.meta.env.DEV
 					{
 						path: 'queue-card',
 						Component: TestQueueCardPage
-					},
-					{ 
-						path: 'queue-create', 
-						Component: TestQueueCreate 
 					},
 					{
 						path: 'queue-status',

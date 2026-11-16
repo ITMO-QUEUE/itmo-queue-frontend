@@ -1,7 +1,8 @@
 import { QueueStatus } from '../../../components/ui/UIQueueStatus'
-import { type StudentQueue, Subject } from '../types/queue'
+import { UIParticipantStatusStatus } from '../../../components/ui/UIParticipantStatus'
+import { type fullQueue, Subject } from '../types/queue'
 
-export const mockFullQueues: StudentQueue[] = [
+export const mockFullQueues: fullQueue[] = [
 	{
 		id: 'queue-001',
 		subject: Subject.PROGRAMMING,
@@ -23,10 +24,15 @@ export const mockFullQueues: StudentQueue[] = [
 		isRegistrationOpen: false,
 
 		students: [
-			{name: "Максим Ковзик", id: 555555, position: 1, status: UIParticipantStatusStatus.WAITING, group: 'основная группа', 
-				works = [
-					{ type: 'lab', number: 3 , isScore: true, link: 'ссылка'},
-					{ type: 'lab', number: 4, isScore: false, link: 'ссылка'}
+			{
+				name: 'Максим Ковзик',
+				id: 555555,
+				position: 1,
+				status: UIParticipantStatusStatus.WAITING,
+				group: 'основная группа',
+				works: [
+					{ type: 'lab', number: 3, isScore: true, link: 'ссылка' },
+					{ type: 'lab', number: 4, isScore: false, link: 'ссылка' }
 				]
 			}
 		],
