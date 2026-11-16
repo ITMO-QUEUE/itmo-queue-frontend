@@ -1,7 +1,16 @@
+import { mockFullQueues } from '../../features/queue-teacher/mocks/FullQueues.ts';
+import { Page } from '../../components/common/Page.tsx'
+
 export const TeacherQueuePage = () => {
+	const Queue = fullMockQueue[0]
+
 	return (
-		<div className='flex h-screen items-center justify-center'>
-			<h1 className='text-2xl font-bold'>Hello TeacherQueuePage</h1>
-		</div>
+		<Page
+			ame = 'Елена Ивановна'
+			role = 'Преподаватель'
+			login = 'e.ivanova'
+			id = {112233}
+		>
+		</Page>
 	)
 }
