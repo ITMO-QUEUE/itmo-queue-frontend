@@ -4,6 +4,8 @@ import type { UIParticipantStatusStatus } from '../../../components/ui/UIPartici
 export interface QueueWork {
 	type: 'lab'
 	number: number
+	priority?: number
+	enabled?: boolean
 }
 
 export interface StudentWork {
@@ -60,6 +62,8 @@ export type StudentQueue = TeacherQueue & {
 
 export type fullQueue = StudentQueue & {
 	students: QueueParticipant[]
+	minutesPerStudent: number
+	requireArtifact: boolean
 }
 
 export enum Subject {
@@ -68,3 +72,5 @@ export enum Subject {
 	WEB_DEVELOPMENT = 'Веб-разработка',
 	OPERATING_SYSTEMS = 'Операционные системы'
 }
+
+export type QueueChanges = Partial<Pick<fullQueue, 'status' | 'isRegistrationOpen' | 'minutesPerStudent' | 'studentsMax' | 'endsAt' | 'requireArtifact' | 'works'>>

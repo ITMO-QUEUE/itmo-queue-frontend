@@ -12,7 +12,7 @@ export interface UIQueueRowProps {
 	name: string
 	works?: readonly string[]
 	workname?: string
-	link: string
+	link: string | null
 	participantStatus: UIParticipantStatusProps
 	isMe?: boolean
 	group?: string
@@ -95,7 +95,7 @@ export const UIQueueRow = ( {
 						{ workCount } { workLabel }
 						{ workCount > 0 && ` · ${ participantWorks.join( ', ' ) }` }
 					</span>
-					{ ( isMe || isTeacher ) && (
+					{ link && ( isMe || isTeacher ) && (
 						<a
 							className={ LINK_CLASSES }
 							href={ link }
@@ -130,7 +130,7 @@ export const UIQueueRow = ( {
 			<div className='ml-4 w-36 shrink-0 [&>button]:w-full text-text-primary'>
 				<UIButton
 					label={ actionLabel }
-					tone={ UIButtonTone.GH }
+					tone={ UIButtonTone.GHOST }
 					disabled={ isActionDisabled }
 					onClick={ () => onAction?.() }
 				/>

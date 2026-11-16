@@ -8,8 +8,8 @@ export const mockFullQueues: fullQueue[] = [
 		subject: Subject.PROGRAMMING,
 
 		works: [
-			{ type: 'lab', number: 3 },
-			{ type: 'lab', number: 4 }
+			{ type: 'lab', number: 3, priority: 1, enabled: true },
+			{ type: 'lab', number: 4, priority: 2, enabled: true }
 		],
 
 		teacher: 'Павел Кузнецов',
@@ -22,17 +22,71 @@ export const mockFullQueues: fullQueue[] = [
 
 		status: QueueStatus.ACTIVE,
 		isRegistrationOpen: false,
+		minutesPerStudent: 10,
+		requireArtifact: true,
 
 		students: [
 			{
-				name: 'Максим Ковзик',
-				id: 555555,
+				name: 'Алексей Смирнов',
+				id: 111111,
 				position: 1,
 				status: UIParticipantStatusStatus.WAITING,
-				group: 'основная группа',
+				group: 'Топ-3',
 				works: [
-					{ type: 'lab', number: 3, isScore: true, link: 'ссылка' },
-					{ type: 'lab', number: 4, isScore: false, link: 'ссылка' }
+					{ type: 'lab', number: 3, link: 'https://example.com/students/111111/labs/3' },
+					{ type: 'lab', number: 4, link: 'https://example.com/students/111111/labs/4' }
+				]
+			},
+			{
+				name: 'Мария Орлова',
+				id: 222222,
+				position: 2,
+				status: UIParticipantStatusStatus.WAITING,
+				group: 'Топ-3',
+				works: [
+					{ type: 'lab', number: 3, link: 'https://example.com/students/222222/labs/3' },
+					{ type: 'lab', number: 4, link: 'https://example.com/students/222222/labs/4' }
+				]
+			},
+			{
+				name: 'Даниил Петров',
+				id: 333333,
+				position: 3,
+				status: UIParticipantStatusStatus.WAITING,
+				group: 'Топ-3',
+				works: [
+					{ type: 'lab', number: 3, link: 'https://example.com/students/333333/labs/3' }
+				]
+			},
+			{
+				name: 'София Волкова',
+				id: 444444,
+				position: 4,
+				status: UIParticipantStatusStatus.WAITING,
+				group: 'Основная группа',
+				works: [
+					{ type: 'lab', number: 4, link: 'https://example.com/students/444444/labs/4' }
+				]
+			},
+			{
+				name: 'Максим Ковзик',
+				id: 555555,
+				position: 5,
+				status: UIParticipantStatusStatus.WAITING,
+				group: 'Основная группа',
+				works: [
+					{ type: 'lab', number: 3, isScore: true, link: 'https://example.com/students/555555/labs/3' },
+					{ type: 'lab', number: 4, isScore: false, link: 'https://example.com/students/555555/labs/4' }
+				]
+			},
+			{
+				name: 'Иван Соколов',
+				id: 666666,
+				position: 6,
+				status: UIParticipantStatusStatus.WAITING,
+				group: 'Основная группа',
+				works: [
+					{ type: 'lab', number: 3, link: 'https://example.com/students/666666/labs/3' }
 				]
 			}
 		],

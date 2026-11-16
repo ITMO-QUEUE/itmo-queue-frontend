@@ -6,9 +6,20 @@ import { UIButton, UIButtonTone } from '../../components/ui/UIButton.tsx'
 import { QueueStatus } from '../../components/common/QueueStatus'
 import { QueueStatus as QueueStatusEnum } from '../../components/ui/UIQueueStatus'
 import { UITab } from '../../components/ui/UITab'
-import type { fullQueue } from '../../features/queue-teacher/types/queue'
+import { UIQueueRow } from '../../components/ui/UIQueueRow'
+import { UIParticipantStatusStatus } from '../../components/ui/UIParticipantStatus'
+import type { QueueChanges } from '../../features/queue-teacher/types/queue'
+import { QueueSettings } from '../../features/queue-teacher/components/QueueSettings'
 
 type QueueTab = 'queue' | 'settings' | 'history'
+
+const participantStatusLabels: Record<UIParticipantStatusStatus, string> = {
+	[UIParticipantStatusStatus.WAITING]: 'Ожидает',
+	[UIParticipantStatusStatus.CALLED]: 'Вызван',
+	[UIParticipantStatusStatus.DEFENDING]: 'На защите',
+	[UIParticipantStatusStatus.ACCEPTED]: 'Принято',
+	[UIParticipantStatusStatus.NO_SHOW]: 'Не явился'
+}
 
 const dateFormatter = new Intl.DateTimeFormat('ru-RU', {
 	day: 'numeric',
@@ -22,7 +33,7 @@ const timeFormatter = new Intl.DateTimeFormat('ru-RU', {
 
 export const TeacherQueuePage = () => {
 	const [activeTab, setActiveTab] = useState<QueueTab>('queue')
-	const [queueStates, setQueueStates] = useState<Record<string, Pick<fullQueue, 'status' | 'isRegistrationOpen'>>>({})
+	const [queueStates, setQueueStates] = useState<Record<string, QueueChanges>>({})
 	const navigate = useNavigate()
 	const { queueId } = useParams<{ queueId: string }>()
 	const initialQueue = mockFullQueues.find(queue => queue.id === queueId)
@@ -37,12 +48,11 @@ export const TeacherQueuePage = () => {
 	}
 
 	const isCompleted = queue.status === QueueStatusEnum.COMPLETED
-	const updateQueueState = (changes: Partial<Pick<fullQueue, 'status' | 'isRegistrationOpen'>>) => {
+	const updateQueueState = (changes: QueueChanges) => {
 		setQueueStates(previous => ({
 			...previous,
 			[queue.id]: {
-				status: queue.status,
-				isRegistrationOpen: queue.isRegistrationOpen,
+				...previous[queue.id],
 				...changes
 			}
 		}))
@@ -139,10 +149,37 @@ export const TeacherQueuePage = () => {
 							/>
 						</div>
 					</div>
+					<section className='flex min-w-0 flex-col gap-4 rounded-card border border-border-subtle bg-bg-surface p-6' aria-labelledby='queue-participants-title'>
+						<h2 id='queue-participants-title' className='text-subheading text-text-primary'>
+							Участники очереди
+						</h2>
+						{queue.students.length === 0 ? (
+							<p className='text-body text-text-secondary'>В очереди пока нет участников.</p>
+						) : (
+							<div className='overflow-x-auto'>
+								<ul className='flex min-w-[900px] flex-col gap-4'>
+									{[...queue.students].sort((a, b) => a.position - b.position).map(student => (
+										<li key={student.id}>
+											<UIQueueRow
+												position={student.position}
+												name={student.name}
+												works={student.works.map(work => `ЛР № ${work.number}`)}
+												link={student.works.find(work => work.link)?.link ?? null}
+												participantStatus={{ status: student.status, label: participantStatusLabels[student.status] }}
+												group={student.group}
+												viewerRole='teacher'
+												forceDisable={isCompleted}
+											/>
+										</li>
+									))}
+								</ul>
+							</div>
+						)}
+					</section>
 				</div>
 			)}
 			{activeTab === 'settings' && (
-				<div>Текущий UITab: {activeTab}</div>
+				<QueueSettings key={queue.id} queue={queue} onSave={updateQueueState} />
 			)}
 			{activeTab === 'history' && (
 				<div>Текущий UITab: {activeTab}</div>
