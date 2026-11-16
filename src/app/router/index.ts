@@ -36,10 +36,6 @@ const routes: RouteObject[] = [
 		Component: AuthPage
 	},
 	{
-    path: 'register',
-    Component: AuthPage
-},
-	{
 		path: 'student',
 		Component: CommonLayout,
 		children: [

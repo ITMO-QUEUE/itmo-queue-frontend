@@ -18,10 +18,12 @@ interface UISelectProps {
 	error?: string
 	required?: boolean
 	disabled?: boolean
+	fullWidth?: boolean
 }
 
 const SELECT_CLASSES = tw(
-	'h-11 w-full appearance-none pl-3 pr-11',
+	'h-11 appearance-none pl-3 pr-11',
+	'w-full',
 	'font-nunito text-body',
 	'rounded-control border border-border-control bg-bg-surface',
 	'cursor-pointer',
@@ -50,13 +52,14 @@ export const UISelect = ({
 	hint,
 	error,
 	required = false,
-	disabled = false
+	disabled = false,
+	fullWidth = false
 }: UISelectProps) => {
 	const id = useId()
 	const helperId = getHelperId(id, error, hint)
 
 	return (
-		<div className='flex w-full flex-col gap-1.5'>
+		<div className={tw('flex flex-col gap-2', fullWidth ? 'w-full' : 'w-86')}>
 			<UIFieldLabel
 				htmlFor={id}
 				label={label}
