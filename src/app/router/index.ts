@@ -95,7 +95,7 @@ const routes: RouteObject[] = [
 
 const testRoutes: RouteObject[] | null =
 	import.meta.env.DEV ?
-		[
+		[	
 			{
 				path: 'test',
 				children: [
