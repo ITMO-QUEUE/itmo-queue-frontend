@@ -50,9 +50,12 @@ export const AuthPage = () => {
 )}
 		{!isRegister && (
     <>
-        <p className='mt-6 text-center text-small font-bold text-text-primary'>
-            Не получается войти?
-        </p>
+        <Link
+    to='/register'
+    className='mt-6 block text-center text-small font-bold text-text-primary'
+>
+    Не получается войти?
+</Link>
         <p className='mt-5 text-caption text-text-secondary'>
             Роль назначает администратор. Самостоятельная регистрация не требуется.
         </p>
