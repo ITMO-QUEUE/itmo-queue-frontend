@@ -6,14 +6,14 @@ import { tw } from '../../libs/utils'
 interface UIInputProps {
 	label: string
 	value: string
-	onChange: (value: string) => void
+	onChange: ( value: string ) => void
 	placeholder?: string
 	type?: 'text' | 'password'
 	error?: string
 	disabled?: boolean
 }
 
-const LABEL_CLASSES = tw('text-label text-text-primary')
+const LABEL_CLASSES = tw( 'text-label text-text-primary' )
 
 const INPUT_CLASSES = tw(
 	'h-11 w-full px-3',
@@ -31,14 +31,14 @@ const ERROR_INPUT_CLASSES = tw(
 	'focus:border-status-danger focus:ring-status-danger/20'
 )
 
-const ERROR_TEXT_CLASSES = tw('text-caption text-status-danger')
+const ERROR_TEXT_CLASSES = tw( 'text-caption text-status-danger' )
 
 const EYE_BUTTON_CLASSES = tw(
 	'absolute inset-y-0 right-0 flex w-11 items-center justify-center',
 	'cursor-pointer disabled:cursor-not-allowed'
 )
 
-export const UIInput = ({
+export const UIInput = ( {
 	label,
 	value,
 	onChange,
@@ -46,66 +46,68 @@ export const UIInput = ({
 	type = 'text',
 	error,
 	disabled = false
-}: UIInputProps) => {
+}: UIInputProps ) => {
 	const id = useId()
-	const [isPasswordVisible, setIsPasswordVisible] = useState(false)
+	const [ isPasswordVisible, setIsPasswordVisible ] = useState( false )
 
 	const isPassword = type === 'password'
-	const inputType = isPassword && !isPasswordVisible ? 'password' : 'text'
+	const inputType = isPassword && ! isPasswordVisible ? 'password' : 'text'
 
 	return (
 		<div className='flex w-full flex-col gap-1.5'>
 			<label
-				htmlFor={id}
-				className={LABEL_CLASSES}
+				htmlFor={ id }
+				className={ LABEL_CLASSES }
 			>
-				{label}
+				{ label }
 			</label>
 
 			<div className='relative'>
 				<input
-					id={id}
-					type={inputType}
-					value={value}
-					onChange={event => onChange(event.currentTarget.value)}
-					placeholder={placeholder}
-					disabled={disabled}
-					aria-invalid={Boolean(error)}
-					aria-describedby={error ? `${id}-error` : undefined}
-					className={tw(
+					id={ id }
+					type={ inputType }
+					value={ value }
+					onChange={ event => onChange( event.currentTarget.value ) }
+					placeholder={ placeholder }
+					disabled={ disabled }
+					aria-invalid={ Boolean( error ) }
+					aria-describedby={ error ? `${ id }-error` : undefined }
+					className={ tw(
 						INPUT_CLASSES,
 						isPassword ? 'pr-11' : '',
 						error ? ERROR_INPUT_CLASSES : ''
-					)}
+					) }
 				/>
 
-				{isPassword && (
+				{ isPassword && (
 					<button
 						type='button'
-						onClick={() => setIsPasswordVisible(visible => !visible)}
-						disabled={disabled}
-						aria-label={isPasswordVisible ? 'Скрыть пароль' : 'Показать пароль'}
-						className={EYE_BUTTON_CLASSES}
+						onClick={ () => setIsPasswordVisible( visible => ! visible ) }
+						disabled={ disabled }
+						aria-label={
+							isPasswordVisible ? 'Скрыть пароль' : 'Показать пароль'
+						}
+						className={ EYE_BUTTON_CLASSES }
 					>
 						<img
-							src={isPasswordVisible ? EyeOffIcon : EyeIcon}
+							src={ isPasswordVisible ? EyeOffIcon : EyeIcon }
 							alt=''
 							aria-hidden='true'
 							className='size-icon shrink-0 select-none'
-							draggable={false}
+							draggable={ false }
 						/>
 					</button>
-				)}
+				) }
 			</div>
 
-			{error && (
+			{ error && (
 				<p
-					id={`${id}-error`}
-					className={ERROR_TEXT_CLASSES}
+					id={ `${ id }-error` }
+					className={ ERROR_TEXT_CLASSES }
 				>
-					{error}
+					{ error }
 				</p>
-			)}
+			) }
 		</div>
 	)
 }

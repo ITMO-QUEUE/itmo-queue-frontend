@@ -1,10 +1,10 @@
+import top3Image from '../../assets/icons/Lock.svg'
 import { tw } from '../../libs/utils'
 import {
 	UIParticipantStatus,
 	type UIParticipantStatusProps,
 	UIParticipantStatusStatus
 } from './UIParticipantStatus'
-import top3Image from '../../assets/icons/Lock.svg'
 
 export interface UIQueueRowProps {
 	position: number

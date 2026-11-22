@@ -3,7 +3,7 @@ import { tw } from '../../libs/utils'
 
 export interface UIButtonProps {
 	label: string
-	onClick: () => void | Promise<void>
+	onClick: () => void | Promise< void >
 	tone: UIButtonTone
 	loading?: boolean
 	disabled?: boolean
@@ -28,14 +28,14 @@ const BASE_CLASSES = tw(
 	'cursor-pointer'
 )
 
-const TONE_CLASSES: Record<UIButtonTone, string> = {
-	[UIButtonTone.PRIMARY]: tw(
+const TONE_CLASSES: Record< UIButtonTone, string > = {
+	[ UIButtonTone.PRIMARY ]: tw(
 		'text-text-inverse bg-action-primary',
 		'enabled:hover:bg-action-hover',
 		'enabled:active:bg-action-pressed'
 	),
 
-	[UIButtonTone.SECONDARY]: tw(
+	[ UIButtonTone.SECONDARY ]: tw(
 		'text-text-primary border border-border-control',
 		'bg-bg-selected',
 		'enabled:hover:bg-action-subtle-hover',
@@ -43,58 +43,58 @@ const TONE_CLASSES: Record<UIButtonTone, string> = {
 		'focus:bg-bg-selected'
 	),
 
-	[UIButtonTone.GHOST]: tw(
+	[ UIButtonTone.GHOST ]: tw(
 		'text-text-primary bg-transparent',
 		'enabled:hover:bg-action-subtle-hover',
 		'enabled:active:bg-action-subtle-pressed',
 		'focus:bg-bg-surface'
 	),
 
-	[UIButtonTone.DANGER]: tw(
+	[ UIButtonTone.DANGER ]: tw(
 		'text-text-inverse bg-status-danger',
 		'enabled:hover:bg-status-danger-hover',
 		'enabled:active:bg-status-danger-pressed'
 	)
 }
 
-export const UIButton = ({
+export const UIButton = ( {
 	label,
 	onClick,
 	tone,
 	disabled = false,
 	loading = false,
 	fullWidth = false
-}: UIButtonProps) => {
+}: UIButtonProps ) => {
 	const isDisabled = disabled || loading
 
 	return (
 		<button
 			type='button'
-			onClick={onClick}
-			disabled={isDisabled}
-			aria-busy={loading}
-			className={tw(
+			onClick={ onClick }
+			disabled={ isDisabled }
+			aria-busy={ loading }
+			className={ tw(
 				BASE_CLASSES,
 				fullWidth ? 'w-full' : 'w-56',
-				TONE_CLASSES[tone]
-			)}
+				TONE_CLASSES[ tone ]
+			) }
 		>
-			{loading && (
+			{ loading && (
 				<span
 					aria-hidden='true'
 					className='inline-flex shrink-0'
 				>
-					{loading && (
+					{ loading && (
 						<img
-							src={Spinner}
+							src={ Spinner }
 							alt=''
 							aria-hidden='true'
 							className='size-5 shrink-0 animate-spin'
 						/>
-					)}
+					) }
 				</span>
-			)}
-			<span>{label}</span>
+			) }
+			<span>{ label }</span>
 		</button>
 	)
 }

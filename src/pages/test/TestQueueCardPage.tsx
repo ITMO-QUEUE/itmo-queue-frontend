@@ -10,14 +10,14 @@ type QueueCardScenario = {
 	props: UIQueueCardScenarioProps
 }
 
-const createDate = (hours: number, minutes = 0) => {
+const createDate = ( hours: number, minutes = 0 ) => {
 	const date = new Date()
-	date.setHours(hours, minutes, 0, 0)
+	date.setHours( hours, minutes, 0, 0 )
 	return date
 }
 
-const DATE_START = createDate(14)
-const DATE_END = createDate(15, 30)
+const DATE_START = createDate( 14 )
+const DATE_END = createDate( 15, 30 )
 
 // Общие свойства карточки без place и onlineLink
 const COMMON_PROPS = {
@@ -104,18 +104,18 @@ const SCENARIOS: QueueCardScenario[] = [
 ]
 
 export const TestQueueCardPage = () => {
-	const [clickCount, setClickCount] = useState(0)
-	const [lastAction, setLastAction] = useState<string | null>(null)
+	const [ clickCount, setClickCount ] = useState( 0 )
+	const [ lastAction, setLastAction ] = useState< string | null >( null )
 
-	const handleAction = (action: string, scenario: string) => {
-		setClickCount(prev => prev + 1)
-		setLastAction(`${action}: ${scenario}`)
+	const handleAction = ( action: string, scenario: string ) => {
+		setClickCount( prev => prev + 1 )
+		setLastAction( `${ action }: ${ scenario }` )
 	}
 
 	return (
 		<main className='h-full w-full overflow-auto bg-bg-page p-6 md:p-10'>
 			<div className='mx-auto flex max-w-7xl flex-col gap-8'>
-				{/* Header */}
+				{ /* Header */ }
 				<header className='flex flex-wrap items-end justify-between gap-4'>
 					<div className='space-y-2'>
 						<p className='text-small text-text-secondary'>
@@ -134,15 +134,15 @@ export const TestQueueCardPage = () => {
 					<div className='min-w-52 rounded-card border border-border-subtle bg-bg-surface px-5 py-3'>
 						<p className='text-small text-text-secondary'>Click events</p>
 
-						<p className='text-section text-text-primary'>{clickCount}</p>
+						<p className='text-section text-text-primary'>{ clickCount }</p>
 
 						<p className='text-caption text-text-secondary'>
-							Last: {lastAction ?? 'None'}
+							Last: { lastAction ?? 'None' }
 						</p>
 					</div>
 				</header>
 
-				{/* QueueCard variants */}
+				{ /* QueueCard variants */ }
 				<section className='flex flex-col gap-5'>
 					<div>
 						<h2 className='text-subheading text-text-primary'>Card variants</h2>
@@ -153,24 +153,24 @@ export const TestQueueCardPage = () => {
 					</div>
 
 					<div className='grid grid-cols-1 gap-6 xl:grid-cols-2'>
-						{SCENARIOS.map(({ key, label, props }) => (
+						{ SCENARIOS.map( ( { key, label, props } ) => (
 							<article
-								key={key}
+								key={ key }
 								className='flex min-w-0 flex-col gap-3'
 							>
-								<p className='text-small text-text-secondary'>{label}</p>
+								<p className='text-small text-text-secondary'>{ label }</p>
 
 								<UIQueueCard
-									{...props}
-									onOpenQueue={() => handleAction('Open queue', label)}
-									onMoveToEnd={() => handleAction('Move to end', label)}
+									{ ...props }
+									onOpenQueue={ () => handleAction( 'Open queue', label ) }
+									onMoveToEnd={ () => handleAction( 'Move to end', label ) }
 								/>
 							</article>
-						))}
+						) ) }
 					</div>
 				</section>
 
-				{/* Online mode */}
+				{ /* Online mode */ }
 				<section className='rounded-card border border-border-subtle bg-bg-surface p-6'>
 					<h2 className='text-subheading text-text-primary'>
 						Online protection
@@ -182,16 +182,16 @@ export const TestQueueCardPage = () => {
 
 					<div className='mt-5 max-w-2xl'>
 						<UIQueueCard
-							{...ONLINE_PROPS}
+							{ ...ONLINE_PROPS }
 							isNearest
-							queueNumber={5}
-							onOpenQueue={() => handleAction('Open queue', 'Online')}
-							onMoveToEnd={() => handleAction('Move to end', 'Online')}
+							queueNumber={ 5 }
+							onOpenQueue={ () => handleAction( 'Open queue', 'Online' ) }
+							onMoveToEnd={ () => handleAction( 'Move to end', 'Online' ) }
 						/>
 					</div>
 				</section>
 
-				{/* Footer */}
+				{ /* Footer */ }
 				<footer className='text-caption text-text-secondary'>
 					UIQueueCard · 2 emphasis variants · 3 states · 6 combinations · Online
 					mode

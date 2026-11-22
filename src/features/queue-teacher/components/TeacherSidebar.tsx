@@ -8,12 +8,12 @@ export const TeacherSidebar = () => {
 	return (
 		<Sidebar>
 			<UINavigationItem
-				icon={QueueIcon}
+				icon={ QueueIcon }
 				path='/teacher/queues'
 				label='Мои очереди'
 			/>
 			<UINavigationItem
-				icon={ProfileIcon}
+				icon={ ProfileIcon }
 				path='/teacher/profile'
 				label='Профиль'
 			/>

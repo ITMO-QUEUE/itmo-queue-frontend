@@ -31,34 +31,34 @@ function parseDisciplines(
 ): { value: string; label: string }[] {
 	return [
 		{ value: ALL_DISCIPLINES, label: 'Все' },
-		...Array.from(new Set(queues.map(queue => queue.subject)))
+		...Array.from( new Set( queues.map( queue => queue.subject ) ) )
 			.sort()
-			.map(value => ({
+			.map( value => ( {
 				value,
 				label: value
-			}))
+			} ) )
 	]
 }
 
 export const StudentDashboard = () => {
-	const [discipline, setDiscipline] = useState<
+	const [ discipline, setDiscipline ] = useState<
 		Subject | typeof ALL_DISCIPLINES
-	>(ALL_DISCIPLINES)
+	>( ALL_DISCIPLINES )
 
 	// TODO: Получить очереди из API
-	const queues: StudentQueueType[] = [...mockQueues].sort(
-		(a, b) => a.startsAt.getTime() - b.startsAt.getTime()
+	const queues: StudentQueueType[] = [ ...mockQueues ].sort(
+		( a, b ) => a.startsAt.getTime() - b.startsAt.getTime()
 	)
 	const filteredQueues: StudentQueueType[] = queues.filter(
 		queue => discipline === ALL_DISCIPLINES || queue.subject === discipline
 	)
 
-	if (queues.length === 0) {
+	if ( queues.length === 0 ) {
 		return <StudentDashboardEmpty />
 	}
 
-	const disciplines = parseDisciplines(queues)
-	const [nearestQueue, ...restQueues] = filteredQueues
+	const disciplines = parseDisciplines( queues )
+	const [ nearestQueue, ...restQueues ] = filteredQueues
 
 	const handleOnMoveToEnd = async () => {
 		// TODO: Отправить запрос на изменение места студента в очереди
@@ -79,37 +79,37 @@ export const StudentDashboard = () => {
 			<div className='flex gap-4'>
 				<UISelect
 					label='Дисциплина'
-					onChange={value =>
-						setDiscipline(value as Subject | typeof ALL_DISCIPLINES)
+					onChange={ value =>
+						setDiscipline( value as Subject | typeof ALL_DISCIPLINES )
 					}
-					options={disciplines}
-					value={discipline}
+					options={ disciplines }
+					value={ discipline }
 				/>
 			</div>
 
 			<UIAlert
-				tone={UIAlertTone.INFO}
+				tone={ UIAlertTone.INFO }
 				title='Вас вызывают на защиту'
 				message='Программирование · 2 работы. Принимает Павел Кузнецов, аудитория 305.'
 			/>
 			<StudentQueue
 				isNearest
-				studentQueue={nearestQueue}
-				onMoveToEnd={handleOnMoveToEnd}
-				onOpenQueue={handleOnOpenQueue}
+				studentQueue={ nearestQueue }
+				onMoveToEnd={ handleOnMoveToEnd }
+				onOpenQueue={ handleOnOpenQueue }
 			/>
-			{!!restQueues.length && (
+			{ !! restQueues.length && (
 				<div className='flex text-section'>Предстоящие записи</div>
-			)}
-			{!!restQueues.length &&
-				restQueues.map(queue => (
+			) }
+			{ !! restQueues.length &&
+				restQueues.map( queue => (
 					<StudentQueue
-						onMoveToEnd={handleOnMoveToEnd}
-						onOpenQueue={handleOnOpenQueue}
-						studentQueue={queue}
-						key={queue.id}
+						onMoveToEnd={ handleOnMoveToEnd }
+						onOpenQueue={ handleOnOpenQueue }
+						studentQueue={ queue }
+						key={ queue.id }
 					/>
-				))}
+				) ) }
 		</Page>
 	)
 }

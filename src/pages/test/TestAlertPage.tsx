@@ -39,25 +39,25 @@ export const TestAlertPage = () => {
 
 				<section className='flex flex-col gap-4 rounded-card border border-border-subtle bg-bg-surface p-6'>
 					<h2 className='text-subheading text-text-primary'>With title</h2>
-					{TONES.map(({ tone, title, message }) => (
+					{ TONES.map( ( { tone, title, message } ) => (
 						<UIAlert
-							key={tone}
-							tone={tone}
-							title={title}
-							message={message}
+							key={ tone }
+							tone={ tone }
+							title={ title }
+							message={ message }
 						/>
-					))}
+					) ) }
 				</section>
 
 				<section className='flex flex-col gap-4 rounded-card border border-border-subtle bg-bg-surface p-6'>
 					<h2 className='text-subheading text-text-primary'>Message only</h2>
-					{TONES.map(({ tone, message }) => (
+					{ TONES.map( ( { tone, message } ) => (
 						<UIAlert
-							key={tone}
-							tone={tone}
-							message={message}
+							key={ tone }
+							tone={ tone }
+							message={ message }
 						/>
-					))}
+					) ) }
 				</section>
 			</div>
 		</main>

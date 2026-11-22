@@ -15,12 +15,12 @@ const STATES = [
 ] as const
 
 export const TestButtonPage = () => {
-	const [clickCount, setClickCount] = useState(0)
-	const [lastClicked, setLastClicked] = useState<string | null>(null)
+	const [ clickCount, setClickCount ] = useState( 0 )
+	const [ lastClicked, setLastClicked ] = useState< string | null >( null )
 
-	const handleClick = (tone: UIButtonTone) => {
-		setClickCount(prev => prev + 1)
-		setLastClicked(tone)
+	const handleClick = ( tone: UIButtonTone ) => {
+		setClickCount( prev => prev + 1 )
+		setLastClicked( tone )
 	}
 
 	return (
@@ -44,10 +44,10 @@ export const TestButtonPage = () => {
 					<div className='rounded-card border border-border-subtle bg-bg-surface px-5 py-3'>
 						<p className='text-small text-text-secondary'>Click events</p>
 
-						<p className='text-section text-text-primary'>{clickCount}</p>
+						<p className='text-section text-text-primary'>{ clickCount }</p>
 
 						<p className='text-caption text-text-secondary'>
-							Last: {lastClicked ?? 'None'}
+							Last: { lastClicked ?? 'None' }
 						</p>
 					</div>
 				</header>
@@ -71,40 +71,40 @@ export const TestButtonPage = () => {
 										Variant
 									</th>
 
-									{STATES.map(state => (
+									{ STATES.map( state => (
 										<th
-											key={state.key}
+											key={ state.key }
 											className='min-w-64 px-6 py-4 text-small text-text-secondary'
 										>
-											{state.label}
+											{ state.label }
 										</th>
-									))}
+									) ) }
 								</tr>
 							</thead>
 
 							<tbody>
-								{TONES.map(({ tone, label }) => (
+								{ TONES.map( ( { tone, label } ) => (
 									<tr
-										key={tone}
+										key={ tone }
 										className='border-t border-border-subtle'
 									>
 										<th className='px-6 py-6 text-label text-text-primary'>
-											{label}
+											{ label }
 										</th>
 
 										<td className='px-6 py-6'>
 											<UIButton
 												label='Button'
-												tone={tone}
-												onClick={() => handleClick(tone)}
+												tone={ tone }
+												onClick={ () => handleClick( tone ) }
 											/>
 										</td>
 
 										<td className='px-6 py-6'>
 											<UIButton
 												label='Button'
-												tone={tone}
-												onClick={() => handleClick(tone)}
+												tone={ tone }
+												onClick={ () => handleClick( tone ) }
 												disabled
 											/>
 										</td>
@@ -112,13 +112,13 @@ export const TestButtonPage = () => {
 										<td className='px-6 py-6'>
 											<UIButton
 												label='Loading...'
-												tone={tone}
-												onClick={() => handleClick(tone)}
+												tone={ tone }
+												onClick={ () => handleClick( tone ) }
 												loading
 											/>
 										</td>
 									</tr>
-								))}
+								) ) }
 							</tbody>
 						</table>
 					</div>
@@ -135,14 +135,14 @@ export const TestButtonPage = () => {
 					</p>
 
 					<div className='mt-6 flex flex-wrap gap-5'>
-						{TONES.map(({ tone, label }) => (
+						{ TONES.map( ( { tone, label } ) => (
 							<UIButton
-								key={tone}
-								label={label}
-								tone={tone}
-								onClick={() => handleClick(tone)}
+								key={ tone }
+								label={ label }
+								tone={ tone }
+								onClick={ () => handleClick( tone ) }
 							/>
-						))}
+						) ) }
 					</div>
 				</section>
 

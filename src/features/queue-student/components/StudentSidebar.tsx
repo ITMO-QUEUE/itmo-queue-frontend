@@ -12,22 +12,22 @@ export const StudentSidebar = () => {
 			<UINavigationItem
 				label='Мои записи'
 				path='/student'
-				icon={HomeIcon}
+				icon={ HomeIcon }
 			/>
 			<UINavigationItem
 				label='Найти очередь'
 				path='/student/queues'
-				icon={QueueIcon}
+				icon={ QueueIcon }
 			/>
 			<UINavigationItem
 				label='История'
 				path='/student/history'
-				icon={HistoryIcon}
+				icon={ HistoryIcon }
 			/>
 			<UINavigationItem
 				label='Профиль'
 				path='/student/profile'
-				icon={ProfileIcon}
+				icon={ ProfileIcon }
 			/>
 		</Sidebar>
 	)

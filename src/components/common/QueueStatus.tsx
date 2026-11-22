@@ -7,13 +7,13 @@ export interface QueueStatusProps {
 	type: QueueStatusEnum
 }
 
-export const QueueStatus = ({ type }: QueueStatusProps) => {
-	switch (type) {
+export const QueueStatus = ( { type }: QueueStatusProps ) => {
+	switch ( type ) {
 		case QueueStatusEnum.ACTIVE: {
 			return (
 				<UIQueueStatus
 					label='Активная защита'
-					status={QueueStatusEnum.ACTIVE}
+					status={ QueueStatusEnum.ACTIVE }
 				/>
 			)
 		}
@@ -21,7 +21,7 @@ export const QueueStatus = ({ type }: QueueStatusProps) => {
 			return (
 				<UIQueueStatus
 					label='Защита завершена'
-					status={QueueStatusEnum.COMPLETED}
+					status={ QueueStatusEnum.COMPLETED }
 				/>
 			)
 		}
@@ -29,7 +29,7 @@ export const QueueStatus = ({ type }: QueueStatusProps) => {
 			return (
 				<UIQueueStatus
 					label='Пауза · резерв'
-					status={QueueStatusEnum.PAUSED}
+					status={ QueueStatusEnum.PAUSED }
 				/>
 			)
 		}
@@ -37,7 +37,7 @@ export const QueueStatus = ({ type }: QueueStatusProps) => {
 			return (
 				<UIQueueStatus
 					label='Предварительная запись'
-					status={QueueStatusEnum.PREREGISTRATION}
+					status={ QueueStatusEnum.PREREGISTRATION }
 				/>
 			)
 		}
@@ -45,7 +45,7 @@ export const QueueStatus = ({ type }: QueueStatusProps) => {
 			return (
 				<UIQueueStatus
 					label='Запись закрыта'
-					status={QueueStatusEnum.REGISTRATION_CLOSED}
+					status={ QueueStatusEnum.REGISTRATION_CLOSED }
 				/>
 			)
 		}
@@ -53,7 +53,7 @@ export const QueueStatus = ({ type }: QueueStatusProps) => {
 			return (
 				<UIQueueStatus
 					label='Запись открыта'
-					status={QueueStatusEnum.REGISTRATION_OPEN}
+					status={ QueueStatusEnum.REGISTRATION_OPEN }
 				/>
 			)
 		}

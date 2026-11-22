@@ -2,10 +2,10 @@ import { useState } from 'react'
 import { Outlet, useNavigate, useParams } from 'react-router'
 import { Page } from '../../components/common/Page.tsx'
 import { QueueStatus } from '../../components/ui/UIQueueStatus'
-import { UITab } from '../../components/ui/UITab'
 import { UISelect, type UISelectOption } from '../../components/ui/UISelect'
-import { TeacherQueue } from '../../features/queue-teacher/components/TeacherQueue'
+import { UITab } from '../../components/ui/UITab'
 import { mockQueues } from '../../features/queue-student/mocks/queues'
+import { TeacherQueue } from '../../features/queue-teacher/components/TeacherQueue'
 
 const TABS = [
 	{

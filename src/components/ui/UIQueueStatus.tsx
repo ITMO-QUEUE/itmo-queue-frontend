@@ -20,17 +20,19 @@ const BASE_CLASSES = tw(
 	'rounded-full'
 )
 
-const STATUS_CLASSES: Record<QueueStatus, string> = {
-	[QueueStatus.PREREGISTRATION]: tw('text-action-primary bg-bg-selected'),
-	[QueueStatus.REGISTRATION_CLOSED]: tw('text-text-secondary bg-bg-page'),
-	[QueueStatus.REGISTRATION_OPEN]: tw(
+const STATUS_CLASSES: Record< QueueStatus, string > = {
+	[ QueueStatus.PREREGISTRATION ]: tw( 'text-action-primary bg-bg-selected' ),
+	[ QueueStatus.REGISTRATION_CLOSED ]: tw( 'text-text-secondary bg-bg-page' ),
+	[ QueueStatus.REGISTRATION_OPEN ]: tw(
 		'text-status-success bg-status-success-bg'
 	),
-	[QueueStatus.ACTIVE]: tw('text-status-success bg-status-success-bg'),
-	[QueueStatus.PAUSED]: tw('text-status-warning bg-status-warning-bg'),
-	[QueueStatus.COMPLETED]: tw('text-text-secondary bg-bg-page')
+	[ QueueStatus.ACTIVE ]: tw( 'text-status-success bg-status-success-bg' ),
+	[ QueueStatus.PAUSED ]: tw( 'text-status-warning bg-status-warning-bg' ),
+	[ QueueStatus.COMPLETED ]: tw( 'text-text-secondary bg-bg-page' )
 }
 
-export const UIQueueStatus = ({ label, status }: UIQueueStatusProps) => (
-	<span className={tw(BASE_CLASSES, STATUS_CLASSES[status])}>{label}</span>
+export const UIQueueStatus = ( { label, status }: UIQueueStatusProps ) => (
+	<span className={ tw( BASE_CLASSES, STATUS_CLASSES[ status ] ) }>
+		{ label }
+	</span>
 )

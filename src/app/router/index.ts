@@ -93,9 +93,8 @@ const routes: RouteObject[] = [
 	}
 ]
 
-const testRoutes: RouteObject[] | null =
-	import.meta.env.DEV ?
-		[
+const testRoutes: RouteObject[] | null = import.meta.env.DEV
+	? [
 			{
 				path: 'test',
 				children: [
@@ -150,15 +149,15 @@ const testRoutes: RouteObject[] | null =
 				]
 			}
 		]
-	:	null
+	: null
 
-if (testRoutes) {
-	routes.push(...testRoutes)
+if ( testRoutes ) {
+	routes.push( ...testRoutes )
 }
 
-routes.push({
+routes.push( {
 	path: '*',
 	Component: NotFoundPage
-})
+} )
 
-export const router = createBrowserRouter(routes)
+export const router = createBrowserRouter( routes )
