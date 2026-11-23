@@ -19,6 +19,6 @@ export const getMyProfile = async (): Promise< CurrentUser > => {
 	return data
 }
 
-export const logout = async(): Promise<void> => {
-	await apiClient.post('/api/v1/auth/logout')
+export const logout = async (): Promise< void > => {
+	await apiClient.post( '/api/v1/auth/logout' )
 }

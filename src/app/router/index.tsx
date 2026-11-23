@@ -3,11 +3,13 @@ import { createBrowserRouter, type RouteObject } from 'react-router'
 import { AuthPage } from '@/pages/AuthPage'
 import { Profile } from '../../components/common/Profile'
 import { CommonLayout } from '../../components/layout/CommonLayout'
+import { AdminCreateUserPage } from '../../pages/admin/AdminCreateUserPage'
 import { AdminUsersPage } from '../../pages/admin/AdminUsersPage'
 import { NotFoundPage } from '../../pages/NotFoundPage'
 import { StudentActiveQueuesPage } from '../../pages/student/StudentActiveQueuesPage'
 import { StudentHistoryPage } from '../../pages/student/StudentHistoryPage'
 import { StudentQueuePage } from '../../pages/student/StudentQueuePage'
+import { StudentQueuesPage } from '../../pages/student/StudentQueuesPage'
 import { TeacherQueuePage } from '../../pages/teacher/TeacherQueuePage'
 import { TeacherQueuesPage } from '../../pages/teacher/TeacherQueuesPage'
 import { TeacherSubjectsPage } from '../../pages/teacher/TeacherSubjectsPage'
@@ -24,11 +26,9 @@ import { TestSelectPage } from '../../pages/test/TestSelectPage'
 import { TestTabPage } from '../../pages/test/TestTabPage'
 import { TestTeacherParametersPage } from '../../pages/test/TestTeacherParametersPage'
 import { GuestOnlyRoute, ProtectedRoute } from './ProtectedRoute'
-import { AdminCreateUserPage } from '../../pages/admin/AdminCreateUserPage' 
-import { StudentQueuesPage } from '../../pages/student/StudentQueuesPage'
 
 const routes: RouteObject[] = [
-		{
+	{
 		element: <GuestOnlyRoute />,
 		children: [
 			{
@@ -41,7 +41,7 @@ const routes: RouteObject[] = [
 			}
 		]
 	},
-		{
+	{
 		element: <ProtectedRoute allowedRoles={ [ 'student' ] } />,
 		children: [
 			{

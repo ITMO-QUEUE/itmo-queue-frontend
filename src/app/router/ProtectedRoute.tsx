@@ -1,5 +1,5 @@
 import { Navigate, Outlet, useLocation } from 'react-router'
-import { useAuthStore, type UserRole } from '../../stores/useAuthStore'
+import { type UserRole, useAuthStore } from '../../stores/useAuthStore'
 
 export const ROLE_HOME_ROUTES: Record< UserRole, string > = {
 	student: '/student/me/queues',

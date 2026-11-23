@@ -25,43 +25,43 @@ const INITIAL_VALUES: CreateUserValues = {
 	isu: '',
 	login: '',
 	password: '',
-	role: 'student',
+	role: 'student'
 }
 
 const ROLE_OPTIONS: UISelectOption[] = [
 	{ value: 'student', label: 'Студент' },
 	{ value: 'teacher', label: 'Преподаватель' },
-	{ value: 'admin', label: 'Администратор' },
+	{ value: 'admin', label: 'Администратор' }
 ]
 
 const validate = ( values: CreateUserValues ): CreateUserErrors => {
 	const errors: CreateUserErrors = {}
 
-	if ( !values.name.trim() ) {
+	if ( ! values.name.trim() ) {
 		errors.name = 'Введите имя'
 	}
 
 	const trimmedIsu = values.isu.trim()
-	if ( !trimmedIsu ) {
+	if ( ! trimmedIsu ) {
 		errors.isu = 'Введите табельный номер'
-	} else if ( !/^[0-9]{6}$/.test( trimmedIsu ) ) {
+	} else if ( ! /^[0-9]{6}$/.test( trimmedIsu ) ) {
 		errors.isu = 'Табельный номер должен состоять из 6 цифр'
 	}
 
 	const trimmedLogin = values.login.trim()
-	if ( !trimmedLogin ) {
+	if ( ! trimmedLogin ) {
 		errors.login = 'Введите логин'
 	} else if ( trimmedLogin.length < 3 ) {
 		errors.login = 'Минимум 3 символа'
 	}
 
-	if ( !values.password ) {
+	if ( ! values.password ) {
 		errors.password = 'Введите пароль'
 	} else if ( values.password.length < 8 ) {
 		errors.password = 'Минимум 8 символов'
 	}
 
-	if ( !values.role ) {
+	if ( ! values.role ) {
 		errors.role = 'Выберите роль'
 	}
 
@@ -84,7 +84,9 @@ export const AdminCreateUserPage = () => {
 		},
 		onError: error => {
 			if ( isAxiosError( error ) && error.response?.status === 409 ) {
-				setSubmitError( 'Пользователь с таким логином или табельным номером уже существует.' )
+				setSubmitError(
+					'Пользователь с таким логином или табельным номером уже существует.'
+				)
 				return
 			}
 			if ( isAxiosError( error ) && error.response?.status === 422 ) {
@@ -92,18 +94,18 @@ export const AdminCreateUserPage = () => {
 				return
 			}
 			setSubmitError( 'Не удалось создать аккаунт. Попробуйте позже.' )
-		},
+		}
 	} )
 
-	const handleChange = < K extends keyof CreateUserValues >( field: K ) => (
-		value: CreateUserValues[ K ]
-	) => {
-		setValues( prev => ( { ...prev, [ field ]: value } ) )
-		setErrors( prev => ( { ...prev, [ field ]: undefined } ) )
-		if ( submitError ) {
-			setSubmitError( null )
+	const handleChange =
+		< K extends keyof CreateUserValues >( field: K ) =>
+		( value: CreateUserValues[ K ] ) => {
+			setValues( prev => ( { ...prev, [ field ]: value } ) )
+			setErrors( prev => ( { ...prev, [ field ]: undefined } ) )
+			if ( submitError ) {
+				setSubmitError( null )
+			}
 		}
-	}
 
 	const handleSubmit = () => {
 		const nextErrors = validate( values )
@@ -118,7 +120,7 @@ export const AdminCreateUserPage = () => {
 			login: values.login.trim(),
 			password: values.password,
 			role: values.role,
-			can_create_queues: values.role === 'teacher' || values.role === 'admin',
+			can_create_queues: values.role === 'teacher' || values.role === 'admin'
 		} )
 	}
 
