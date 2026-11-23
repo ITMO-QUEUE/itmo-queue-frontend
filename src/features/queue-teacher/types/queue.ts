@@ -1,5 +1,5 @@
 import type { QueueStatus } from '../../../components/ui/UIQueueStatus'
-import type { UIParticipantStatusStatus } from '../../../components/ui/UIParticipantStatus'
+import type { StudentRecord } from '../../../types/StudentRecord'
 
 export interface QueueWork {
 	type: 'lab'
@@ -15,15 +15,6 @@ export interface StudentWork {
 	result?: string
 	score?: number
 	link: string | null
-}
-
-export interface QueueParticipant {
-	name: string
-	id: number
-	position: number
-	works: StudentWork[]
-	status: UIParticipantStatusStatus
-	group: string
 }
 
 type QueueLocation =
@@ -61,7 +52,7 @@ export type StudentQueue = TeacherQueue & {
 }
 
 export type fullQueue = StudentQueue & {
-	students: QueueParticipant[]
+	studentRecords: StudentRecord[]
 	minutesPerStudent: number
 	requireArtifact: boolean
 }

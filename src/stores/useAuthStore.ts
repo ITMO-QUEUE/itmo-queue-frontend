@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 
-interface User {
+export interface User {
 	name: string
 	type: 'student' | 'teacher'
 	email?: string

@@ -6,15 +6,22 @@ import { UIButton, UIButtonTone } from '../../components/ui/UIButton.tsx'
 import { QueueStatus } from '../../components/common/QueueStatus'
 import { QueueStatus as QueueStatusEnum } from '../../components/ui/UIQueueStatus'
 import { UITab } from '../../components/ui/UITab'
-import { UIQueueRow } from '../../components/ui/UIQueueRow'
-import { UIParticipantStatusStatus } from '../../components/ui/UIParticipantStatus'
+import { QueueRows } from '../../components/common/QueueRows'
+import { useAuthStore } from '../../stores/useAuthStore'
 import type { QueueChanges } from '../../features/queue-teacher/types/queue'
 import { QueueSettings } from '../../features/queue-teacher/components/QueueSettings'
 import { UIStudentWorkResult, type UIStudentWorkResultProps } from '../../components/ui/UIStudentWorkResult'
+import type { User } from '../../../stores/useAuthStore.ts'
 
 type QueueTab = 'queue' | 'settings' | 'history'
 
 type HistoryAttempt = Omit<UIStudentWorkResultProps, 'OnClick'> & { id: string }
+
+export const TeacherSample: User = {
+	id: 'teacher-1',
+	name: 'Елена Ивановна',
+	type: 'teacher'
+}
 
 const testResults: HistoryAttempt[] = [
 	{
@@ -52,14 +59,6 @@ const testResults: HistoryAttempt[] = [
 	}
 ]
 
-const participantStatusLabels: Record<UIParticipantStatusStatus, string> = {
-	[UIParticipantStatusStatus.WAITING]: 'Ожидает',
-	[UIParticipantStatusStatus.CALLED]: 'Вызван',
-	[UIParticipantStatusStatus.DEFENDING]: 'На защите',
-	[UIParticipantStatusStatus.ACCEPTED]: 'Принято',
-	[UIParticipantStatusStatus.NO_SHOW]: 'Не явился'
-}
-
 const dateFormatter = new Intl.DateTimeFormat('ru-RU', {
 	day: 'numeric',
 	month: 'long',
@@ -71,6 +70,7 @@ const timeFormatter = new Intl.DateTimeFormat('ru-RU', {
 })
 
 export const TeacherQueuePage = () => {
+	const currentUser = TeacherSample	
 	const [activeTab, setActiveTab] = useState<QueueTab>('queue')
 	const [queueStates, setQueueStates] = useState<Record<string, QueueChanges>>({})
 	const navigate = useNavigate()
@@ -192,26 +192,13 @@ export const TeacherQueuePage = () => {
 						<h2 id='queue-participants-title' className='text-section text-text-primary'>
 							Участники очереди
 						</h2>
-						{queue.students.length === 0 ? (
+						{queue.studentRecords.length === 0 ? (
 							<p className='text-body text-text-secondary'>В очереди пока нет участников.</p>
 						) : (
 							<div className='overflow-x-auto'>
-								<ul className='flex min-w-[900px] flex-col gap-4'>
-									{[...queue.students].sort((a, b) => a.position - b.position).map(student => (
-										<li key={student.id}>
-											<UIQueueRow
-												position={student.position}
-												name={student.name}
-												works={student.works.map(work => `ЛР № ${work.number}`)}
-												link={student.works.find(work => work.link)?.link ?? null}
-												participantStatus={{ status: student.status, label: participantStatusLabels[student.status] }}
-												group={student.group}
-												viewerRole='teacher'
-												forceDisable={isCompleted}
-											/>
-										</li>
-									))}
-								</ul>
+								<div className='min-w-[900px]'>
+									<QueueRows records={queue.studentRecords} currentUser={currentUser} />
+								</div>
 							</div>
 						)}
 					</section>

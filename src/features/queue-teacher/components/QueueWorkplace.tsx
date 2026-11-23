@@ -8,6 +8,6 @@ export type UIWorkPlaceProps = {
 
 export enum UIWorkPlaceStatus {
 	FREE = 'free',
-    CALLING = 'calling'
+    CALLING = 'calling',
     DEFENDING = 'defending'
 }
