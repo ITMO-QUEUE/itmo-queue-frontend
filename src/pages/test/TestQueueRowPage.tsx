@@ -1,119 +1,71 @@
-import { UIParticipantStatusStatus } from '../../components/ui/UIParticipantStatus'
-import {
-	UIQueueRow,
-	type UIQueueRowProps
-} from '../../components/ui/UIQueueRow'
+import { ParticipantStatus, type StudentRecord } from '../../types/StudentRecord'
+import { UIQueueRow } from '../../components/ui/UIQueueRow'
 
-const WAITING = {
-	status: UIParticipantStatusStatus.WAITING,
-	label: 'Ожидает'
+const ARTIFACT_URL = '#queue-row-artifacts'
+
+function exampleRecord(id: string, overrides: Partial<StudentRecord>): StudentRecord {
+	return {
+		id,
+		student_id: `student-${id}`,
+		queue_id: 'demo-queue',
+		student_name: 'Алексей Смирнов',
+		position: null,
+		status: ParticipantStatus.WAITING,
+		is_top3: false,
+		is_reserve: false,
+		self_moves_count: 0,
+		works: [{ work_id: 'lab-3', title: 'ЛР № 3', priority: 1, artifact_url: ARTIFACT_URL }],
+		...overrides
+	}
 }
-const PARTICIPANT = {
-	name: 'Алексей Смирнов',
-	works: [ 'ЛР № 3' ],
-	link: '#queue-row-artifacts',
-	participantStatus: WAITING
-} satisfies Omit< UIQueueRowProps, 'position' >
 
-const EXAMPLES: {
-	title: string
-	description: string
-	rows: UIQueueRowProps[]
-}[] = [
+const EXAMPLES = [
 	{
 		title: 'Участники очереди',
-		description:
-			'Первые три места, основная группа и ваша запись со ссылкой на артефакты.',
+		description: 'Первые три места, основная группа и резерв.',
 		rows: [
-			{ ...PARTICIPANT, position: 1, name: 'Анна Иванова' },
-			{
-				...PARTICIPANT,
-				position: 2,
-				name: 'Илья Соколов',
-				works: [ 'ЛР № 1', 'ЛР № 2' ]
-			},
-			{ ...PARTICIPANT, position: 3, name: 'Даниил Петров' },
-			{
-				...PARTICIPANT,
-				position: 4,
-				name: 'София Волкова',
-				works: [ 'ЛР № 4' ]
-			},
-			{
-				...PARTICIPANT,
-				position: 7,
-				name: 'Максим Козвик',
-				works: [ 'ЛР № 3', 'ЛР № 4' ],
-				isMe: true
-			}
+			exampleRecord('1', { position: 1, student_name: 'Анна Иванова', is_top3: true }),
+			exampleRecord('2', {
+				position: 2, student_name: 'Илья Соколов', is_top3: true,
+				works: [
+					{ work_id: 'lab-1', title: 'ЛР № 1', priority: 1, artifact_url: ARTIFACT_URL },
+					{ work_id: 'lab-2', title: 'ЛР № 2', priority: 2, artifact_url: ARTIFACT_URL }
+				]
+			}),
+			exampleRecord('3', { position: 3, student_name: 'Даниил Петров', is_top3: true }),
+			exampleRecord('4', { position: 4, student_name: 'София Волкова' }),
+			exampleRecord('5', { student_name: 'Максим Козвик', is_reserve: true })
 		]
 	},
 	{
-		title: 'Статусы и своя запись в топ-3',
-		description:
-			'Статус меняет бейдж. Подсветка строки и ссылка появляются у вашей записи.',
-		rows: [
-			{
-				...PARTICIPANT,
-				position: 1,
-				isMe: true,
-				participantStatus: {
-					status: UIParticipantStatusStatus.DEFENDING,
-					label: 'На защите'
-				}
-			},
-			{
-				...PARTICIPANT,
-				position: 2,
-				participantStatus: {
-					status: UIParticipantStatusStatus.CALLED,
-					label: 'Вызван'
-				}
-			},
-			{ ...PARTICIPANT, position: 4 },
-			{
-				...PARTICIPANT,
-				position: 5,
-				participantStatus: {
-					status: UIParticipantStatusStatus.ACCEPTED,
-					label: 'Принято'
-				}
-			},
-			{
-				...PARTICIPANT,
-				position: 6,
-				participantStatus: {
-					status: UIParticipantStatusStatus.NO_SHOW,
-					label: 'Неявка'
-				}
-			}
-		]
+		title: 'Статусы участников',
+		description: 'Все шесть статусов записи в очереди.',
+		rows: Object.values(ParticipantStatus).map(status =>
+			exampleRecord(`status-${status}`, { status })
+		)
 	},
 	{
 		title: 'Разное наполнение',
-		description:
-			'Пустой список, пять работ, длинное имя и название группы для проверки переноса текста.',
+		description: 'Пустой список, несколько работ и длинные названия.',
 		rows: [
-			{ ...PARTICIPANT, position: 8, works: [] },
-			{
-				...PARTICIPANT,
+			exampleRecord('8', { position: 8, works: [] }),
+			exampleRecord('12', {
 				position: 12,
-				works: [ 'ЛР № 1', 'ЛР № 2', 'ЛР № 3', 'ЛР № 4', 'ЛР № 5' ],
-				isMe: true
-			},
-			{
-				...PARTICIPANT,
+				works: [1, 2, 3, 4, 5].map(number => ({
+					work_id: `lab-${number}`, title: `ЛР № ${number}`, priority: number
+				}))
+			}),
+			exampleRecord('123', {
 				position: 123,
-				name: 'Александра Константинова-Рождественская',
-				works: [
-					'Лабораторная работа № 6 — проектирование информационной системы'
-				],
-				group: 'Дополнительная группа'
-			}
+				student_name: 'Александра Константинова-Рождественская',
+				works: [{
+					work_id: 'lab-6', priority: 1,
+					title: 'Лабораторная работа № 6 — проектирование информационной системы'
+				}]
+			})
 		]
 	}
 ]
-
 export const TestQueueRowPage = () => {
 	return (
 		<main className='h-full w-full overflow-auto bg-bg-page p-6 md:p-10'>
@@ -142,8 +94,8 @@ export const TestQueueRowPage = () => {
 						<div className='flex flex-col gap-3'>
 							{ rows.map( row => (
 								<UIQueueRow
-									key={ row.position }
-									{ ...row }
+									key={ row.id }
+									record={ row }
 								/>
 							) ) }
 						</div>

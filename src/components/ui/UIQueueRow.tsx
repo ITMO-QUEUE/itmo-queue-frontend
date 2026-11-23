@@ -1,139 +1,83 @@
 import { LockKeyhole } from 'lucide-react'
 import { tw } from '../../libs/utils'
-import {
-	UIParticipantStatus,
-	UIParticipantStatusStatus,
-	type UIParticipantStatusProps
-} from './UIParticipantStatus'
-import { UIButtonTone, UIButton } from './UIButton'
+import { useAuthStore } from '../../stores/useAuthStore'
+import { ParticipantStatus, type StudentRecord } from '../../types/StudentRecord'
+import { UIButton, UIButtonTone } from './UIButton'
+import { UIParticipantStatus } from './UIParticipantStatus'
 
-export interface UIQueueRowProps {
-	position: number
-	name: string
-	works?: readonly string[]
-	workname?: string
-	link: string
-	participantStatus: UIParticipantStatusProps
-	isMe?: boolean
-	group?: string
-	linkLabel?: string
-	viewerRole?: 'student' | 'teacher'
-	forceDisable: boolean //для случаев, когда необходимо принудительно закрыть все доступ к кнопкам в обход обычной логике
-	onAction?: () => void | Promise< void >
+const STATUS_LABELS: Record<ParticipantStatus, string> = {
+	[ParticipantStatus.WAITING]: 'Ожидает',
+	[ParticipantStatus.CALLED]: 'Вызван',
+	[ParticipantStatus.IN_DEFENSE]: 'На защите',
+	[ParticipantStatus.COMPLETED]: 'Завершено',
+	[ParticipantStatus.CANCELLED]: 'Отменено',
+	[ParticipantStatus.REMOVED]: 'Удалён из очереди'
 }
 
-const BASE_CLASSES = tw(
-	'flex min-w-0 flex-1 items-center gap-4 p-4',
-	'font-nunito border border-border-subtle rounded-control'
-)
-const DETAILS_CLASSES = tw( 'flex min-w-0 basis-2/5 flex-col gap-1' )
 const LINK_CLASSES = tw(
 	'text-caption text-action-primary w-fit rounded-control',
 	'hover:text-action-hover hover:underline',
-	'focus-visible:outline-2 focus-visible:outline-offset-2',
-	'focus-visible:outline-border-focus'
+	'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-border-focus'
 )
 
-const WORK_PLURALS = new Intl.PluralRules( 'ru' )
-const WORK_LABELS: Record< string, string > = {
-	one: 'работа',
-	few: 'работы',
-	many: 'работ',
-	other: 'работ'
+const WORK_PLURALS = new Intl.PluralRules('ru')
+const WORK_LABELS: Record<string, string> = {
+	one: 'работа', few: 'работы', many: 'работ', other: 'работ'
 }
 
-export const UIQueueRow = ( {
-	position,
-	name,
-	works,
-	workname,
-	link,
-	participantStatus,
-	group = 'Основная группа',
-	linkLabel = 'Открыть артефакты',
-	isMe = false,
-	viewerRole = 'student',
-	onAction,
-	forceDisable = false //например, когда сам пользователь вызван, чтобы закрыть все остальные кнопки
-	
-	}: UIQueueRowProps ) => {
-	const isTop3 = position >= 1 && position <= 3
-	const isTeacher = viewerRole === 'teacher'
-	const isCalled = participantStatus.status === UIParticipantStatusStatus.CALLED
-	const MeCalled = isMe && isCalled
-	const actionLabel = 
-	isTeacher
-		? 'Управлять'
-		: isMe	
-			? 'Моя запись'
-			: isTop3
-				? 'Топ 3'
-				: 'Обменяться'
-	const isActionDisabled = ! isTeacher && ! isMe && (forceDisable || isCalled || isTop3 )
-	const participantWorks = works ?? ( workname ? [ workname ] : [] )
-	const workCount = participantWorks.length
-	const workLabel = WORK_LABELS[ WORK_PLURALS.select( workCount ) ]
+export const UIQueueRow = ({ record }: { record: StudentRecord }) => {
+	const user = useAuthStore(state => state.user)
+	const isTeacher = user?.type === 'teacher'
+	const isMe = user?.type === 'student' && user.id === record.student_id
+	const { works, is_top3, is_reserve, status } = record
+	const workCount = works.length || (record.work_id ? 1 : 0)
+	const workTitles = works.map(work => work.title).join(', ')
+	const linkedWorks = works.filter(work => work.artifact_url)
+	const actionLabel = isTeacher ? 'Управлять' : isMe ? 'Моя запись' : is_top3 ? 'Топ 3' : 'Обменяться'
 
 	return (
 		<div className='flex w-full items-center'>
-			<div
-				className={ tw(
-					BASE_CLASSES,
-					isMe ? 'bg-bg-selected' : 'bg-bg-surface'
-				) }
-			>
+			<div className={tw(
+				'flex min-w-0 flex-1 items-center gap-4 p-4 font-nunito border border-border-subtle rounded-control',
+				isMe ? 'bg-bg-selected' : 'bg-bg-surface'
+			)}>
 				<span className='w-20 shrink-0 text-label text-text-primary'>
 					<span className='sr-only'>Позиция в очереди: </span>
-					{ position }
+					{record.position ?? ''}
 				</span>
-				<div className={ DETAILS_CLASSES }>
+				<div className='flex min-w-0 basis-2/5 flex-col gap-1'>
 					<span className='text-label text-text-primary break-words'>
-						{ name }
-						{ isMe && ' · вы' }
+						{record.student_name}{isMe && ' · вы'}
 					</span>
 					<span className='text-small text-text-secondary break-words'>
-						{ workCount } { workLabel }
-						{ workCount > 0 && ` · ${ participantWorks.join( ', ' ) }` }
+						{workCount} {WORK_LABELS[WORK_PLURALS.select(workCount)]}
+						{workTitles && ` · ${workTitles}`}
 					</span>
-					{ ( isMe || isTeacher ) && (
-						<a
-							className={ LINK_CLASSES }
-							href={ link }
-						>
-							{ linkLabel } <span aria-hidden='true'>→</span>
+					{(isMe || isTeacher) && linkedWorks.map(work => (
+						<a key={work.work_id} className={LINK_CLASSES} href={work.artifact_url ?? undefined}>
+							Открыть артефакты · {work.title} <span aria-hidden='true'>→</span>
 						</a>
-					) }
+					))}
+					{(isMe || isTeacher) && !linkedWorks.length && record.artifact_url && (
+						<a className={LINK_CLASSES} href={record.artifact_url}>
+							Открыть артефакты <span aria-hidden='true'>→</span>
+						</a>
+					)}
 				</div>
-				<div
-					className='min-w-0 flex-1'
-					aria-hidden='true'
-				/>
-				<div className='w-44 shrink-0'>
-					<UIParticipantStatus { ...participantStatus } />
-				</div>
+				<div className='min-w-0 flex-1' aria-hidden='true' />
+				<UIParticipantStatus status={status} label={STATUS_LABELS[status]} />
 				<span className='w-36 shrink-0 text-right text-small text-text-secondary break-words'>
-					{ isTop3 ? (
+					{is_top3 ? (
 						<span className='inline-flex items-center gap-1'>
 							Топ-3
-							{ ! isTeacher && (
-								<LockKeyhole
-									className='size-3'
-									aria-hidden='true'
-								/>
-							) }
+							{!isTeacher && <LockKeyhole className='size-3' aria-hidden='true' />}
 						</span>
-					) : (
-						group
-					) }
+					) : is_reserve ? 'Резерв' : 'Основная группа'}
 				</span>
 			</div>
-			<div className='ml-4 w-36 shrink-0 [&>button]:w-full text-text-primary'>
-				<UIButton
-					label={ actionLabel }
-					tone={ UIButtonTone.GH }
-					disabled={ isActionDisabled }
-					onClick={ () => onAction?.() }
-				/>
+			<div className='ml-4 w-36 shrink-0 text-text-primary'>
+				{/* StudentRecord не содержит onAction и forceDisable. До подключения действий очереди кнопка недоступна. */}
+				<UIButton label={actionLabel} tone={UIButtonTone.GHOST} fullWidth onClick={() => {}} />
 			</div>
 		</div>
 	)
