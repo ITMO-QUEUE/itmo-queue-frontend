@@ -10,8 +10,47 @@ import { UIQueueRow } from '../../components/ui/UIQueueRow'
 import { UIParticipantStatusStatus } from '../../components/ui/UIParticipantStatus'
 import type { QueueChanges } from '../../features/queue-teacher/types/queue'
 import { QueueSettings } from '../../features/queue-teacher/components/QueueSettings'
+import { UIStudentWorkResult, type UIStudentWorkResultProps } from '../../components/ui/UIStudentWorkResult'
 
 type QueueTab = 'queue' | 'settings' | 'history'
+
+type HistoryAttempt = Omit<UIStudentWorkResultProps, 'OnClick'> & { id: string }
+
+const testResults: HistoryAttempt[] = [
+	{
+		id: 'attempt-001',
+		WorkName: 'ЛР № 3',
+		Subject: 'Программирование',
+		date: '26 октября',
+		startTime: '14:00',
+		endTime: '16:00',
+		Session: 'защита лабораторных работ',
+		Teacher: 'Павел Кузнецов',
+		result: '7,5 / 10'
+	},
+	{
+		id: 'attempt-002',
+		WorkName: 'ЛР № 4',
+		Subject: 'Программирование',
+		date: '26 октября',
+		startTime: '14:00',
+		endTime: '16:00',
+		Session: 'защита лабораторных работ',
+		Teacher: 'Елена Иванова',
+		result: 'Принято'
+	},
+	{
+		id: 'attempt-003',
+		WorkName: 'ЛР № 3',
+		Subject: 'Программирование',
+		date: '19 октября',
+		startTime: '14:00',
+		endTime: '16:00',
+		Session: 'защита лабораторных работ',
+		Teacher: 'Павел Кузнецов',
+		result: 'Неявка'
+	}
+]
 
 const participantStatusLabels: Record<UIParticipantStatusStatus, string> = {
 	[UIParticipantStatusStatus.WAITING]: 'Ожидает',
@@ -98,7 +137,7 @@ export const TeacherQueuePage = () => {
 					)}
 				</div>
 			</header>
-			<div className='flex gap-2'>
+			<div className='flex gap-2 overflow-x-auto'>
 				<UITab
 					label='Очередь'
 					active={activeTab === 'queue'}
@@ -118,7 +157,7 @@ export const TeacherQueuePage = () => {
 					className='w-[230px] shrink-0'
 				/>
 			</div>
-			{activeTab === 'queue' && (
+			{activeTab === 'queue' && !isCompleted && (
 				<div className='flex flex-col gap-6'>
 					<div className='flex flex-wrap gap-4'>
 						<div className='w-[240px] shrink-0'>
@@ -150,7 +189,7 @@ export const TeacherQueuePage = () => {
 						</div>
 					</div>
 					<section className='flex min-w-0 flex-col gap-4 rounded-card border border-border-subtle bg-bg-surface p-6' aria-labelledby='queue-participants-title'>
-						<h2 id='queue-participants-title' className='text-subheading text-text-primary'>
+						<h2 id='queue-participants-title' className='text-section text-text-primary'>
 							Участники очереди
 						</h2>
 						{queue.students.length === 0 ? (
@@ -181,8 +220,38 @@ export const TeacherQueuePage = () => {
 			{activeTab === 'settings' && (
 				<QueueSettings key={queue.id} queue={queue} onSave={updateQueueState} />
 			)}
-			{activeTab === 'history' && (
-				<div>Текущий UITab: {activeTab}</div>
+			{(activeTab === 'history' || isCompleted) && (
+				<div className='flex min-w-0 flex-row gap-4'>
+				<section className='flex min-w-0 flex-1 flex-col gap-4 rounded-card border border-border-subtle bg-bg-surface p-6' aria-labelledby='queue-WorkResults-title'>
+					<h2 id='queue-WorkResults-title' className='text-section text-text-primary'>
+							Попытки и результаты
+					</h2>
+					<ul aria-label='История попыток' className='grid w-full min-w-0 grid-cols-1 gap-3 sm:gap-4'>
+						{testResults.map(({ id, ...attempt }) => (
+							<li key={id}>
+								<UIStudentWorkResult
+									{...attempt}
+									OnClick={() => window.alert([
+										`${attempt.WorkName} · ${attempt.Subject}`,
+										`${attempt.date} · ${attempt.startTime}–${attempt.endTime}`,
+										`Сеанс: ${attempt.Session}`,
+										`Преподаватель: ${attempt.Teacher}`,
+										`Результат: ${attempt.result ?? 'не указан'}`
+									].join('\n'))}
+								/>
+							</li>
+						))}
+					</ul>
+				</section>
+				<section className='flex min-w-0 self-start shrink-0 basis-[calc((100%_-_--spacing(4))/3)] flex-col gap-4 rounded-card border border-border-subtle bg-bg-surface p-6' aria-labelledby='queue-WorkResults-history'>
+					<h3 id='queue-WorkResults-history' className='text-subheading text-text-primary'>
+							История сеанса
+					</h3>
+					<div className='text-body text-text-secondary'>
+						Каждая работа и попытка хранятся отдельно. Неявка относится к дате попытки.
+					</div>
+				</section>
+				</div>
 			)}
 		</div>
 	)
