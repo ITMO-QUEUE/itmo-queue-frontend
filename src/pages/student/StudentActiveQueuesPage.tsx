@@ -40,7 +40,7 @@ function parseDisciplines(
 	]
 }
 
-export const StudentDashboard = () => {
+export const StudentActiveQueuesPage = () => {
 	const [ discipline, setDiscipline ] = useState<
 		Subject | typeof ALL_DISCIPLINES
 	>( ALL_DISCIPLINES )

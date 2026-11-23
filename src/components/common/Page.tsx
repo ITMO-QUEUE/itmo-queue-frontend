@@ -1,12 +1,12 @@
 import { useNavigate } from 'react-router'
-import { openCreateQueueDialog } from '../../libs/utils'
+import { openCreateQueueDialog, openCreateUserDialog } from '../../libs/utils'
 import { UIButton, UIButtonTone } from '../ui/UIButton'
 
 export interface PageProps {
 	children: React.ReactNode
 	title: string
 	subtitle?: string
-	sidebutton?: 'find-queue' | 'create-queue'
+	sidebutton?: 'find-queue' | 'create-queue' | 'create-user' | 'user-list'
 }
 
 export const Page = ( {
@@ -38,6 +38,20 @@ export const Page = ( {
 						label='Создать очередь'
 						onClick={ openCreateQueueDialog }
 						tone={ UIButtonTone.PRIMARY }
+					/>
+				) }
+				{ sidebutton === 'create-user' && (
+					<UIButton
+						label='Добавить пользователя'
+						onClick={ () => navigate( '/admin/users/create' ) }
+						tone={ UIButtonTone.PRIMARY }
+					/>
+				) }
+				{ sidebutton === 'user-list' && (
+					<UIButton
+						label='К списку пользователей'
+						tone={ UIButtonTone.GHOST }
+						onClick={ () => navigate( '/admin' ) }
 					/>
 				) }
 			</div>

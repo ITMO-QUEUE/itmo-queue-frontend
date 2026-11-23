@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react'
 import logo from '@/assets/Logo.svg'
 
-interface SidebarProps {
+export interface SidebarProps {
 	children: ReactNode[]
 }
 
