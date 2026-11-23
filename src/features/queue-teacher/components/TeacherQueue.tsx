@@ -1,11 +1,11 @@
 import { UIButton, UIButtonTone } from '../../../components/ui/UIButton'
 import {
-	UIQueueStatus,
-	QueueStatus
+	QueueStatus,
+	UIQueueStatus
 } from '../../../components/ui/UIQueueStatus'
 import type {
-	TeacherQueue as TeacherQueueType,
-	QueueWork
+	QueueWork,
+	TeacherQueue as TeacherQueueType
 } from '../../queue-student/types/queue'
 
 export interface TeacherQueueProps {

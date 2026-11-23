@@ -6,11 +6,12 @@ import {
 } from '../../../components/ui/UIQueueCard'
 import { QueueStatus as QueueStatusEnum } from '../../../components/ui/UIQueueStatus'
 
-export const StudentQueue = (props: UIQueueCardProps) => {
+export const StudentQueue = ( props: UIQueueCardProps ) => {
 	const { isRegistrationOpen, status } = props.studentQueue
 	const isButtonDisabled =
 		props.isMoveUsed ||
-		(props.studentQueue.queueNumber >= 1 && props.studentQueue.queueNumber <= 3)
+		( props.studentQueue.queueNumber >= 1 &&
+			props.studentQueue.queueNumber <= 3 )
 
 	const handleCancelQueue = () => {
 		// TODO: логика отмены записи
@@ -19,23 +20,23 @@ export const StudentQueue = (props: UIQueueCardProps) => {
 
 	return (
 		<div className='flex flex-col gap-3 w-full h-auto'>
-			<UIQueueCard {...props} />
+			<UIQueueCard { ...props } />
 			<div className='flex justify-between items-center w-full'>
 				<div className='flex justify-start w-auto gap-2'>
-					<QueueStatus type={status} />
+					<QueueStatus type={ status } />
 					<QueueStatus
 						type={
-							isRegistrationOpen ?
-								QueueStatusEnum.REGISTRATION_OPEN
-							:	QueueStatusEnum.REGISTRATION_CLOSED
+							isRegistrationOpen
+								? QueueStatusEnum.REGISTRATION_OPEN
+								: QueueStatusEnum.REGISTRATION_CLOSED
 						}
 					/>
 				</div>
 				<UIButton
 					label='Отменить запись'
-					onClick={handleCancelQueue}
-					tone={UIButtonTone.GHOST}
-					disabled={isButtonDisabled}
+					onClick={ handleCancelQueue }
+					tone={ UIButtonTone.GHOST }
+					disabled={ isButtonDisabled }
 				/>
 			</div>
 		</div>

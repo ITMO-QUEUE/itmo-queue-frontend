@@ -4,7 +4,7 @@ interface UITabProps {
 	label: string
 	disabled?: boolean
 	active?: boolean
-	onClick?: () => void | Promise<void>
+	onClick?: () => void | Promise< void >
 	className?: string
 }
 
@@ -33,13 +33,13 @@ const DISABLED_CLASSES = tw(
 	'focus-visible:ring-0'
 )
 
-export const UITab = ({
+export const UITab = ( {
 	label,
 	disabled = false,
 	active = false,
 	onClick,
 	className
-}: UITabProps) => {
+}: UITabProps ) => {
 	const classes = tw(
 		BASE_CLASSES,
 		active && ACTIVE_CLASSES,
@@ -50,11 +50,11 @@ export const UITab = ({
 	return (
 		<button
 			type='button'
-			className={classes}
-			disabled={disabled}
-			onClick={onClick}
+			className={ classes }
+			disabled={ disabled }
+			onClick={ onClick }
 		>
-			{label}
+			{ label }
 		</button>
 	)
 }

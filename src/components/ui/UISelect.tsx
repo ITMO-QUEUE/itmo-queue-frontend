@@ -11,7 +11,7 @@ export interface UISelectOption {
 interface UISelectProps {
 	label: string
 	value: string
-	onChange: (value: string) => void
+	onChange: ( value: string ) => void
 	options: UISelectOption[]
 	placeholder?: string
 	hint?: string
@@ -43,7 +43,7 @@ const CHEVRON_CLASSES = tw(
 	'size-icon -translate-y-1/2 select-none'
 )
 
-export const UISelect = ({
+export const UISelect = ( {
 	label,
 	value,
 	onChange,
@@ -54,63 +54,65 @@ export const UISelect = ({
 	required = false,
 	disabled = false,
 	fullWidth = false
-}: UISelectProps) => {
+}: UISelectProps ) => {
 	const id = useId()
-	const helperId = getHelperId(id, error, hint)
+	const helperId = getHelperId( id, error, hint )
 
 	return (
-		<div className={tw('flex flex-col gap-2', fullWidth ? 'w-full' : 'w-86')}>
+		<div
+			className={ tw( 'flex flex-col gap-2', fullWidth ? 'w-full' : 'w-86' ) }
+		>
 			<UIFieldLabel
-				htmlFor={id}
-				label={label}
-				required={required}
+				htmlFor={ id }
+				label={ label }
+				required={ required }
 			/>
 
 			<div className='relative'>
 				<select
-					id={id}
-					value={value}
-					onChange={event => onChange(event.currentTarget.value)}
-					required={required}
-					disabled={disabled}
-					aria-invalid={Boolean(error)}
-					aria-describedby={helperId}
-					className={tw(
+					id={ id }
+					value={ value }
+					onChange={ event => onChange( event.currentTarget.value ) }
+					required={ required }
+					disabled={ disabled }
+					aria-invalid={ Boolean( error ) }
+					aria-describedby={ helperId }
+					className={ tw(
 						SELECT_CLASSES,
 						value === '' ? 'text-text-secondary' : 'text-text-primary',
 						error ? ERROR_SELECT_CLASSES : ''
-					)}
+					) }
 				>
 					<option
 						value=''
 						disabled
 					>
-						{placeholder}
+						{ placeholder }
 					</option>
 
-					{options.map(option => (
+					{ options.map( option => (
 						<option
-							key={option.value}
-							value={option.value}
+							key={ option.value }
+							value={ option.value }
 						>
-							{option.label}
+							{ option.label }
 						</option>
-					))}
+					) ) }
 				</select>
 
 				<img
-					src={ChevronDownIcon}
+					src={ ChevronDownIcon }
 					alt=''
 					aria-hidden='true'
-					className={CHEVRON_CLASSES}
-					draggable={false}
+					className={ CHEVRON_CLASSES }
+					draggable={ false }
 				/>
 			</div>
 
 			<UIFieldHelper
-				id={`${id}-helper`}
-				error={error}
-				hint={hint}
+				id={ `${ id }-helper` }
+				error={ error }
+				hint={ hint }
 			/>
 		</div>
 	)

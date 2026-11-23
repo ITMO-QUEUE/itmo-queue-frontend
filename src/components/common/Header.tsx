@@ -6,9 +6,9 @@ export const Header = () => {
 	const { name, type } = user || { name: 'Джон Дое', type: 'student' }
 	const shownType = type === 'student' ? 'Студент' : 'Преподаватель'
 	const initials = name
-		.split(' ')
-		.map(n => n[0])
-		.join('')
+		.split( ' ' )
+		.map( n => n[ 0 ] )
+		.join( '' )
 		.toUpperCase()
 
 	return (
@@ -19,10 +19,10 @@ export const Header = () => {
 			<div className='flex gap-6 justify-end align-center text-text-primary text-sm'>
 				<button className='cursor-pointer'>Уведомления</button>
 				<div className='p-2 rounded-full bg-bg-selected flex justify-center items-center text-text-primary font-bold'>
-					{initials}
+					{ initials }
 				</div>
 				<span className='h-full flex items-center'>
-					{name} · {shownType}
+					{ name } · { shownType }
 				</span>
 			</div>
 		</div>

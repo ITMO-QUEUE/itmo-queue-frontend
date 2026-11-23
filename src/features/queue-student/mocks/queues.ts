@@ -12,12 +12,12 @@ export const mockQueues: StudentQueue[] = [
 		],
 
 		teacher: 'Павел Кузнецов',
-		teachers: ['Павел Кузнецов', 'Елена Иванова'],
+		teachers: [ 'Павел Кузнецов', 'Елена Иванова' ],
 
 		auditorium: '305',
 
-		startsAt: new Date('2026-11-10T14:00:00'),
-		endsAt: new Date('2026-11-10T16:00:00'),
+		startsAt: new Date( '2026-11-10T14:00:00' ),
+		endsAt: new Date( '2026-11-10T16:00:00' ),
 
 		status: QueueStatus.ACTIVE,
 		isRegistrationOpen: false,
@@ -30,15 +30,15 @@ export const mockQueues: StudentQueue[] = [
 		id: 'queue-002',
 		subject: Subject.DATABASES,
 
-		works: [{ type: 'lab', number: 2 }],
+		works: [ { type: 'lab', number: 2 } ],
 
 		teacher: 'Елена Иванова',
-		teachers: ['Елена Иванова'],
+		teachers: [ 'Елена Иванова' ],
 
 		auditorium: '401',
 
-		startsAt: new Date('2026-11-12T12:00:00'),
-		endsAt: new Date('2026-11-12T14:00:00'),
+		startsAt: new Date( '2026-11-12T12:00:00' ),
+		endsAt: new Date( '2026-11-12T14:00:00' ),
 
 		status: QueueStatus.PREREGISTRATION,
 		isRegistrationOpen: true,
@@ -57,12 +57,12 @@ export const mockQueues: StudentQueue[] = [
 		],
 
 		teacher: 'Александр Смирнов',
-		teachers: ['Александр Смирнов', 'Мария Петрова'],
+		teachers: [ 'Александр Смирнов', 'Мария Петрова' ],
 
 		onlineLink: 'https://example.com/meeting',
 
-		startsAt: new Date('2026-11-17T10:00:00'),
-		endsAt: new Date('2026-11-17T12:00:00'),
+		startsAt: new Date( '2026-11-17T10:00:00' ),
+		endsAt: new Date( '2026-11-17T12:00:00' ),
 
 		status: QueueStatus.PAUSED,
 		isRegistrationOpen: true,
@@ -75,15 +75,15 @@ export const mockQueues: StudentQueue[] = [
 		id: 'queue-004',
 		subject: Subject.PROGRAMMING,
 
-		works: [{ type: 'lab', number: 5 }],
+		works: [ { type: 'lab', number: 5 } ],
 
 		teacher: 'Павел Кузнецов',
-		teachers: ['Павел Кузнецов'],
+		teachers: [ 'Павел Кузнецов' ],
 
 		auditorium: '305',
 
-		startsAt: new Date('2026-11-20T14:00:00'),
-		endsAt: new Date('2026-11-20T16:00:00'),
+		startsAt: new Date( '2026-11-20T14:00:00' ),
+		endsAt: new Date( '2026-11-20T16:00:00' ),
 
 		status: QueueStatus.PREREGISTRATION,
 		isRegistrationOpen: false,
@@ -104,12 +104,12 @@ export const mockQueues: StudentQueue[] = [
 		],
 
 		teacher: 'Дмитрий Волков',
-		teachers: ['Дмитрий Волков', 'Анна Соколова'],
+		teachers: [ 'Дмитрий Волков', 'Анна Соколова' ],
 
 		auditorium: '210',
 
-		startsAt: new Date('2026-11-24T10:00:00'),
-		endsAt: new Date('2026-11-24T13:00:00'),
+		startsAt: new Date( '2026-11-24T10:00:00' ),
+		endsAt: new Date( '2026-11-24T13:00:00' ),
 
 		status: QueueStatus.COMPLETED,
 		isRegistrationOpen: false,

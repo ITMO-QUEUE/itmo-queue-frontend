@@ -6,17 +6,17 @@ interface UIFieldLabelProps {
 	required?: boolean
 }
 
-export const UIFieldLabel = ({
+export const UIFieldLabel = ( {
 	htmlFor,
 	label,
 	required = false
-}: UIFieldLabelProps) => (
+}: UIFieldLabelProps ) => (
 	<label
-		htmlFor={htmlFor}
+		htmlFor={ htmlFor }
 		className='text-label text-text-primary'
 	>
-		{label}
-		{required && <span aria-hidden='true'> *</span>}
+		{ label }
+		{ required && <span aria-hidden='true'> *</span> }
 	</label>
 )
 
@@ -26,25 +26,25 @@ interface UIFieldHelperProps {
 	hint?: string
 }
 
-export const UIFieldHelper = ({ id, error, hint }: UIFieldHelperProps) => {
+export const UIFieldHelper = ( { id, error, hint }: UIFieldHelperProps ) => {
 	const text = error ?? hint
 
-	if (!text) {
+	if ( ! text ) {
 		return null
 	}
 
 	return (
 		<p
-			id={id}
-			className={tw(
+			id={ id }
+			className={ tw(
 				'text-caption',
 				error ? 'text-status-danger' : 'text-text-secondary'
-			)}
+			) }
 		>
-			{text}
+			{ text }
 		</p>
 	)
 }
 
-export const getHelperId = (id: string, error?: string, hint?: string) =>
-	error || hint ? `${id}-helper` : undefined
+export const getHelperId = ( id: string, error?: string, hint?: string ) =>
+	error || hint ? `${ id }-helper` : undefined

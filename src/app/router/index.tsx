@@ -1,15 +1,15 @@
 import { createBrowserRouter, type RouteObject } from 'react-router'
 
 import { AuthPage } from '@/pages/AuthPage'
+import { Profile } from '../../components/common/Profile'
 import { CommonLayout } from '../../components/layout/CommonLayout'
+import { AdminCreateUserPage } from '../../pages/admin/AdminCreateUserPage'
+import { AdminUsersPage } from '../../pages/admin/AdminUsersPage'
 import { NotFoundPage } from '../../pages/NotFoundPage'
-import { StudentDashboard } from '../../pages/student/StudentDashboard'
+import { StudentActiveQueuesPage } from '../../pages/student/StudentActiveQueuesPage'
 import { StudentHistoryPage } from '../../pages/student/StudentHistoryPage'
-import { StudentProfilePage } from '../../pages/student/StudentProfilePage'
 import { StudentQueuePage } from '../../pages/student/StudentQueuePage'
 import { StudentQueuesPage } from '../../pages/student/StudentQueuesPage'
-import { TeacherDashboard } from '../../pages/teacher/TeacherDashboard'
-import { TeacherProfilePage } from '../../pages/teacher/TeacherProfilePage'
 import { TeacherQueuePage } from '../../pages/teacher/TeacherQueuePage'
 import { TeacherQueuesPage } from '../../pages/teacher/TeacherQueuesPage'
 import { TeacherSubjectsPage } from '../../pages/teacher/TeacherSubjectsPage'
@@ -25,77 +25,135 @@ import { TestQueueStatus } from '../../pages/test/TestQueueStatus'
 import { TestSelectPage } from '../../pages/test/TestSelectPage'
 import { TestTabPage } from '../../pages/test/TestTabPage'
 import { TestTeacherParametersPage } from '../../pages/test/TestTeacherParametersPage'
+import { GuestOnlyRoute, ProtectedRoute } from './ProtectedRoute'
 
 const routes: RouteObject[] = [
 	{
-		path: '/',
-		Component: AuthPage
-	},
-	{
-		path: 'auth',
-		Component: AuthPage
-	},
-	{
-		path: 'student',
-		Component: CommonLayout,
+		element: <GuestOnlyRoute />,
 		children: [
 			{
-				index: true,
-				Component: StudentDashboard
+				path: '/',
+				Component: AuthPage
 			},
 			{
-				path: 'queues',
-				Component: StudentQueuesPage,
-				children: [
-					{
-						path: ':queueId',
-						Component: StudentQueuePage
-					}
-				]
-			},
-			{
-				path: 'profile',
-				Component: StudentProfilePage
-			},
-			{
-				path: 'history',
-				Component: StudentHistoryPage
+				path: 'auth',
+				Component: AuthPage
 			}
 		]
 	},
 	{
-		path: 'teacher',
-		Component: CommonLayout,
+		element: <ProtectedRoute allowedRoles={ [ 'student' ] } />,
 		children: [
 			{
-				index: true,
-				Component: TeacherDashboard
-			},
-			{
-				path: 'queues',
-				Component: TeacherQueuesPage,
+				path: 'student',
+				Component: CommonLayout,
 				children: [
 					{
-						path: ':queueId',
-						Component: TeacherQueuePage
+						path: 'me',
+						children: [
+							{
+								path: 'queues',
+								index: true,
+								Component: StudentActiveQueuesPage
+							},
+							{
+								path: '*',
+								Component: StudentActiveQueuesPage
+							}
+						]
+					},
+					{
+						path: 'queues',
+						Component: StudentQueuesPage,
+						children: [
+							{
+								path: ':queueId',
+								Component: StudentQueuePage
+							}
+						]
+					},
+					{
+						path: 'profile',
+						Component: Profile
+					},
+					{
+						path: 'history',
+						Component: StudentHistoryPage
+					},
+					{
+						path: '*',
+						Component: StudentActiveQueuesPage
 					}
 				]
-			},
+			}
+		]
+	},
+
+	{
+		element: <ProtectedRoute allowedRoles={ [ 'teacher' ] } />,
+		children: [
 			{
-				path: 'profile',
-				Component: TeacherProfilePage
-			},
+				path: 'teacher',
+				Component: CommonLayout,
+				children: [
+					{
+						path: 'queues',
+						Component: TeacherQueuesPage,
+						children: [
+							{
+								path: ':queueId',
+								Component: TeacherQueuePage
+							}
+						]
+					},
+					{
+						path: 'profile',
+						Component: Profile
+					},
+					{
+						path: 'subjects',
+						Component: TeacherSubjectsPage
+					},
+					{
+						path: '*',
+						Component: TeacherQueuesPage
+					}
+				]
+			}
+		]
+	},
+	{
+		element: <ProtectedRoute allowedRoles={ [ 'admin' ] } />,
+		children: [
 			{
-				path: 'subjects',
-				Component: TeacherSubjectsPage
+				path: 'admin',
+				Component: CommonLayout,
+				children: [
+					{
+						path: 'users',
+						Component: AdminUsersPage,
+						index: true
+					},
+					{
+						path: 'profile',
+						Component: Profile
+					},
+					{
+						path: 'users/create',
+						Component: AdminCreateUserPage
+					},
+					{
+						path: '*',
+						Component: AdminUsersPage
+					}
+				]
 			}
 		]
 	}
 ]
 
-const testRoutes: RouteObject[] | null =
-	import.meta.env.DEV ?
-		[
+const testRoutes: RouteObject[] | null = import.meta.env.DEV
+	? [
 			{
 				path: 'test',
 				children: [
@@ -150,15 +208,15 @@ const testRoutes: RouteObject[] | null =
 				]
 			}
 		]
-	:	null
+	: null
 
-if (testRoutes) {
-	routes.push(...testRoutes)
+if ( testRoutes ) {
+	routes.push( ...testRoutes )
 }
 
-routes.push({
+routes.push( {
 	path: '*',
 	Component: NotFoundPage
-})
+} )
 
-export const router = createBrowserRouter(routes)
+export const router = createBrowserRouter( routes )

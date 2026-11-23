@@ -47,18 +47,20 @@ export const TestQueueStatus = () => (
 			<section className='flex flex-col gap-5 rounded-card border border-border-subtle bg-bg-surface p-6'>
 				<h2 className='text-subheading text-text-primary'>Status variants</h2>
 				<div className='flex flex-wrap gap-6'>
-					{STATUSES.map(({ status, label }) => (
+					{ STATUSES.map( ( { status, label } ) => (
 						<article
-							key={status}
+							key={ status }
 							className='flex flex-col gap-3'
 						>
-							<p className='text-small text-text-secondary'>Status={status}</p>
+							<p className='text-small text-text-secondary'>
+								Status={ status }
+							</p>
 							<UIQueueStatus
-								status={status}
-								label={label}
+								status={ status }
+								label={ label }
 							/>
 						</article>
-					))}
+					) ) }
 				</div>
 			</section>
 		</div>

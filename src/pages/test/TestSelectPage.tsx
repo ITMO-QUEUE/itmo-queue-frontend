@@ -14,8 +14,8 @@ const STAGES: UISelectOption[] = [
 ]
 
 export const TestSelectPage = () => {
-	const [subject, setSubject] = useState('')
-	const [stage, setStage] = useState('active')
+	const [ subject, setSubject ] = useState( '' )
+	const [ stage, setStage ] = useState( 'active' )
 
 	return (
 		<main className='h-full w-full overflow-auto bg-bg-page p-6 md:p-10'>
@@ -33,36 +33,36 @@ export const TestSelectPage = () => {
 				<section className='grid gap-6 rounded-card border border-border-subtle bg-bg-surface p-6 md:grid-cols-2'>
 					<UISelect
 						label='Default (empty)'
-						value={subject}
-						onChange={setSubject}
-						options={SUBJECTS}
+						value={ subject }
+						onChange={ setSubject }
+						options={ SUBJECTS }
 						placeholder='Выберите дисциплину'
 					/>
 					<UISelect
 						label='With value'
-						value={stage}
-						onChange={setStage}
-						options={STAGES}
+						value={ stage }
+						onChange={ setStage }
+						options={ STAGES }
 					/>
 					<UISelect
 						label='Error'
 						value=''
-						onChange={() => undefined}
-						options={SUBJECTS}
+						onChange={ () => undefined }
+						options={ SUBJECTS }
 						placeholder='Выберите дисциплину'
 						error='Выберите дисциплину'
 					/>
 					<UISelect
 						label='Disabled'
 						value='done'
-						onChange={() => undefined}
-						options={STAGES}
+						onChange={ () => undefined }
+						options={ STAGES }
 						disabled
 					/>
 				</section>
 
 				<p className='text-caption text-text-secondary'>
-					Subject: «{subject}» · Stage: «{stage}»
+					Subject: «{ subject }» · Stage: «{ stage }»
 				</p>
 			</div>
 		</main>

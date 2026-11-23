@@ -75,14 +75,14 @@ export const UIDialog = ( props: UIDialogProps ) => {
 			<div className={ ACTIONS_CLASSES }>
 				<UIButton
 					label={ content.confirmLabel }
-					onClick={ () => { } }
+					onClick={ () => {} }
 					tone={ content.confirmTone }
 					loading={ loading }
 					disabled={ disabled }
 				/>
 				<UIButton
 					label='Отмена'
-					onClick={ () => { } }
+					onClick={ () => {} }
 					tone={ UIButtonTone.SECONDARY }
 				/>
 			</div>
