@@ -20,7 +20,7 @@ export const UIStudentWorkResult = ({
 	Teacher,
 	result,
 	OnClick
-},  ) => (
+}: UIStudentWorkResultProps) => (
 	<article className='flex items-center justify-between gap-4 rounded-control border border-border-subtle bg-bg-surface p-4 font-nunito'>
 		<div className='min-w-0 wrap-break-word text-small text-text-secondary'>
 			<h3 className='mb-1 text-label text-text-primary'>
