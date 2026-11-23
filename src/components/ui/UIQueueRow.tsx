@@ -1,4 +1,5 @@
-import { LockKeyhole } from 'lucide-react'
+import Lock from '@/assets/icons/Lock.svg'
+
 import { tw } from '../../libs/utils'
 import { useAuthStore } from '../../stores/useAuthStore'
 import { ParticipantStatus, type StudentRecord } from '../../types/StudentRecord'
