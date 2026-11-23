@@ -7,11 +7,11 @@ import { QueueStatus } from '../../components/common/QueueStatus'
 import { QueueStatus as QueueStatusEnum } from '../../components/ui/UIQueueStatus'
 import { UITab } from '../../components/ui/UITab'
 import { QueueRows } from '../../components/common/QueueRows'
-import { useAuthStore } from '../../stores/useAuthStore'
+import type { User } from '../../stores/useAuthStore'
 import type { QueueChanges } from '../../features/queue-teacher/types/queue'
 import { QueueSettings } from '../../features/queue-teacher/components/QueueSettings'
 import { UIStudentWorkResult, type UIStudentWorkResultProps } from '../../components/ui/UIStudentWorkResult'
-import type { User } from '../../../stores/useAuthStore.ts'
+import { UIWorkPlace, UIWorkPlaceStatus, type UIWorkPlaceProps } from '../../features/queue-teacher/components/QueueWorkplace'
 
 type QueueTab = 'queue' | 'settings' | 'history'
 
@@ -68,6 +68,39 @@ const timeFormatter = new Intl.DateTimeFormat('ru-RU', {
 	hour: '2-digit',
 	minute: '2-digit'
 })
+
+const TeacherWorkplace = (props: Pick<UIWorkPlaceProps, 'Name' | 'CurentStudent'>) => {
+	const [status, setStatus] = useState(UIWorkPlaceStatus.FREE)
+	const [saveStatus, setSaveStatus] = useState<UIWorkPlaceProps['saveStatus']>('idle')
+	const [scores, setScores] = useState<Record<string, string>>({})
+
+	const callNext = () => setStatus(UIWorkPlaceStatus.CALLING)
+	const startDefence = () => setStatus(UIWorkPlaceStatus.DEFENDING)
+	const saveResults = () => setSaveStatus('saved')
+	const finishDefence = () => {
+		setScores({})
+		setSaveStatus('idle')
+		setStatus(UIWorkPlaceStatus.FREE)
+	}
+	const changeScore = (workId: string, value: string) => {
+		setScores(previous => ({ ...previous, [workId]: value }))
+		setSaveStatus('idle')
+	}
+
+	return (
+		<UIWorkPlace
+			{...props}
+			status={status}
+			saveStatus={saveStatus}
+			scores={scores}
+			onScoreChange={changeScore}
+			CallNext={callNext}
+			StartDefence={startDefence}
+			SaveResult={saveResults}
+			FinishDefence={finishDefence}
+		/>
+	)
+}
 
 export const TeacherQueuePage = () => {
 	const currentUser = TeacherSample	
@@ -188,6 +221,7 @@ export const TeacherQueuePage = () => {
 							/>
 						</div>
 					</div>
+					<TeacherWorkplace key={queue.id} Name={currentUser.name} CurentStudent={queue.studentRecords[0]} />
 					<section className='flex min-w-0 flex-col gap-4 rounded-card border border-border-subtle bg-bg-surface p-6' aria-labelledby='queue-participants-title'>
 						<h2 id='queue-participants-title' className='text-section text-text-primary'>
 							Участники очереди
