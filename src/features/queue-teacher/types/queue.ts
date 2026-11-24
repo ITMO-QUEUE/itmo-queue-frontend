@@ -64,4 +64,15 @@ export enum Subject {
 	OPERATING_SYSTEMS = 'Операционные системы'
 }
 
-export type QueueChanges = Partial<Pick<fullQueue, 'status' | 'isRegistrationOpen' | 'minutesPerStudent' | 'studentsMax' | 'endsAt' | 'requireArtifact' | 'works'>>
+export type QueueChanges = Partial<
+	Pick<
+		fullQueue,
+		| 'status'
+		| 'isRegistrationOpen'
+		| 'minutesPerStudent'
+		| 'studentsMax'
+		| 'endsAt'
+		| 'requireArtifact'
+		| 'works'
+	>
+>

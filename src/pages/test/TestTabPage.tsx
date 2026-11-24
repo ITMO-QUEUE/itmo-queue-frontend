@@ -15,20 +15,20 @@ const TABS = [
 ] as const
 
 export const TestTabPage = () => {
-	const [activeTab, setActiveTab] = useState<string>('queue')
-	const [clickCount, setClickCount] = useState(0)
-	const [lastClicked, setLastClicked] = useState<string | null>(null)
+	const [ activeTab, setActiveTab ] = useState< string >( 'queue' )
+	const [ clickCount, setClickCount ] = useState( 0 )
+	const [ lastClicked, setLastClicked ] = useState< string | null >( null )
 
-	const handleClick = (id: string) => {
-		setActiveTab(id)
-		setClickCount(prev => prev + 1)
-		setLastClicked(id)
+	const handleClick = ( id: string ) => {
+		setActiveTab( id )
+		setClickCount( prev => prev + 1 )
+		setLastClicked( id )
 	}
 
 	return (
 		<main className='h-full w-full overflow-auto bg-bg-page p-6 md:p-10'>
 			<div className='mx-auto flex max-w-6xl flex-col gap-8'>
-				{/* Header */}
+				{ /* Header */ }
 				<header className='flex flex-wrap items-end justify-between gap-4'>
 					<div className='space-y-2'>
 						<p className='text-small text-text-secondary'>
@@ -45,15 +45,15 @@ export const TestTabPage = () => {
 					<div className='min-w-48 rounded-card border border-border-subtle bg-bg-surface px-5 py-3'>
 						<p className='text-small text-text-secondary'>Click events</p>
 
-						<p className='text-section text-text-primary'>{clickCount}</p>
+						<p className='text-section text-text-primary'>{ clickCount }</p>
 
 						<p className='text-caption text-text-secondary'>
-							Last: {lastClicked ?? 'None'}
+							Last: { lastClicked ?? 'None' }
 						</p>
 					</div>
 				</header>
 
-				{/* Static states */}
+				{ /* Static states */ }
 				<section className='overflow-hidden rounded-card border border-border-subtle bg-bg-surface'>
 					<div className='border-b border-border-subtle px-6 py-5'>
 						<h2 className='text-subheading text-text-primary'>Tab states</h2>
@@ -71,14 +71,14 @@ export const TestTabPage = () => {
 										Component
 									</th>
 
-									{STATES.map(state => (
+									{ STATES.map( state => (
 										<th
-											key={state.key}
+											key={ state.key }
 											className='min-w-56 px-6 py-4 text-small text-text-secondary'
 										>
-											{state.label}
+											{ state.label }
 										</th>
-									))}
+									) ) }
 								</tr>
 							</thead>
 
@@ -88,19 +88,19 @@ export const TestTabPage = () => {
 										Tab
 									</th>
 
-									{/* Default */}
+									{ /* Default */ }
 									<td className='px-6 py-8'>
 										<UITab label='Очередь' />
 									</td>
 
-									{/* Hover */}
+									{ /* Hover */ }
 									<td className='px-6 py-8'>
 										<div className='[&>button]:bg-bg-selected'>
 											<UITab label='Очередь' />
 										</div>
 									</td>
 
-									{/* Active */}
+									{ /* Active */ }
 									<td className='px-6 py-8'>
 										<UITab
 											label='Очередь'
@@ -108,7 +108,7 @@ export const TestTabPage = () => {
 										/>
 									</td>
 
-									{/* Disabled */}
+									{ /* Disabled */ }
 									<td className='px-6 py-8'>
 										<UITab
 											label='Очередь'
@@ -121,7 +121,7 @@ export const TestTabPage = () => {
 					</div>
 				</section>
 
-				{/* Interactive example */}
+				{ /* Interactive example */ }
 				<section className='rounded-card border border-border-subtle bg-bg-surface p-6'>
 					<div>
 						<h2 className='text-subheading text-text-primary'>
@@ -134,14 +134,14 @@ export const TestTabPage = () => {
 					</div>
 
 					<div className='mt-6 flex flex-wrap gap-2'>
-						{TABS.map(tab => (
+						{ TABS.map( tab => (
 							<UITab
-								key={tab.id}
-								label={tab.label}
-								active={activeTab === tab.id}
-								onClick={() => handleClick(tab.id)}
+								key={ tab.id }
+								label={ tab.label }
+								active={ activeTab === tab.id }
+								onClick={ () => handleClick( tab.id ) }
 							/>
-						))}
+						) ) }
 
 						<UITab
 							label='Недоступно'
@@ -153,11 +153,11 @@ export const TestTabPage = () => {
 						<p className='text-caption text-text-secondary'>ACTIVE TAB</p>
 
 						<h3 className='mt-2 text-section text-text-primary'>
-							{TABS.find(tab => tab.id === activeTab)?.label}
+							{ TABS.find( tab => tab.id === activeTab )?.label }
 						</h3>
 
 						<p className='mt-2 text-small text-text-secondary'>
-							Selected ID: {activeTab}
+							Selected ID: { activeTab }
 						</p>
 					</div>
 
@@ -165,7 +165,7 @@ export const TestTabPage = () => {
 						<button
 							type='button'
 							className='rounded-control border border-border-subtle px-4 py-2 text-label text-text-primary hover:bg-bg-selected'
-							onClick={() => setActiveTab('queue')}
+							onClick={ () => setActiveTab( 'queue' ) }
 						>
 							Reset selection
 						</button>
@@ -173,17 +173,17 @@ export const TestTabPage = () => {
 						<button
 							type='button'
 							className='rounded-control border border-border-subtle px-4 py-2 text-label text-text-primary hover:bg-bg-selected'
-							onClick={() => {
-								setClickCount(0)
-								setLastClicked(null)
-							}}
+							onClick={ () => {
+								setClickCount( 0 )
+								setLastClicked( null )
+							} }
 						>
 							Reset events
 						</button>
 					</div>
 				</section>
 
-				{/* Custom className */}
+				{ /* Custom className */ }
 				<section className='rounded-card border border-border-subtle bg-bg-surface p-6'>
 					<h2 className='text-subheading text-text-primary'>
 						Custom className

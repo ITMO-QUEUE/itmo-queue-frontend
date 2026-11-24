@@ -20,7 +20,7 @@ const BASE_CLASSES = tw(
 	'rounded-full'
 )
 
-const STATUS_CLASSES: Record< UIParticipantStatusProps['status'], string > = {
+const STATUS_CLASSES: Record< UIParticipantStatusProps[ 'status' ], string > = {
 	[ UIParticipantStatusStatus.WAITING ]: tw( 'text-text-secondary bg-bg-page' ),
 	[ UIParticipantStatusStatus.CALLED ]: tw(
 		'text-status-warning bg-status-warning-bg'
