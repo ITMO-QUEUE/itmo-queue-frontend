@@ -1,120 +1,212 @@
-import top3Image from '../../assets/icons/Lock.svg'
+import Lock from '@/assets/icons/Lock.svg'
 import { tw } from '../../libs/utils'
+import { type CurrentUser, useAuthStore } from '../../stores/useAuthStore'
+import {
+	ParticipantStatus,
+	type StudentRecord
+} from '../../types/StudentRecord'
+import { UIButton, UIButtonTone } from './UIButton'
+
 import {
 	UIParticipantStatus,
-	type UIParticipantStatusProps,
-	UIParticipantStatusStatus
+	type UIParticipantStatusProps
 } from './UIParticipantStatus'
 
-export interface UIQueueRowProps {
-	position: number
-	name: string
-	workname: string
-	priority: number
-	link: string
-	participantStatus: UIParticipantStatusProps
-	linkLabel?: string
-	top3ImageSrc?: string
-	onMoreClick?: () => void
+type RecordRowProps = {
+	record: StudentRecord
+	currentUser?: CurrentUser | null
 }
 
-const BASE_CLASSES = tw(
-	'flex flex-wrap items-center gap-4 w-full p-4',
-	'font-nunito border border-border-subtle rounded-control'
-)
+type ArtifactLink = { id: string; href: string; label: string }
 
-const DETAILS_CLASSES = tw( 'flex min-w-0 flex-1 flex-col gap-1' )
-const ACTIONS_CLASSES = tw(
-	'flex min-w-0 flex-1 flex-wrap items-center justify-start gap-4'
-)
+type RowDetails = {
+	position: number | null
+	name: string
+	works?: readonly string[]
+	workname?: string
+	link?: string | null
+	linkLabel?: string
+	participantStatus: UIParticipantStatusProps
+	isMe?: boolean
+	group?: string
+	viewerRole?: CurrentUser[ 'role' ]
+	forceDisable?: boolean
+	onAction?: () => void | Promise< void >
+}
+
+export type UIQueueRowProps = RecordRowProps | RowDetails
+
+const STATUS_LABELS: Record< ParticipantStatus, string > = {
+	[ ParticipantStatus.WAITING ]: 'Ожидает',
+	[ ParticipantStatus.CALLED ]: 'Вызван',
+	[ ParticipantStatus.IN_DEFENSE ]: 'На защите',
+	[ ParticipantStatus.COMPLETED ]: 'Завершено',
+	[ ParticipantStatus.CANCELLED ]: 'Отменено',
+	[ ParticipantStatus.REMOVED ]: 'Удалён из очереди'
+}
+
 const LINK_CLASSES = tw(
 	'text-caption text-action-primary w-fit rounded-control',
 	'hover:text-action-hover hover:underline',
-	'focus-visible:outline-2 focus-visible:outline-offset-2',
-	'focus-visible:outline-border-focus'
-)
-const MORE_CLASSES = tw(
-	'inline-flex size-8 items-center justify-center rounded-control',
-	'text-text-secondary cursor-pointer hover:bg-action-subtle-hover',
-	'focus-visible:outline-2 focus-visible:outline-offset-2',
-	'focus-visible:outline-border-focus'
+	'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-border-focus'
 )
 
-export const UIQueueRow = ( {
+const WORK_PLURALS = new Intl.PluralRules( 'ru' )
+const WORK_LABELS: Record< string, string > = {
+	one: 'работа',
+	few: 'работы',
+	many: 'работ',
+	other: 'работ'
+}
+
+function RowContent( {
 	position,
 	name,
+	works,
 	workname,
-	priority,
 	link,
+	linkLabel = 'Открыть артефакты',
+	group = 'Основная группа',
 	participantStatus,
-	linkLabel = 'Ссылка на код',
-	top3ImageSrc = top3Image,
-	onMoreClick
-}: UIQueueRowProps ) => {
-	const isTop3 = position >= 1 && position <= 3
-	const isCalled = participantStatus.status === UIParticipantStatusStatus.CALLED
+	isMe = false,
+	viewerRole,
+	forceDisable,
+	onAction,
+	isTop3 = position !== null && position >= 1 && position <= 3,
+	artifactLinks = [],
+	workCount
+}: RowDetails & {
+	isTop3?: boolean
+	artifactLinks?: ArtifactLink[]
+	workCount?: number
+} ) {
+	const titles = works ?? ( workname ? [ workname ] : [] )
+	const count = workCount ?? titles.length
+	const links =
+		! artifactLinks.length && link
+			? [ { id: link, href: link, label: linkLabel } ]
+			: artifactLinks
+	const isTeacher = viewerRole === 'teacher'
+	const actionLabel = isTeacher
+		? 'Управлять'
+		: isMe
+			? 'Моя запись'
+			: isTop3
+				? 'Топ 3'
+				: 'Обменяться'
+	const disabled =
+		! onAction ||
+		( ! isTeacher &&
+			! isMe &&
+			( forceDisable ||
+				isTop3 ||
+				participantStatus.status === ParticipantStatus.CALLED ) )
 
 	return (
-		<div
-			className={ tw(
-				BASE_CLASSES,
-				isCalled ? 'bg-bg-selected' : 'bg-bg-surface'
-			) }
-		>
-			<span className='text-label text-text-primary shrink-0'>
-				<span className='sr-only'>Позиция в очереди: </span>
-				{ position }
-			</span>
-			<div className={ DETAILS_CLASSES }>
-				<span className='text-label text-text-primary break-words'>
-					{ name }
-				</span>
-				<span className='text-small text-text-secondary break-words'>
-					{ workname } · приоритет { priority }
-				</span>
-				<a
-					className={ LINK_CLASSES }
-					href={ link }
-				>
-					{ linkLabel } <span aria-hidden='true'>→</span>
-				</a>
-			</div>
-			<div className={ ACTIONS_CLASSES }>
-				<UIParticipantStatus { ...participantStatus } />
-				{ isTop3 ? (
-					<span className='inline-flex items-center gap-1 text-small text-text-secondary'>
-						Топ-3 ·
-						{ top3ImageSrc ? (
-							<img
-								src={ top3ImageSrc }
-								alt=''
-								className='size-4 shrink-0 object-contain'
-							/>
-						) : (
-							<span
-								aria-hidden='true'
-								className='size-4 shrink-0 rounded-sm bg-disabled-bg'
-							/>
-						) }
-					</span>
-				) : onMoreClick ? (
-					<button
-						type='button'
-						className={ MORE_CLASSES }
-						onClick={ onMoreClick }
-						aria-label={ `Действия участника: ${ name }` }
-					>
-						<span aria-hidden='true'>···</span>
-					</button>
-				) : (
-					<span
-						aria-hidden='true'
-						className='inline-flex size-8 items-center justify-center text-text-secondary'
-					>
-						···
-					</span>
+		<div className='flex w-full items-center'>
+			<div
+				className={ tw(
+					'flex min-w-0 flex-1 items-center gap-4 p-4 font-nunito border border-border-subtle rounded-control',
+					isMe ? 'bg-bg-selected' : 'bg-bg-surface'
 				) }
+			>
+				<span className='w-20 shrink-0 text-label text-text-primary'>
+					<span className='sr-only'>Позиция в очереди: </span>
+					{ position }
+				</span>
+				<div className='flex min-w-0 basis-2/5 flex-col gap-1'>
+					<span className='text-label text-text-primary wrap-break-word'>
+						{ name }
+						{ isMe && ' · вы' }
+					</span>
+					<span className='text-small text-text-secondary wrap-break-word'>
+						{ count } { WORK_LABELS[ WORK_PLURALS.select( count ) ] }
+						{ titles.length > 0 && ` · ${ titles.join( ', ' ) }` }
+					</span>
+					{ ( isMe || isTeacher ) &&
+						links.map( artifact => (
+							<a
+								key={ artifact.id }
+								className={ LINK_CLASSES }
+								href={ artifact.href }
+							>
+								{ artifact.label } <span aria-hidden='true'>→</span>
+							</a>
+						) ) }
+				</div>
+				<div
+					className='min-w-0 flex-1'
+					aria-hidden='true'
+				/>
+				<UIParticipantStatus { ...participantStatus } />
+				<span className='w-36 shrink-0 text-right text-small text-text-secondary wrap-break-word'>
+					{ isTop3 ? (
+						<span className='inline-flex items-center gap-1'>
+							Топ-3
+							{ ! isTeacher && (
+								<img
+									src={ Lock }
+									className='size-3'
+									alt=''
+								/>
+							) }
+						</span>
+					) : (
+						group
+					) }
+				</span>
+			</div>
+			<div className='ml-4 w-36 shrink-0 text-text-primary'>
+				<UIButton
+					label={ actionLabel }
+					tone={ UIButtonTone.GHOST }
+					fullWidth
+					disabled={ isTop3 && ! isMe && ! isTeacher }
+					onClick={ () => onAction?.() }
+				/>
 			</div>
 		</div>
 	)
 }
+
+function RecordRow( { record, currentUser }: RecordRowProps ) {
+	const CurrentUser = useAuthStore( state =>
+		currentUser === undefined ? state.user : currentUser
+	)
+	const links = record.works.flatMap( work =>
+		work.artifact_url
+			? [
+					{
+						id: work.work_id,
+						href: work.artifact_url,
+						label: `Открыть артефакты · ${ work.title }`
+					}
+				]
+			: []
+	)
+
+	// Действие кнопки и принудительная блокировка отсутствуют в StudentRecord.
+	return (
+		<RowContent
+			position={ record.position }
+			name={ record.student_name }
+			works={ record.works.map( work => work.title ) }
+			workCount={ record.works.length || ( record.work_id ? 1 : 0 ) }
+			artifactLinks={ links }
+			link={ record.artifact_url }
+			participantStatus={ {
+				status: record.status,
+				label: STATUS_LABELS[ record.status ]
+			} }
+			isTop3={ record.is_top3 }
+			group={ record.is_reserve ? 'Резерв' : 'Основная группа' }
+			viewerRole={ CurrentUser?.role }
+			isMe={
+				CurrentUser?.role === 'student' && CurrentUser.id === record.student_id
+			}
+		/>
+	)
+}
+
+export const UIQueueRow = ( props: UIQueueRowProps ) =>
+	'record' in props ? <RecordRow { ...props } /> : <RowContent { ...props } />

@@ -46,12 +46,10 @@ export const Profile = () => {
 							key={ label }
 							className='grid grid-cols-[15em_minmax(0,1fr)] items-start'
 						>
-							<div className='min-w-0 pr-4 text-small text-text-secondary [overflow-wrap:anywhere]'>
+							<div className='min-w-0 pr-4 text-small text-text-secondary wrap-anywhere'>
 								{ label }
 							</div>
-							<div className='min-w-0 text-label [overflow-wrap:anywhere]'>
-								{ value }
-							</div>
+							<div className='min-w-0 text-label wrap-anywhere'>{ value }</div>
 						</div>
 					) ) }
 				</div>

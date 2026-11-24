@@ -1,8 +1,9 @@
 import { tw } from '../../libs/utils'
+import { ParticipantStatus } from '../../types/StudentRecord'
 
 export interface UIParticipantStatusProps {
 	label: string
-	status: UIParticipantStatusStatus
+	status: UIParticipantStatusStatus | ParticipantStatus
 }
 
 export enum UIParticipantStatusStatus {
@@ -19,7 +20,7 @@ const BASE_CLASSES = tw(
 	'rounded-full'
 )
 
-const STATUS_CLASSES: Record< UIParticipantStatusStatus, string > = {
+const STATUS_CLASSES: Record< UIParticipantStatusProps[ 'status' ], string > = {
 	[ UIParticipantStatusStatus.WAITING ]: tw( 'text-text-secondary bg-bg-page' ),
 	[ UIParticipantStatusStatus.CALLED ]: tw(
 		'text-status-warning bg-status-warning-bg'
@@ -27,6 +28,10 @@ const STATUS_CLASSES: Record< UIParticipantStatusStatus, string > = {
 	[ UIParticipantStatusStatus.DEFENDING ]: tw(
 		'text-action-primary bg-bg-selected'
 	),
+	[ ParticipantStatus.IN_DEFENSE ]: 'text-action-primary bg-bg-selected',
+	[ ParticipantStatus.COMPLETED ]: 'text-status-success bg-status-success-bg',
+	[ ParticipantStatus.CANCELLED ]: 'text-text-secondary bg-bg-page',
+	[ ParticipantStatus.REMOVED ]: 'text-status-danger bg-status-danger-bg',
 	[ UIParticipantStatusStatus.ACCEPTED ]: tw(
 		'text-status-success bg-status-success-bg'
 	),
