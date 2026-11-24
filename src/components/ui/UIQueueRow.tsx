@@ -1,6 +1,6 @@
 import Lock from '@/assets/icons/Lock.svg'
 import { tw } from '../../libs/utils'
-import { type User, useAuthStore } from '../../stores/useAuthStore'
+import { type CurrentUser, useAuthStore } from '../../stores/useAuthStore'
 import {
 	ParticipantStatus,
 	type StudentRecord
@@ -14,7 +14,7 @@ import {
 
 type RecordRowProps = {
 	record: StudentRecord
-	currentUser?: User | null
+	currentUser?: CurrentUser | null
 }
 
 type ArtifactLink = { id: string; href: string; label: string }
@@ -29,7 +29,7 @@ type RowDetails = {
 	participantStatus: UIParticipantStatusProps
 	isMe?: boolean
 	group?: string
-	viewerRole?: User[ 'type' ]
+	viewerRole?: CurrentUser[ 'role' ]
 	forceDisable?: boolean
 	onAction?: () => void | Promise< void >
 }
@@ -115,11 +115,11 @@ function RowContent( {
 					{ position }
 				</span>
 				<div className='flex min-w-0 basis-2/5 flex-col gap-1'>
-					<span className='text-label text-text-primary break-words'>
+					<span className='text-label text-text-primary wrap-break-word'>
 						{ name }
 						{ isMe && ' · вы' }
 					</span>
-					<span className='text-small text-text-secondary break-words'>
+					<span className='text-small text-text-secondary wrap-break-word'>
 						{ count } { WORK_LABELS[ WORK_PLURALS.select( count ) ] }
 						{ titles.length > 0 && ` · ${ titles.join( ', ' ) }` }
 					</span>
@@ -139,7 +139,7 @@ function RowContent( {
 					aria-hidden='true'
 				/>
 				<UIParticipantStatus { ...participantStatus } />
-				<span className='w-36 shrink-0 text-right text-small text-text-secondary break-words'>
+				<span className='w-36 shrink-0 text-right text-small text-text-secondary wrap-break-word'>
 					{ isTop3 ? (
 						<span className='inline-flex items-center gap-1'>
 							Топ-3
@@ -170,7 +170,7 @@ function RowContent( {
 }
 
 function RecordRow( { record, currentUser }: RecordRowProps ) {
-	const user = useAuthStore( state =>
+	const CurrentUser = useAuthStore( state =>
 		currentUser === undefined ? state.user : currentUser
 	)
 	const links = record.works.flatMap( work =>
@@ -200,8 +200,10 @@ function RecordRow( { record, currentUser }: RecordRowProps ) {
 			} }
 			isTop3={ record.is_top3 }
 			group={ record.is_reserve ? 'Резерв' : 'Основная группа' }
-			viewerRole={ user?.type }
-			isMe={ user?.type === 'student' && user.id === record.student_id }
+			viewerRole={ CurrentUser?.role }
+			isMe={
+				CurrentUser?.role === 'student' && CurrentUser.id === record.student_id
+			}
 		/>
 	)
 }

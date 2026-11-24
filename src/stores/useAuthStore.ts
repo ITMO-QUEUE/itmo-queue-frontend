@@ -1,15 +1,8 @@
 import { create } from 'zustand'
 import type { components } from '../types/schema'
 
-export interface User {
-	name: string
-	type: 'student' | 'teacher'
-	email?: string
-	id: string
-}
 export type UserRole = components[ 'schemas' ][ 'UserRole' ]
 export type CurrentUser = components[ 'schemas' ][ 'UserProfile' ]
-
 
 interface AuthState {
 	user: CurrentUser | null
