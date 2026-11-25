@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
 import { type PropsWithChildren, useEffect } from 'react'
-import { getMyProfile } from '../../features/auth/api/authApi'
 import { useAuthStore } from '../../stores/useAuthStore'
+import { getMyProfile } from '../api/auth/auth.api'
 
 export const AuthProvider = ( { children }: PropsWithChildren ) => {
 	const user = useAuthStore( state => state.user )

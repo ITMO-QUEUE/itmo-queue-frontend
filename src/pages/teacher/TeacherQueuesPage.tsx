@@ -72,6 +72,7 @@ export const TeacherQueuesPage = () => {
 	const [ subject, setSubject ] = useState( '' )
 	const [ stage, setStage ] = useState( '' )
 	const [ date, setDate ] = useState( '' )
+
 	const queues = [ ...mockQueues ]
 		.filter(
 			queue =>
