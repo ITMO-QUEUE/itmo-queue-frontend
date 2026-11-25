@@ -3,7 +3,7 @@ import { useId, useState } from 'react'
 import { Outlet, useParams } from 'react-router'
 import { Page } from '../../components/common/Page'
 import { UISelect } from '../../components/ui/UISelect'
-import {	
+import {
 	getAvailableQueues,
 	type QueueFilters,
 	type QueueList
