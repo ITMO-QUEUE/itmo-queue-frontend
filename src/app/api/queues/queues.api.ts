@@ -14,7 +14,8 @@ import type {
 	SessionOptions,
 	SessionRead,
 	SessionUpdate,
-	SwapRead
+	SwapRead,
+	WorkRead
 } from './queues.api.d'
 
 // ============================================================================
@@ -29,6 +30,18 @@ export const getQueues = async (
 		params
 	} )
 	return data
+}
+
+export const getAllWorks = async (): Promise< WorkRead[] > => {
+	const limit = 100
+	const works: WorkRead[] = []
+	while ( true ) {
+		const { data } = await apiClient.get< WorkRead[] >( '/api/v1/works', {
+			params: { limit, offset: works.length }
+		} )
+		works.push( ...data )
+		if ( data.length < limit ) return works
+	}
 }
 
 export const getMyQueues = async (
@@ -176,7 +189,7 @@ export const cancelSwapOffer = async (
 // ============================================================================
 
 export const getSessionOptions = async (): Promise< SessionOptions > => {
-	// Получает справочники (дисциплины, преподаватели, работы) для формы создания сессии очереди
+	// Получает дисциплины, преподавателей и идентификатор потока для формы создания сессии
 	const { data } = await apiClient.get< SessionOptions >(
 		'/api/v1/session-options'
 	)
