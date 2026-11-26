@@ -1,5 +1,9 @@
+import { skipToken, useQuery } from '@tanstack/react-query'
+import { isAxiosError } from 'axios'
 import { useState } from 'react'
 import { useNavigate, useParams } from 'react-router'
+import { getQueueById } from '../../app/api/queues/queues.api'
+import type { QueueDetail } from '../../app/api/queues/queues.api.d'
 import { Page } from '../../components/common/Page.tsx'
 import { QueueRows } from '../../components/common/QueueRows'
 import { QueueStatus } from '../../components/common/QueueStatus'
@@ -16,11 +20,54 @@ import {
 	type UIWorkPlaceProps,
 	UIWorkPlaceStatus
 } from '../../features/queue-teacher/components/QueueWorkplace'
-import { mockFullQueues } from '../../features/queue-teacher/mocks/FullQueues.ts'
-import type { QueueChanges } from '../../features/queue-teacher/types/queue'
+import type {
+	fullQueue,
+	QueueChanges
+} from '../../features/queue-teacher/types/queue'
 import type { User } from '../../stores/useAuthStore'
+import { ParticipantStatus } from '../../types/StudentRecord'
 
 type QueueTab = 'queue' | 'settings' | 'history'
+
+const queueStatuses = {
+	preliminary: QueueStatusEnum.PREREGISTRATION,
+	active: QueueStatusEnum.ACTIVE,
+	finished: QueueStatusEnum.COMPLETED
+} satisfies Record< QueueDetail[ 'stage' ], fullQueue[ 'status' ] >
+
+const participantStatuses = {
+	waiting: ParticipantStatus.WAITING,
+	called: ParticipantStatus.CALLED,
+	in_defense: ParticipantStatus.IN_DEFENSE,
+	completed: ParticipantStatus.COMPLETED,
+	cancelled: ParticipantStatus.CANCELLED,
+	removed: ParticipantStatus.REMOVED
+} satisfies Record<
+	QueueDetail[ 'students' ][ number ][ 'status' ],
+	ParticipantStatus
+>
+
+const toPageQueue = ( detail: QueueDetail ): fullQueue => ( {
+	id: detail.id,
+	subject: detail.discipline_name,
+	teachers: detail.teachers.map( teacher => teacher.name ),
+	startsAt: new Date( detail.planned_start ),
+	endsAt: new Date( detail.planned_end ),
+	status: queueStatuses[ detail.stage ],
+	isRegistrationOpen: detail.registration_open,
+	studentsMax: detail.quota,
+	auditorium: detail.location ?? '',
+	teacher: '',
+	queueNumber: detail.my_entry?.position ?? 0,
+	// QueueDetail не содержит номера лабораторных и требование артефакта.
+	works: [],
+	requireArtifact: false,
+	minutesPerStudent: detail.avg_duration_min ?? 0,
+	studentRecords: detail.students.map( student => ( {
+		...student,
+		status: participantStatuses[ student.status ]
+	} ) )
+} )
 
 type HistoryAttempt = Omit< UIStudentWorkResultProps, 'OnClick' > & {
 	id: string
@@ -122,12 +169,50 @@ export const TeacherQueuePage = () => {
 	>( {} )
 	const navigate = useNavigate()
 	const { queueId } = useParams< { queueId: string } >()
-	const initialQueue = mockFullQueues.find( queue => queue.id === queueId )
+	const {
+		data: queueDetail,
+		isLoading,
+		isError,
+		error,
+		refetch
+	} = useQuery( {
+		queryKey: [ 'queue', queueId ],
+		queryFn: queueId ? () => getQueueById( queueId ) : skipToken
+	} )
+	const initialQueue = queueDetail ? toPageQueue( queueDetail ) : undefined
 	const queue = initialQueue
 		? { ...initialQueue, ...queueStates[ initialQueue.id ] }
 		: undefined
 
-	if ( ! queue ) {
+	if ( isLoading ) {
+		return (
+			<Page title='Загрузка очереди'>
+				<p role='status'>Загрузка данных очереди…</p>
+			</Page>
+		)
+	}
+
+	if (
+		isError &&
+		! ( isAxiosError( error ) && error.response?.status === 404 )
+	) {
+		return (
+			<Page title='Не удалось загрузить очередь'>
+				<p role='alert'>
+					Не удалось получить данные очереди. Попробуйте ещё раз.
+				</p>
+				<UIButton
+					label='Повторить'
+					tone={ UIButtonTone.SECONDARY }
+					onClick={ () => {
+						void refetch()
+					} }
+				/>
+			</Page>
+		)
+	}
+
+	if ( ! queue || ! queueDetail || isError ) {
 		return (
 			<Page title='Очередь не найдена'>
 				<p>Очередь с указанным идентификатором отсутствует.</p>
@@ -158,6 +243,8 @@ export const TeacherQueuePage = () => {
 			</div>
 			<header className='flex w-full flex-col gap-6'>
 				<h1 className='text-heading text-text-primary'>{ queue.subject }</h1>
+				<p className='text-body text-text-secondary'>{ queueDetail.title }</p>
+				{ queueDetail.description && <p>{ queueDetail.description }</p> }
 				<p className='text-body text-text-secondary'>
 					{ queue.works.some( work => work.type === 'lab' ) &&
 						'Лабораторные работы · ' }
@@ -183,13 +270,15 @@ export const TeacherQueuePage = () => {
 					<span aria-hidden='true'>/</span>
 					{ queue.auditorium ? (
 						<span>ауд. { queue.auditorium }</span>
-					) : (
+					) : queue.onlineLink ? (
 						<a
 							className='text-action-primary hover:underline'
 							href={ queue.onlineLink }
 						>
 							Онлайн
 						</a>
+					) : (
+						<span>Место не указано</span>
 					) }
 				</div>
 			</header>
@@ -282,6 +371,17 @@ export const TeacherQueuePage = () => {
 								</div>
 							</div>
 						) }
+					</section>
+					<section
+						className='flex min-w-0 flex-col gap-4 rounded-card border border-border-subtle bg-bg-surface p-6'
+						aria-labelledby='queue-deleted-records-title'
+					>
+						<h2
+							id='queue-deleted-records-title'
+							className='text-section text-text-primary'
+						>
+							Удалённые записи
+						</h2>
 					</section>
 				</div>
 			) }
