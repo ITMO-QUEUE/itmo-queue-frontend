@@ -1,5 +1,5 @@
 import { apiClient } from '../../../libs/axios'
-import { type HealthResponse } from './system.api.d'
+import type { HealthResponse } from './system.api.d'
 
 // ============================================================================
 // ИНФРАСТРУКТУРА И SSE-ПОТОК ОЧЕРЕДИ В РЕАЛЬНОМ ВРЕМЕНИ

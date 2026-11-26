@@ -37,7 +37,9 @@ export const Page = ( {
 				{ sidebutton === 'create-queue' && (
 					<UIButton
 						label='Создать очередь'
-						onClick={ () => modalStore.openModal({ type: 'create-defense-session'}) }
+						onClick={ () =>
+							modalStore.openModal( { type: 'create-defense-session' } )
+						}
 						tone={ UIButtonTone.PRIMARY }
 					/>
 				) }
