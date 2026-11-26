@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useNavigate } from 'react-router'
-import { logout as logoutRequest } from '../../features/auth/api/authApi.ts'
+import { logout as logoutRequest } from '../../app/api/auth/auth.api.ts'
 import { transcribeUserRole } from '../../libs/utils'
 import { useAuthStore } from '../../stores/useAuthStore'
 import { UIAlert, UIAlertTone } from '../ui/UIAlert.tsx'

@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router'
-import { openCreateQueueDialog, openCreateUserDialog } from '../../libs/utils'
+import { useModalStore } from '../../stores/useModalStore'
 import { UIButton, UIButtonTone } from '../ui/UIButton'
 
 export interface PageProps {
@@ -16,6 +16,7 @@ export const Page = ( {
 	sidebutton
 }: PageProps ) => {
 	const navigate = useNavigate()
+	const modalStore = useModalStore()
 
 	return (
 		<div className='bg-bg-page flex flex-col w-full h-auto min-h-full p-content gap-6'>
@@ -36,7 +37,9 @@ export const Page = ( {
 				{ sidebutton === 'create-queue' && (
 					<UIButton
 						label='Создать очередь'
-						onClick={ openCreateQueueDialog }
+						onClick={ () =>
+							modalStore.openModal( { type: 'create-defense-session' } )
+						}
 						tone={ UIButtonTone.PRIMARY }
 					/>
 				) }

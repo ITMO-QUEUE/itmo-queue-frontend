@@ -7,10 +7,10 @@ import {
 	AlertBadCredentials,
 	AlertServiceUnavailable
 } from '@/features/auth/components/Alerts.tsx'
+import { loginAndFetchProfile } from '../../../app/api/auth/auth.api'
 import { UIButton, UIButtonTone } from '../../../components/ui/UIButton'
 import { UIInput } from '../../../components/ui/UIInput'
 import { useAuthStore } from '../../../stores/useAuthStore'
-import { loginAndFetchProfile } from '../api/authApi'
 
 interface LoginValues {
 	login: string
