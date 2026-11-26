@@ -1,12 +1,15 @@
 import type { StudentQueue } from '../../features/queue-student/types/queue'
 import { tw } from '../../libs/utils'
+import { QueueStatus } from '../common/QueueStatus'
 import { UIButton, UIButtonTone } from './UIButton'
+import { QueueStatus as QueueStatusEnum } from './UIQueueStatus'
 
 export type UIQueueCardProps = {
 	isNearest?: boolean
 	isMoveUsed?: boolean
 
-	studentQueue: StudentQueue
+	studentQueue: StudentQueues
+	
 
 	onOpenQueue: () => void
 	onMoveToEnd: () => void
@@ -50,6 +53,7 @@ export const UIQueueCard = ( {
 	onOpenQueue,
 	onMoveToEnd
 }: UIQueueCardProps ) => {
+	const { isRegistrationOpen, status } = studentQueue
 	const dateTime = formatDateTime( studentQueue.startsAt, studentQueue.endsAt )
 	const isTop3 = studentQueue.queueNumber >= 1 && studentQueue.queueNumber <= 3
 	const isMoveDisabled = isTop3 || isMoveUsed
@@ -71,8 +75,20 @@ export const UIQueueCard = ( {
 
 	return (
 		<div className={ cardClassName }>
-			<div className='text-label font-bold'>
-				{ isNearest ? 'Ближайшая защита' : 'Следующая защита' }
+			<div className='flex flex-wrap items-center justify-between gap-3'>
+				<div className='text-label font-bold'>
+					{ isNearest ? 'Ближайшая защита' : 'Следующая защита' }
+				</div>
+				<div className='grid w-full grid-cols-1 gap-2 sm:w-auto sm:grid-cols-2 [&>span]:min-h-9 [&>span]:w-full [&>span]:rounded-lg [&>span]:font-bold sm:[&>span]:w-52'>
+					<QueueStatus type={ status } />
+					<QueueStatus
+						type={
+							isRegistrationOpen
+								? QueueStatusEnum.REGISTRATION_OPEN
+								: QueueStatusEnum.REGISTRATION_CLOSED
+						}
+					/>
+				</div>
 			</div>
 
 			<h3 className='text-subheading font-bold'>
