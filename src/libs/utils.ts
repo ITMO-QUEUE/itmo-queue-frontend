@@ -1,3 +1,5 @@
+import { useModalStore } from '../stores/useModalStore'
+
 export { cn } from 'cn'
 
 /*
@@ -8,11 +10,6 @@ Add the following to your VSCode settings.json to enable tailwindCSS class name 
 export const tw = (
 	...classes: ( string | undefined | null | false )[]
 ): string => classes.filter( Boolean ).join( ' ' )
-
-export const openCreateQueueDialog = () => {
-	// TODO: открыть модалку с формой создания очереди для преподавателя
-	return
-}
 
 export const openCreateUserDialog = () => {
 	// TODO: открыть модалку с формой создания преподавателя
