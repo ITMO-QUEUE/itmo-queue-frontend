@@ -9,8 +9,11 @@ import type {
 export type UIWorkPlaceProps = {
 	Name?: string
 	CurentStudent?: StudentRecord
+	otherWorkplaces?: readonly { id: string; message: string }[]
 	status: UIWorkPlaceStatus
 	saveStatus: 'idle' | 'saving' | 'saved' | 'error'
+	isPending?: boolean
+	message?: string
 	scores: Record< string, string >
 	onScoreChange: ( workId: string, value: string ) => void
 	SaveResult: () => void | Promise< void >
@@ -23,11 +26,6 @@ export enum UIWorkPlaceStatus {
 	FREE = 'free',
 	CALLING = 'calling',
 	DEFENDING = 'defending'
-}
-
-const sampleStudent: Pick< StudentRecord, 'student_name' | 'works' > = {
-	student_name: 'Алексей Смирнов',
-	works: [ { work_id: '111111_0003', title: 'ЛР № 3', priority: 1 } ]
 }
 
 type WorkScoreRowProps = {
@@ -55,21 +53,28 @@ const WorkScoreRow = ( {
 					onChange={ onEdit }
 				/>
 			</div>
-			<a
-				className='text-small text-action-primary'
-				href={ work.artifact_url ?? undefined }
-			>
-				Открыть артефакт →
-			</a>
+			{ work.artifact_url && (
+				<a
+					className='text-small text-action-primary'
+					href={ work.artifact_url }
+					target='_blank'
+					rel='noopener noreferrer'
+				>
+					Открыть артефакт →
+				</a>
+			) }
 		</div>
 	)
 }
 
 export const UIWorkPlace = ( {
 	Name,
-	CurentStudent,
+	CurentStudent: student,
+	otherWorkplaces = [],
 	status,
 	saveStatus,
+	isPending = false,
+	message,
 	scores,
 	onScoreChange,
 	CallNext,
@@ -77,7 +82,6 @@ export const UIWorkPlace = ( {
 	SaveResult,
 	FinishDefence
 }: UIWorkPlaceProps ) => {
-	const student = CurentStudent ?? sampleStudent
 	const isFree = status === UIWorkPlaceStatus.FREE
 
 	return (
@@ -87,22 +91,37 @@ export const UIWorkPlace = ( {
 		>
 			<h2 className='text-section'>Ваше рабочее место</h2>
 			<div
-				className='flex flex-wrap items-start gap-4'
+				className='flex flex-wrap items-center gap-4'
 				aria-live='polite'
 			>
 				<WorkplaceStatusBadge status={ status } />
 				<span className='text-label'>
 					{ isFree
 						? 'Вы свободны'
-						: [
-								student.student_name,
-								...student.works.map( work => work.title )
-							].join( ' · ' ) }
+						: student
+							? [
+									student.student_name,
+									...student.works.map( work => work.title )
+								].join( ' · ' )
+							: 'Данные студента недоступны' }
 				</span>
 			</div>
-			<p className='text-small text-text-secondary'>
-				Павел Кузнецов принимает Марию Орлову.
-			</p>
+			{ otherWorkplaces.length > 0 && (
+				<ul
+					className='flex flex-col gap-2 text-small text-text-secondary'
+					aria-label='Рабочие места других преподавателей'
+				>
+					{ otherWorkplaces.map( workplace => (
+						<li key={ workplace.id }>{ workplace.message }</li>
+					) ) }
+				</ul>
+			) }
+			{ message && (
+				<UIAlert
+					tone={ UIAlertTone.INFO }
+					message={ message }
+				/>
+			) }
 
 			{ status === UIWorkPlaceStatus.CALLING && (
 				<p className='text-body'>
@@ -111,11 +130,13 @@ export const UIWorkPlace = ( {
 			) }
 			{ status === UIWorkPlaceStatus.DEFENDING ? (
 				<>
-					{ student.works.map( work => (
+					{ student?.works.map( work => (
 						<WorkScoreRow
 							key={ work.work_id }
 							work={ work }
-							disabled={ saveStatus === 'saving' }
+							disabled={
+								isPending || saveStatus === 'saving' || saveStatus === 'saved'
+							}
 							score={ scores[ work.work_id ] ?? '' }
 							onEdit={ value => onScoreChange( work.work_id, value ) }
 						/>
@@ -127,6 +148,9 @@ export const UIWorkPlace = ( {
 								tone={ UIButtonTone.PRIMARY }
 								fullWidth
 								loading={ saveStatus === 'saving' }
+								disabled={
+									isPending || saveStatus === 'saved' || ! student?.works.length
+								}
 								onClick={ SaveResult }
 							/>
 						</div>
@@ -135,7 +159,7 @@ export const UIWorkPlace = ( {
 								label='Завершить защиту'
 								tone={ UIButtonTone.SECONDARY }
 								fullWidth
-								disabled={ saveStatus !== 'saved' }
+								disabled={ isPending || saveStatus !== 'saved' }
 								onClick={ FinishDefence }
 							/>
 						</div>
@@ -160,6 +184,8 @@ export const UIWorkPlace = ( {
 						label={ isFree ? 'Вызвать следующего' : 'Начать защиту' }
 						tone={ UIButtonTone.PRIMARY }
 						fullWidth
+						loading={ isPending }
+						disabled={ ! isFree && ! student }
 						onClick={ isFree ? CallNext : StartDefence }
 					/>
 				</div>

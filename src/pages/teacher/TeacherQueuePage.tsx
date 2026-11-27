@@ -13,11 +13,7 @@ import { QueueStatus as QueueStatusEnum } from '../../components/ui/UIQueueStatu
 import { UITab } from '../../components/ui/UITab'
 import { QueueHistory } from '../../features/queue-teacher/components/QueueHistory'
 import { QueueSettings } from '../../features/queue-teacher/components/QueueSettings'
-import {
-	UIWorkPlace,
-	type UIWorkPlaceProps,
-	UIWorkPlaceStatus
-} from '../../features/queue-teacher/components/QueueWorkplace'
+import { TeacherWorkplace } from '../../features/queue-teacher/components/TeacherWorkplace'
 import type {
 	fullQueue,
 	QueueChanges
@@ -89,42 +85,6 @@ const timeFormatter = new Intl.DateTimeFormat( 'ru-RU', {
 	minute: '2-digit'
 } )
 
-const TeacherWorkplace = (
-	props: Pick< UIWorkPlaceProps, 'Name' | 'CurentStudent' >
-) => {
-	const [ status, setStatus ] = useState( UIWorkPlaceStatus.FREE )
-	const [ saveStatus, setSaveStatus ] =
-		useState< UIWorkPlaceProps[ 'saveStatus' ] >( 'idle' )
-	const [ scores, setScores ] = useState< Record< string, string > >( {} )
-
-	const callNext = () => setStatus( UIWorkPlaceStatus.CALLING )
-	const startDefence = () => setStatus( UIWorkPlaceStatus.DEFENDING )
-	const saveResults = () => setSaveStatus( 'saved' )
-	const finishDefence = () => {
-		setScores( {} )
-		setSaveStatus( 'idle' )
-		setStatus( UIWorkPlaceStatus.FREE )
-	}
-	const changeScore = ( workId: string, value: string ) => {
-		setScores( previous => ( { ...previous, [ workId ]: value } ) )
-		setSaveStatus( 'idle' )
-	}
-
-	return (
-		<UIWorkPlace
-			{ ...props }
-			status={ status }
-			saveStatus={ saveStatus }
-			scores={ scores }
-			onScoreChange={ changeScore }
-			CallNext={ callNext }
-			StartDefence={ startDefence }
-			SaveResult={ saveResults }
-			FinishDefence={ finishDefence }
-		/>
-	)
-}
-
 export const TeacherQueuePage = () => {
 	const currentUser = useAuthStore( state => state.user )
 	const [ activeTab, setActiveTab ] = useState< QueueTab >( 'queue' )
@@ -158,6 +118,7 @@ export const TeacherQueuePage = () => {
 
 	if (
 		isError &&
+		! queueDetail &&
 		! ( isAxiosError( error ) && error.response?.status === 404 )
 	) {
 		return (
@@ -176,7 +137,7 @@ export const TeacherQueuePage = () => {
 		)
 	}
 
-	if ( ! queue || ! queueDetail || isError ) {
+	if ( ! queue || ! queueDetail ) {
 		return (
 			<Page title='Очередь не найдена'>
 				<p>Очередь с указанным идентификатором отсутствует.</p>
@@ -345,23 +306,14 @@ export const TeacherQueuePage = () => {
 							message={ `Начало активной защиты выполняется вручную. Плановое начало — ${ timeFormatter.format( queue.startsAt ) }.` }
 						/>
 					) }
-					<TeacherWorkplace
-						key={ queue.id }
-						Name={ currentUser?.name }
-						CurentStudent={
-							activeRecords.find(
-								record =>
-									record.teacher_id === currentUser?.id &&
-									( record.status === ParticipantStatus.CALLED ||
-										record.status === ParticipantStatus.IN_DEFENSE )
-							) ??
-							activeRecords.find(
-								record =>
-									record.status === ParticipantStatus.WAITING &&
-									! record.is_reserve
-							)
-						}
-					/>
+					{ ! isPreregistration && (
+						<TeacherWorkplace
+							key={ `${ queue.id }:${ currentUser?.id }` }
+							queue={ queueDetail }
+							teacherId={ currentUser?.id }
+							name={ currentUser?.name }
+						/>
+					) }
 					<section
 						className='flex min-w-0 flex-col gap-4 rounded-card border border-border-subtle bg-bg-surface p-6'
 						aria-labelledby='queue-participants-title'
