@@ -11,7 +11,11 @@ interface UIInputProps {
 	type?: 'text' | 'password'
 	error?: string
 	disabled?: boolean
+	readOnly?: boolean
+	naturalNumber?: boolean
 }
+
+const NATURAL_NUMBER_INPUT = /^[1-9]\d*$/
 
 const LABEL_CLASSES = tw( 'text-label text-text-primary' )
 
@@ -45,7 +49,9 @@ export const UIInput = ( {
 	placeholder,
 	type = 'text',
 	error,
-	disabled = false
+	disabled = false,
+	readOnly = false,
+	naturalNumber = false
 }: UIInputProps ) => {
 	const id = useId()
 	const [ isPasswordVisible, setIsPasswordVisible ] = useState( false )
@@ -67,9 +73,22 @@ export const UIInput = ( {
 					id={ id }
 					type={ inputType }
 					value={ value }
-					onChange={ event => onChange( event.currentTarget.value ) }
+					inputMode={ naturalNumber ? 'numeric' : undefined }
+					pattern={ naturalNumber ? '[1-9][0-9]*' : undefined }
+					onChange={ event => {
+						const nextValue = event.currentTarget.value
+						if (
+							naturalNumber &&
+							nextValue !== '' &&
+							( ! NATURAL_NUMBER_INPUT.test( nextValue ) ||
+								! Number.isSafeInteger( Number( nextValue ) ) )
+						)
+							return
+						onChange( nextValue )
+					} }
 					placeholder={ placeholder }
 					disabled={ disabled }
+					readOnly={ readOnly }
 					aria-invalid={ Boolean( error ) }
 					aria-describedby={ error ? `${ id }-error` : undefined }
 					className={ tw(

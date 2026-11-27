@@ -15,6 +15,7 @@ import {
 type RecordRowProps = {
 	record: StudentRecord
 	currentUser?: CurrentUser | null
+	onAction?: () => void | Promise< void >
 }
 
 type ArtifactLink = { id: string; href: string; label: string }
@@ -173,7 +174,7 @@ function RowContent( {
 					label={ actionLabel }
 					tone={ UIButtonTone.GHOST }
 					fullWidth
-					disabled={ isTop3 && ! isMe && ! isTeacher }
+					disabled={ disabled }
 					onClick={ () => onAction?.() }
 				/>
 			</div>
@@ -181,7 +182,7 @@ function RowContent( {
 	)
 }
 
-function RecordRow( { record, currentUser }: RecordRowProps ) {
+function RecordRow( { record, currentUser, onAction }: RecordRowProps ) {
 	const CurrentUser = useAuthStore( state =>
 		currentUser === undefined ? state.user : currentUser
 	)
@@ -197,9 +198,9 @@ function RecordRow( { record, currentUser }: RecordRowProps ) {
 			: []
 	)
 
-	// Действие кнопки и принудительная блокировка отсутствуют в StudentRecord.
 	return (
 		<RowContent
+			onAction={ onAction }
 			position={ record.position }
 			name={ record.student_name }
 			works={ record.works.map( work =>

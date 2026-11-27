@@ -5,9 +5,14 @@ import { UIQueueRow } from '../ui/UIQueueRow'
 export type QueueRowsProps = {
 	records: readonly StudentRecord[]
 	currentUser: CurrentUser | null
+	onManageRecord?: ( record: StudentRecord ) => void
 }
 
-export const QueueRows = ( { records, currentUser }: QueueRowsProps ) => (
+export const QueueRows = ( {
+	records,
+	currentUser,
+	onManageRecord
+}: QueueRowsProps ) => (
 	<ul
 		className='flex flex-col gap-3'
 		aria-label='Участники очереди'
@@ -29,6 +34,11 @@ export const QueueRows = ( { records, currentUser }: QueueRowsProps ) => (
 					<UIQueueRow
 						record={ record }
 						currentUser={ currentUser }
+						onAction={
+							onManageRecord && currentUser?.role === 'teacher'
+								? () => onManageRecord( record )
+								: undefined
+						}
 					/>
 				</li>
 			)
