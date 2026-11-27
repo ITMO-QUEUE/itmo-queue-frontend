@@ -7,6 +7,7 @@ import type { QueueDetail } from '../../app/api/queues/queues.api.d'
 import { Page } from '../../components/common/Page.tsx'
 import { QueueRows } from '../../components/common/QueueRows'
 import { QueueStatus } from '../../components/common/QueueStatus'
+import { UIAlert, UIAlertTone } from '../../components/ui/UIAlert'
 import { UIButton, UIButtonTone } from '../../components/ui/UIButton.tsx'
 import { QueueStatus as QueueStatusEnum } from '../../components/ui/UIQueueStatus'
 import { UITab } from '../../components/ui/UITab'
@@ -337,6 +338,13 @@ export const TeacherQueuePage = () => {
 							</div>
 						) }
 					</div>
+					{ isPreregistration && (
+						<UIAlert
+							tone={ UIAlertTone.INFO }
+							title='Идёт предварительная запись'
+							message={ `Начало активной защиты выполняется вручную. Плановое начало — ${ timeFormatter.format( queue.startsAt ) }.` }
+						/>
+					) }
 					<TeacherWorkplace
 						key={ queue.id }
 						Name={ currentUser?.name }
