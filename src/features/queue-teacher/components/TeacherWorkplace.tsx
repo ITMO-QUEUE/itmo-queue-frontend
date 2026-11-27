@@ -203,7 +203,8 @@ export const TeacherWorkplace = ( {
 				! student?.attempt_id ||
 				absentAttemptId !== student.attempt_id ||
 				status !== UIWorkPlaceStatus.CALLING
-			) return
+			)
+				return
 			await evaluateStudent( queue.id, student.student_id, {
 				attempt_id: student.attempt_id,
 				status: 'absent',

@@ -50,7 +50,10 @@ export const DialogAbsent = ( {
 						</Dialog.Description>
 						{ message && (
 							<div className='mt-4'>
-								<UIAlert tone={ UIAlertTone.ERROR } message={ message } />
+								<UIAlert
+									tone={ UIAlertTone.ERROR }
+									message={ message }
+								/>
 							</div>
 						) }
 						<div className='mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2'>

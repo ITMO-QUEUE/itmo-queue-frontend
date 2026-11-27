@@ -75,7 +75,9 @@ const toTeacherQueue = (
 	auditorium: detail.location ?? '',
 	workTitles: [ ...detail.works ]
 		.sort( ( a, b ) => a.priority - b.priority )
-		.map( work => workTitles.get( work.work_id ) )
+		.map(
+			work => workTitles.get( work.work_id ) ?? 'Название работы недоступно'
+		)
 } )
 
 export const TeacherQueuesPage = () => {
