@@ -53,7 +53,7 @@ export const TeacherQueue = ( {
 					<h2 className='text-subheading font-bold break-words'>
 						{ queue.subject }
 					</h2>
-					{ workLabel && <p className='text-label font-bold'>{ workLabel }</p> }
+					{ queue.workTitles.length > 0 && <p className='text-label font-bold'>{ queue.workTitles.join( ', ' ) }</p> }
 					<p className='text-body'>
 						{ queue.status === QueueStatus.PREREGISTRATION
 							? 'Защита ещё не началась'
