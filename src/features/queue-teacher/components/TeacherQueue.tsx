@@ -6,7 +6,7 @@ import {
 import type { TeacherQueue as TeacherQueueType } from '../../queue-student/types/queue'
 
 export interface TeacherQueueProps {
-	teacherQueue: TeacherQueueType & { workTitles: ( string | undefined )[] }
+	teacherQueue: TeacherQueueType & { workTitles: string[] }
 	isNearest?: boolean
 	onOpenQueue: () => void
 }
@@ -27,26 +27,12 @@ const timeFormatter = new Intl.DateTimeFormat( 'ru-RU', {
 	minute: '2-digit'
 } )
 
-const formatWorkTitles = ( titles: ( string | undefined )[] ) => {
-	if ( ! titles.length ) return ''
-	if ( titles.every( title => ! title ) ) return `Работ в очереди: ${ titles.length }`
-
-	const numbers = titles.map( title =>
-		title?.match( /^(?:ЛР|Лабораторная работа)\s*№\s*(\d+)$/i )?.[ 1 ]
-	)
-	if ( numbers.every( number => number !== undefined ) ) {
-		return `ЛР ${ numbers.map( number => `№ ${ number }` ).join( ', ' ) }`
-	}
-	return titles.map( title => title || 'Название недоступно' ).join( ', ' )
-}
-
 export const TeacherQueue = ( {
 	teacherQueue: queue,
 	isNearest = false,
 	onOpenQueue
 }: TeacherQueueProps ) => {
 	const isCompleted = queue.status === QueueStatus.COMPLETED
-	const workLabel = formatWorkTitles( queue.workTitles )
 
 	return (
 		<section

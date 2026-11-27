@@ -15,6 +15,7 @@ import type {
 	SessionRead,
 	SessionUpdate,
 	SwapRead,
+	WorkCreate,
 	WorkRead
 } from './queues.api.d'
 
@@ -42,6 +43,13 @@ export const getAllWorks = async (): Promise< WorkRead[] > => {
 		works.push( ...data )
 		if ( data.length < limit ) return works
 	}
+}
+
+export const createWork = async (
+	payload: WorkCreate
+): Promise< WorkRead > => {
+	const { data } = await apiClient.post< WorkRead >( '/api/v1/works', payload )
+	return data
 }
 
 export const getMyQueues = async (

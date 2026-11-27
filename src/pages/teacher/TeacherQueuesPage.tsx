@@ -75,7 +75,9 @@ const toTeacherQueue = (
 	auditorium: detail.location ?? '',
 	workTitles: [ ...detail.works ]
 		.sort( ( a, b ) => a.priority - b.priority )
-		.map( work => workTitles.get( work.work_id ) )
+		.map(
+			work => workTitles.get( work.work_id ) ?? 'Название работы недоступно'
+		)
 } )
 
 export const TeacherQueuesPage = () => {
@@ -108,9 +110,11 @@ export const TeacherQueuesPage = () => {
 	const { data: works } = useQuery( {
 		queryKey: [ 'teacher', 'works' ],
 		queryFn: getAllWorks,
-		enabled: ! queueId && !! data?.pages.some( page =>
-			page.some( queue => queue.works.length > 0 )
-		)
+		enabled:
+			! queueId &&
+			!! data?.pages.some( page =>
+				page.some( queue => queue.works.length > 0 )
+			)
 	} )
 	const workTitles = new Map(
 		works?.map( work => [ work.id, work.title ] as const )

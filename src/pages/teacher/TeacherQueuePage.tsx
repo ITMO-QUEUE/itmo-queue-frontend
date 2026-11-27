@@ -1,33 +1,55 @@
-import { skipToken, useQuery } from '@tanstack/react-query'
+import {
+	skipToken,
+	useMutation,
+	useQuery,
+	useQueryClient
+} from '@tanstack/react-query'
 import { isAxiosError } from 'axios'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router'
-import { getQueueById } from '../../app/api/queues/queues.api'
+import {
+	activateQueueSession,
+	finishQueueSession,
+	getQueueById,
+	setQueueRegistration
+} from '../../app/api/queues/queues.api'
 import type { QueueDetail } from '../../app/api/queues/queues.api.d'
+import { createQueueEventSource } from '../../app/api/system/system.api'
+import type { QueueStreamEventType } from '../../app/api/system/system.api.d'
 import { Page } from '../../components/common/Page.tsx'
 import { QueueRows } from '../../components/common/QueueRows'
 import { QueueStatus } from '../../components/common/QueueStatus'
+import { UIAlert, UIAlertTone } from '../../components/ui/UIAlert'
 import { UIButton, UIButtonTone } from '../../components/ui/UIButton.tsx'
 import { QueueStatus as QueueStatusEnum } from '../../components/ui/UIQueueStatus'
-import {
-	UIStudentWorkResult,
-	type UIStudentWorkResultProps
-} from '../../components/ui/UIStudentWorkResult'
 import { UITab } from '../../components/ui/UITab'
+import { EmptyQueue } from '../../features/queue-teacher/components/EmptyQueue'
+import { FinishQueueDialog } from '../../features/queue-teacher/components/FinishQueueDialog'
+import { QueueBans } from '../../features/queue-teacher/components/QueueBans'
+import { QueueHistory } from '../../features/queue-teacher/components/QueueHistory'
+import { QueueParticipantDialog } from '../../features/queue-teacher/components/QueueParticipantDialog'
 import { QueueSettings } from '../../features/queue-teacher/components/QueueSettings'
+import { TeacherWorkplace } from '../../features/queue-teacher/components/TeacherWorkplace'
+import type { fullQueue } from '../../features/queue-teacher/types/queue'
+import { getQueueErrorMessage } from '../../features/queue-teacher/utils/queueError'
 import {
-	UIWorkPlace,
-	type UIWorkPlaceProps,
-	UIWorkPlaceStatus
-} from '../../features/queue-teacher/components/QueueWorkplace'
-import type {
-	fullQueue,
-	QueueChanges
-} from '../../features/queue-teacher/types/queue'
-import type { User } from '../../stores/useAuthStore'
-import { ParticipantStatus } from '../../types/StudentRecord'
+	createQueueSettingsDraft,
+	type QueueSettingsDraft
+} from '../../features/queue-teacher/utils/queueSettingsDraft'
+import { useAuthStore } from '../../stores/useAuthStore'
+import {
+	ParticipantStatus,
+	type StudentRecord
+} from '../../types/StudentRecord'
 
 type QueueTab = 'queue' | 'settings' | 'history'
+
+const queueEvents: QueueStreamEventType[] = [
+	'snapshot',
+	'queue.updated',
+	'participant.status_changed',
+	'queue.status_changed'
+]
 
 const queueStatuses = {
 	preliminary: QueueStatusEnum.PREREGISTRATION,
@@ -49,7 +71,7 @@ const participantStatuses = {
 
 const toPageQueue = ( detail: QueueDetail ): fullQueue => ( {
 	id: detail.id,
-	subject: detail.discipline_name,
+	subject: detail.discipline_name as fullQueue[ 'subject' ],
 	teachers: detail.teachers.map( teacher => teacher.name ),
 	startsAt: new Date( detail.planned_start ),
 	endsAt: new Date( detail.planned_end ),
@@ -63,57 +85,20 @@ const toPageQueue = ( detail: QueueDetail ): fullQueue => ( {
 	works: [],
 	requireArtifact: false,
 	minutesPerStudent: detail.avg_duration_min ?? 0,
-	studentRecords: detail.students.map( student => ( {
-		...student,
-		status: participantStatuses[ student.status ]
-	} ) )
+	studentRecords: detail.students
+		.map(
+			( student ): StudentRecord => ( {
+				...student,
+				status: participantStatuses[ student.status ]
+			} )
+		)
+		.sort(
+			( a, b ) =>
+				Number( a.is_reserve ) - Number( b.is_reserve ) ||
+				( a.position ?? Number.MAX_SAFE_INTEGER ) -
+					( b.position ?? Number.MAX_SAFE_INTEGER )
+		)
 } )
-
-type HistoryAttempt = Omit< UIStudentWorkResultProps, 'OnClick' > & {
-	id: string
-}
-
-export const TeacherSample: User = {
-	id: 'teacher-1',
-	name: 'Елена Ивановна',
-	type: 'teacher'
-}
-
-const testResults: HistoryAttempt[] = [
-	{
-		id: 'attempt-001',
-		WorkName: 'ЛР № 3',
-		Subject: 'Программирование',
-		date: '26 октября',
-		startTime: '14:00',
-		endTime: '16:00',
-		Session: 'защита лабораторных работ',
-		Teacher: 'Павел Кузнецов',
-		result: '7,5 / 10'
-	},
-	{
-		id: 'attempt-002',
-		WorkName: 'ЛР № 4',
-		Subject: 'Программирование',
-		date: '26 октября',
-		startTime: '14:00',
-		endTime: '16:00',
-		Session: 'защита лабораторных работ',
-		Teacher: 'Елена Иванова',
-		result: 'Принято'
-	},
-	{
-		id: 'attempt-003',
-		WorkName: 'ЛР № 3',
-		Subject: 'Программирование',
-		date: '19 октября',
-		startTime: '14:00',
-		endTime: '16:00',
-		Session: 'защита лабораторных работ',
-		Teacher: 'Павел Кузнецов',
-		result: 'Неявка'
-	}
-]
 
 const dateFormatter = new Intl.DateTimeFormat( 'ru-RU', {
 	day: 'numeric',
@@ -125,48 +110,17 @@ const timeFormatter = new Intl.DateTimeFormat( 'ru-RU', {
 	minute: '2-digit'
 } )
 
-const TeacherWorkplace = (
-	props: Pick< UIWorkPlaceProps, 'Name' | 'CurentStudent' >
-) => {
-	const [ status, setStatus ] = useState( UIWorkPlaceStatus.FREE )
-	const [ saveStatus, setSaveStatus ] =
-		useState< UIWorkPlaceProps[ 'saveStatus' ] >( 'idle' )
-	const [ scores, setScores ] = useState< Record< string, string > >( {} )
-
-	const callNext = () => setStatus( UIWorkPlaceStatus.CALLING )
-	const startDefence = () => setStatus( UIWorkPlaceStatus.DEFENDING )
-	const saveResults = () => setSaveStatus( 'saved' )
-	const finishDefence = () => {
-		setScores( {} )
-		setSaveStatus( 'idle' )
-		setStatus( UIWorkPlaceStatus.FREE )
-	}
-	const changeScore = ( workId: string, value: string ) => {
-		setScores( previous => ( { ...previous, [ workId ]: value } ) )
-		setSaveStatus( 'idle' )
-	}
-
-	return (
-		<UIWorkPlace
-			{ ...props }
-			status={ status }
-			saveStatus={ saveStatus }
-			scores={ scores }
-			onScoreChange={ changeScore }
-			CallNext={ callNext }
-			StartDefence={ startDefence }
-			SaveResult={ saveResults }
-			FinishDefence={ finishDefence }
-		/>
-	)
-}
-
 export const TeacherQueuePage = () => {
-	const currentUser = TeacherSample
+	const queryClient = useQueryClient()
+	const currentUser = useAuthStore( state => state.user )
 	const [ activeTab, setActiveTab ] = useState< QueueTab >( 'queue' )
-	const [ queueStates, setQueueStates ] = useState<
-		Record< string, QueueChanges >
+	const [ managedRecord, setManagedRecord ] = useState< StudentRecord | null >(
+		null
+	)
+	const [ settingsDrafts, setSettingsDrafts ] = useState<
+		Record< string, QueueSettingsDraft >
 	>( {} )
+	const [ finishing, setFinishing ] = useState( false )
 	const navigate = useNavigate()
 	const { queueId } = useParams< { queueId: string } >()
 	const {
@@ -179,10 +133,65 @@ export const TeacherQueuePage = () => {
 		queryKey: [ 'queue', queueId ],
 		queryFn: queueId ? () => getQueueById( queueId ) : skipToken
 	} )
-	const initialQueue = queueDetail ? toPageQueue( queueDetail ) : undefined
-	const queue = initialQueue
-		? { ...initialQueue, ...queueStates[ initialQueue.id ] }
-		: undefined
+	const activation = useMutation( {
+		mutationFn: activateQueueSession,
+		onSuccess: async ( session, activatedQueueId ) => {
+			const queryKey = [ 'queue', activatedQueueId ]
+			await queryClient.cancelQueries( { queryKey, exact: true } )
+			queryClient.setQueryData< QueueDetail >( queryKey, previous =>
+				previous ? { ...previous, ...session } : previous
+			)
+
+			await queryClient.invalidateQueries( { queryKey, exact: true } )
+		}
+	} )
+	const registration = useMutation( {
+		mutationFn: ( { queueId, open }: { queueId: string; open: boolean } ) =>
+			setQueueRegistration( queueId, open ),
+		onSuccess: async ( session, { queueId } ) => {
+			const queryKey = [ 'queue', queueId ]
+			await queryClient.cancelQueries( { queryKey, exact: true } )
+			queryClient.setQueryData< QueueDetail >( queryKey, previous =>
+				previous
+					? { ...previous, registration_open: session.registration_open }
+					: previous
+			)
+
+			await queryClient.invalidateQueries( { queryKey, exact: true } )
+		}
+	} )
+	const finish = useMutation( {
+		mutationFn: ( { id, reason }: { id: string; reason?: string } ) =>
+			finishQueueSession( id, reason ),
+		onSuccess: async ( session, { id } ) => {
+			const queryKey = [ 'queue', id ]
+			await queryClient.cancelQueries( { queryKey, exact: true } )
+			queryClient.setQueryData< QueueDetail >( queryKey, previous =>
+				previous ? { ...previous, ...session } : previous
+			)
+			setFinishing( false )
+			await Promise.all( [
+				queryClient.invalidateQueries( { queryKey } ),
+				queryClient.invalidateQueries( {
+					queryKey: [ 'teacher', 'my-queues' ]
+				} )
+			] )
+		}
+	} )
+	useEffect( () => {
+		if ( ! queueId ) return
+		const events = createQueueEventSource( queueId )
+		const refresh = () => {
+			void refetch()
+			void queryClient.invalidateQueries( {
+				queryKey: [ 'queue', queueId, 'bans' ],
+				exact: true
+			} )
+		}
+		for ( const event of queueEvents ) events.addEventListener( event, refresh )
+		return () => events.close()
+	}, [ queueId, refetch, queryClient ] )
+	const queue = queueDetail ? toPageQueue( queueDetail ) : undefined
 
 	if ( isLoading ) {
 		return (
@@ -194,6 +203,7 @@ export const TeacherQueuePage = () => {
 
 	if (
 		isError &&
+		! queueDetail &&
 		! ( isAxiosError( error ) && error.response?.status === 404 )
 	) {
 		return (
@@ -212,7 +222,7 @@ export const TeacherQueuePage = () => {
 		)
 	}
 
-	if ( ! queue || ! queueDetail || isError ) {
+	if ( ! queue || ! queueDetail ) {
 		return (
 			<Page title='Очередь не найдена'>
 				<p>Очередь с указанным идентификатором отсутствует.</p>
@@ -220,16 +230,16 @@ export const TeacherQueuePage = () => {
 		)
 	}
 
+	const isPreregistration = queue.status === QueueStatusEnum.PREREGISTRATION
+	const isActive = queue.status === QueueStatusEnum.ACTIVE
 	const isCompleted = queue.status === QueueStatusEnum.COMPLETED
-	const updateQueueState = ( changes: QueueChanges ) => {
-		setQueueStates( previous => ( {
-			...previous,
-			[ queue.id ]: {
-				...previous[ queue.id ],
-				...changes
-			}
-		} ) )
-	}
+	const activeRecords = queue.studentRecords.filter( record =>
+		[
+			ParticipantStatus.WAITING,
+			ParticipantStatus.CALLED,
+			ParticipantStatus.IN_DEFENSE
+		].includes( record.status )
+	)
 
 	return (
 		<div className='flex min-h-full w-full flex-col gap-8 bg-bg-page p-content'>
@@ -310,9 +320,18 @@ export const TeacherQueuePage = () => {
 								label='Открыть запись'
 								tone={ UIButtonTone.SECONDARY }
 								fullWidth
-								disabled={ isCompleted || queue.isRegistrationOpen }
+								disabled={
+									isCompleted ||
+									queue.isRegistrationOpen ||
+									registration.isPending ||
+									activation.isPending
+								}
+								loading={
+									registration.isPending &&
+									registration.variables?.open === true
+								}
 								onClick={ () =>
-									updateQueueState( { isRegistrationOpen: true } )
+									registration.mutate( { queueId: queue.id, open: true } )
 								}
 							/>
 						</div>
@@ -321,57 +340,111 @@ export const TeacherQueuePage = () => {
 								label='Закрыть запись'
 								tone={ UIButtonTone.SECONDARY }
 								fullWidth
-								disabled={ isCompleted || ! queue.isRegistrationOpen }
+								disabled={
+									isCompleted ||
+									! queue.isRegistrationOpen ||
+									registration.isPending ||
+									activation.isPending
+								}
+								loading={
+									registration.isPending &&
+									registration.variables?.open === false
+								}
 								onClick={ () =>
-									updateQueueState( { isRegistrationOpen: false } )
+									registration.mutate( { queueId: queue.id, open: false } )
 								}
 							/>
 						</div>
-						<div className='w-[240px] shrink-0'>
-							<UIButton
-								label='Завершить сеанс'
-								tone={ UIButtonTone.DANGER }
-								fullWidth
-								disabled={ isCompleted }
-								onClick={ () =>
-									updateQueueState( {
-										status: QueueStatusEnum.COMPLETED,
-										isRegistrationOpen: false
-									} )
-								}
-							/>
-						</div>
+						{ isPreregistration && (
+							<div className='w-[240px] shrink-0'>
+								<UIButton
+									label='Начать активную защиту'
+									tone={ UIButtonTone.PRIMARY }
+									fullWidth
+									disabled={ isCompleted || registration.isPending }
+									loading={ activation.isPending }
+									onClick={ () => activation.mutate( queue.id ) }
+								/>
+							</div>
+						) }
+						{ isActive && (
+							<div className='w-[240px] shrink-0'>
+								<UIButton
+									label='Завершить сеанс'
+									tone={ UIButtonTone.DANGER }
+									fullWidth
+									disabled={ isCompleted || registration.isPending }
+									loading={ finish.isPending }
+									onClick={ () => {
+										finish.reset()
+										setFinishing( true )
+									} }
+								/>
+							</div>
+						) }
 					</div>
-					<TeacherWorkplace
-						key={ queue.id }
-						Name={ currentUser.name }
-						CurentStudent={ queue.studentRecords[ 0 ] }
-					/>
-					<section
-						className='flex min-w-0 flex-col gap-4 rounded-card border border-border-subtle bg-bg-surface p-6'
-						aria-labelledby='queue-participants-title'
-					>
-						<h2
-							id='queue-participants-title'
-							className='text-section text-text-primary'
+					{ registration.isError &&
+						registration.variables?.queueId === queue.id && (
+							<UIAlert
+								tone={ UIAlertTone.ERROR }
+								title={
+									registration.variables.open
+										? 'Не удалось открыть запись'
+										: 'Не удалось закрыть запись'
+								}
+								message={ getQueueErrorMessage( registration.error ) }
+							/>
+						) }
+					{ activation.isError && activation.variables === queue.id && (
+						<UIAlert
+							tone={ UIAlertTone.ERROR }
+							title='Не удалось начать активную защиту'
+							message={ getQueueErrorMessage( activation.error ) }
+						/>
+					) }
+					{ isPreregistration && (
+						<UIAlert
+							tone={ UIAlertTone.INFO }
+							title='Идёт предварительная запись'
+							message={ `Начало активной защиты выполняется вручную. Плановое начало — ${ timeFormatter.format( queue.startsAt ) }.` }
+						/>
+					) }
+					{ ! isPreregistration && (
+						<TeacherWorkplace
+							key={ `${ queue.id }:${ currentUser?.id }` }
+							queue={ queueDetail }
+							teacherId={ currentUser?.id }
+							name={ currentUser?.name }
+						/>
+					) }
+					{ activeRecords.length === 0 ? (
+						<EmptyQueue />
+					) : (
+						<section
+							className='flex min-w-0 flex-col gap-4 rounded-card border border-border-subtle bg-bg-surface p-6'
+							aria-labelledby='queue-participants-title'
 						>
-							Участники очереди
-						</h2>
-						{ queue.studentRecords.length === 0 ? (
-							<p className='text-body text-text-secondary'>
-								В очереди пока нет участников.
+							<h2
+								id='queue-participants-title'
+								className='text-section text-text-primary'
+							>
+								Участники очереди
+							</h2>
+							<p className='text-small text-text-secondary'>
+								Одна работа — одно место. Сначала приоритет 1, затем приоритет
+								2.
 							</p>
-						) : (
 							<div className='overflow-x-auto'>
 								<div className='min-w-[900px]'>
 									<QueueRows
-										records={ queue.studentRecords }
+										records={ activeRecords }
 										currentUser={ currentUser }
+										onManageRecord={ setManagedRecord }
 									/>
 								</div>
 							</div>
-						) }
-					</section>
+						</section>
+					) }
 					<section
 						className='flex min-w-0 flex-col gap-4 rounded-card border border-border-subtle bg-bg-surface p-6'
 						aria-labelledby='queue-deleted-records-title'
@@ -382,17 +455,58 @@ export const TeacherQueuePage = () => {
 						>
 							Удалённые записи
 						</h2>
+						<QueueBans
+							key={ queue.id }
+							queueId={ queue.id }
+						/>
 					</section>
 				</div>
+			) }
+			{ finishing && ! isCompleted && (
+				<FinishQueueDialog
+					hasParticipants={ activeRecords.length > 0 }
+					pending={ finish.isPending }
+					error={
+						finish.isError ? getQueueErrorMessage( finish.error ) : undefined
+					}
+					onCancel={ () => setFinishing( false ) }
+					onFinish={ reason => {
+						if ( ! finish.isPending ) finish.mutate( { id: queue.id, reason } )
+					} }
+				/>
 			) }
 			{ activeTab === 'settings' && (
 				<QueueSettings
 					key={ queue.id }
-					queue={ queue }
-					onSave={ updateQueueState }
+					queue={ queueDetail }
+					isCompleted={ isCompleted }
+					settingsDraft={
+						settingsDrafts[ queue.id ] ??
+						createQueueSettingsDraft( queueDetail )
+					}
+					onDraftChange={ draft =>
+						setSettingsDrafts( current => ( {
+							...current,
+							[ queue.id ]: draft
+						} ) )
+					}
 				/>
 			) }
-			{ ( activeTab === 'history' || isCompleted ) && (
+			{ managedRecord &&
+				managedRecord.queue_id === queue.id &&
+				! isCompleted && (
+					<QueueParticipantDialog
+						key={ managedRecord.id }
+						record={
+							activeRecords.find( record => record.id === managedRecord.id ) ??
+							managedRecord
+						}
+						canCall={ isActive }
+						onClose={ () => setManagedRecord( null ) }
+					/>
+				) }
+			{ ( activeTab === 'history' ||
+				( activeTab === 'queue' && isCompleted ) ) && (
 				<div className='flex min-w-0 flex-row gap-4'>
 					<section
 						className='flex min-w-0 flex-1 flex-col gap-4 rounded-card border border-border-subtle bg-bg-surface p-6'
@@ -404,29 +518,10 @@ export const TeacherQueuePage = () => {
 						>
 							Попытки и результаты
 						</h2>
-						<ul
-							aria-label='История попыток'
-							className='grid w-full min-w-0 grid-cols-1 gap-3 sm:gap-4'
-						>
-							{ testResults.map( ( { id, ...attempt } ) => (
-								<li key={ id }>
-									<UIStudentWorkResult
-										{ ...attempt }
-										OnClick={ () =>
-											window.alert(
-												[
-													`${ attempt.WorkName } · ${ attempt.Subject }`,
-													`${ attempt.date } · ${ attempt.startTime }–${ attempt.endTime }`,
-													`Сеанс: ${ attempt.Session }`,
-													`Преподаватель: ${ attempt.Teacher }`,
-													`Результат: ${ attempt.result ?? 'не указан' }`
-												].join( '\n' )
-											)
-										}
-									/>
-								</li>
-							) ) }
-						</ul>
+						<QueueHistory
+							key={ queue.id }
+							queueId={ queue.id }
+						/>
 					</section>
 					<section
 						className='flex min-w-0 self-start shrink-0 basis-[calc((100%_-_--spacing(4))/3)] flex-col gap-4 rounded-card border border-border-subtle bg-bg-surface p-6'
