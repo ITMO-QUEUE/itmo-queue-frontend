@@ -33,16 +33,27 @@ export const getQueues = async (
 	return data
 }
 
-export const getAllWorks = async (): Promise< WorkRead[] > => {
-	const limit = 100
-	const works: WorkRead[] = []
-	while ( true ) {
-		const { data } = await apiClient.get< WorkRead[] >( '/api/v1/works', {
-			params: { limit, offset: works.length }
-		} )
-		works.push( ...data )
-		if ( data.length < limit ) return works
+export const getAllWorks = (): Promise<WorkRead[]> => {
+	const loadPage = async (offset: number): Promise<WorkRead[]> => {
+		const limit = 100
+
+		const { data } = await apiClient.get<WorkRead[]>(
+			'/api/v1/works',
+			{
+				params: { limit, offset }
+			}
+		)
+
+		if (data.length < limit) {
+			return data
+		}
+
+		const remaining = await loadPage(offset + data.length)
+
+		return [...data, ...remaining]
 	}
+
+	return loadPage(0)
 }
 
 export const createWork = async (
@@ -359,4 +370,15 @@ export const liftStudentBan = async (
 	await apiClient.delete(
 		`/api/v1/queues/${ queueId }/students/${ studentId }/ban`
 	)
+}
+export const updateMyEntryWorks = async (
+	queueId: string,
+	payload: Enrollment
+): Promise<Participant> => {
+	const { data } = await apiClient.patch<Participant>(
+		`/api/v1/queues/${queueId}/entries/me`,
+		payload
+	)
+
+	return data
 }
