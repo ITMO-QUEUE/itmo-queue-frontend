@@ -110,7 +110,12 @@ function RowContent( {
 					isMe ? 'bg-bg-selected' : 'bg-bg-surface'
 				) }
 			>
-				<span className='w-20 shrink-0 text-label text-text-primary'>
+				<span
+					className={ tw(
+						'shrink-0 text-label text-text-primary',
+						isTeacher ? 'w-5' : 'w-20'
+					) }
+				>
 					<span className='sr-only'>Позиция в очереди: </span>
 					{ position }
 				</span>
@@ -120,8 +125,9 @@ function RowContent( {
 						{ isMe && ' · вы' }
 					</span>
 					<span className='text-small text-text-secondary wrap-break-word'>
-						{ count } { WORK_LABELS[ WORK_PLURALS.select( count ) ] }
-						{ titles.length > 0 && ` · ${ titles.join( ', ' ) }` }
+						{ isTeacher && titles.length > 0
+							? titles.join( ', ' )
+							: `${ count } ${ WORK_LABELS[ WORK_PLURALS.select( count ) ] }${ titles.length ? ` · ${ titles.join( ', ' ) }` : '' }` }
 					</span>
 					{ ( isMe || isTeacher ) &&
 						links.map( artifact => (
@@ -138,8 +144,13 @@ function RowContent( {
 					className='min-w-0 flex-1'
 					aria-hidden='true'
 				/>
-				<UIParticipantStatus { ...participantStatus } />
-				<span className='w-36 shrink-0 text-right text-small text-text-secondary wrap-break-word'>
+				{ ! isTeacher && <UIParticipantStatus { ...participantStatus } /> }
+				<span
+					className={ tw(
+						'shrink-0 text-small text-text-secondary wrap-break-word',
+						isTeacher ? 'w-32 text-left' : 'w-36 text-right'
+					) }
+				>
 					{ isTop3 ? (
 						<span className='inline-flex items-center gap-1'>
 							Топ-3
@@ -155,6 +166,7 @@ function RowContent( {
 						group
 					) }
 				</span>
+				{ isTeacher && <UIParticipantStatus { ...participantStatus } /> }
 			</div>
 			<div className='ml-4 w-36 shrink-0 text-text-primary'>
 				<UIButton
@@ -190,7 +202,11 @@ function RecordRow( { record, currentUser }: RecordRowProps ) {
 		<RowContent
 			position={ record.position }
 			name={ record.student_name }
-			works={ record.works.map( work => work.title ) }
+			works={ record.works.map( work =>
+				CurrentUser?.role === 'teacher'
+					? `${ work.title } · приоритет ${ work.priority }`
+					: work.title
+			) }
 			workCount={ record.works.length || ( record.work_id ? 1 : 0 ) }
 			artifactLinks={ links }
 			link={ record.artifact_url }

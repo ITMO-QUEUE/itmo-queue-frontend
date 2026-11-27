@@ -1,10 +1,10 @@
-import type { User } from '../../stores/useAuthStore'
+import type { CurrentUser } from '../../stores/useAuthStore'
 import type { StudentRecord } from '../../types/StudentRecord'
 import { UIQueueRow } from '../ui/UIQueueRow'
 
 export type QueueRowsProps = {
 	records: readonly StudentRecord[]
-	currentUser: User | null
+	currentUser: CurrentUser | null
 }
 
 export const QueueRows = ( { records, currentUser }: QueueRowsProps ) => (
@@ -14,8 +14,9 @@ export const QueueRows = ( { records, currentUser }: QueueRowsProps ) => (
 	>
 		{ records.map( ( record, index ) => {
 			const previous = records[ index - 1 ]
-			const startsNewGroup =
-				previous !== undefined && previous.is_reserve !== record.is_reserve
+			const startsNewGroup = previous
+				? previous.is_reserve !== record.is_reserve
+				: record.is_reserve
 
 			return (
 				<li key={ record.id }>

@@ -9,11 +9,8 @@ import { QueueRows } from '../../components/common/QueueRows'
 import { QueueStatus } from '../../components/common/QueueStatus'
 import { UIButton, UIButtonTone } from '../../components/ui/UIButton.tsx'
 import { QueueStatus as QueueStatusEnum } from '../../components/ui/UIQueueStatus'
-import {
-	UIStudentWorkResult,
-	type UIStudentWorkResultProps
-} from '../../components/ui/UIStudentWorkResult'
 import { UITab } from '../../components/ui/UITab'
+import { QueueHistory } from '../../features/queue-teacher/components/QueueHistory'
 import { QueueSettings } from '../../features/queue-teacher/components/QueueSettings'
 import {
 	UIWorkPlace,
@@ -24,8 +21,11 @@ import type {
 	fullQueue,
 	QueueChanges
 } from '../../features/queue-teacher/types/queue'
-import type { User } from '../../stores/useAuthStore'
-import { ParticipantStatus } from '../../types/StudentRecord'
+import { useAuthStore } from '../../stores/useAuthStore'
+import {
+	ParticipantStatus,
+	type StudentRecord
+} from '../../types/StudentRecord'
 
 type QueueTab = 'queue' | 'settings' | 'history'
 
@@ -49,7 +49,7 @@ const participantStatuses = {
 
 const toPageQueue = ( detail: QueueDetail ): fullQueue => ( {
 	id: detail.id,
-	subject: detail.discipline_name,
+	subject: detail.discipline_name as fullQueue[ 'subject' ],
 	teachers: detail.teachers.map( teacher => teacher.name ),
 	startsAt: new Date( detail.planned_start ),
 	endsAt: new Date( detail.planned_end ),
@@ -63,57 +63,20 @@ const toPageQueue = ( detail: QueueDetail ): fullQueue => ( {
 	works: [],
 	requireArtifact: false,
 	minutesPerStudent: detail.avg_duration_min ?? 0,
-	studentRecords: detail.students.map( student => ( {
-		...student,
-		status: participantStatuses[ student.status ]
-	} ) )
+	studentRecords: detail.students
+		.map(
+			( student ): StudentRecord => ( {
+				...student,
+				status: participantStatuses[ student.status ]
+			} )
+		)
+		.sort(
+			( a, b ) =>
+				Number( a.is_reserve ) - Number( b.is_reserve ) ||
+				( a.position ?? Number.MAX_SAFE_INTEGER ) -
+					( b.position ?? Number.MAX_SAFE_INTEGER )
+		)
 } )
-
-type HistoryAttempt = Omit< UIStudentWorkResultProps, 'OnClick' > & {
-	id: string
-}
-
-export const TeacherSample: User = {
-	id: 'teacher-1',
-	name: 'Елена Ивановна',
-	type: 'teacher'
-}
-
-const testResults: HistoryAttempt[] = [
-	{
-		id: 'attempt-001',
-		WorkName: 'ЛР № 3',
-		Subject: 'Программирование',
-		date: '26 октября',
-		startTime: '14:00',
-		endTime: '16:00',
-		Session: 'защита лабораторных работ',
-		Teacher: 'Павел Кузнецов',
-		result: '7,5 / 10'
-	},
-	{
-		id: 'attempt-002',
-		WorkName: 'ЛР № 4',
-		Subject: 'Программирование',
-		date: '26 октября',
-		startTime: '14:00',
-		endTime: '16:00',
-		Session: 'защита лабораторных работ',
-		Teacher: 'Елена Иванова',
-		result: 'Принято'
-	},
-	{
-		id: 'attempt-003',
-		WorkName: 'ЛР № 3',
-		Subject: 'Программирование',
-		date: '19 октября',
-		startTime: '14:00',
-		endTime: '16:00',
-		Session: 'защита лабораторных работ',
-		Teacher: 'Павел Кузнецов',
-		result: 'Неявка'
-	}
-]
 
 const dateFormatter = new Intl.DateTimeFormat( 'ru-RU', {
 	day: 'numeric',
@@ -162,7 +125,7 @@ const TeacherWorkplace = (
 }
 
 export const TeacherQueuePage = () => {
-	const currentUser = TeacherSample
+	const currentUser = useAuthStore( state => state.user )
 	const [ activeTab, setActiveTab ] = useState< QueueTab >( 'queue' )
 	const [ queueStates, setQueueStates ] = useState<
 		Record< string, QueueChanges >
@@ -221,6 +184,18 @@ export const TeacherQueuePage = () => {
 	}
 
 	const isCompleted = queue.status === QueueStatusEnum.COMPLETED
+	const activeRecords = queue.studentRecords.filter( record =>
+		[
+			ParticipantStatus.WAITING,
+			ParticipantStatus.CALLED,
+			ParticipantStatus.IN_DEFENSE
+		].includes( record.status )
+	)
+	const deletedRecords = queue.studentRecords.filter( record =>
+		[ ParticipantStatus.CANCELLED, ParticipantStatus.REMOVED ].includes(
+			record.status
+		)
+	)
 	const updateQueueState = ( changes: QueueChanges ) => {
 		setQueueStates( previous => ( {
 			...previous,
@@ -344,8 +319,20 @@ export const TeacherQueuePage = () => {
 					</div>
 					<TeacherWorkplace
 						key={ queue.id }
-						Name={ currentUser.name }
-						CurentStudent={ queue.studentRecords[ 0 ] }
+						Name={ currentUser?.name }
+						CurentStudent={
+							activeRecords.find(
+								record =>
+									record.teacher_id === currentUser?.id &&
+									( record.status === ParticipantStatus.CALLED ||
+										record.status === ParticipantStatus.IN_DEFENSE )
+							) ??
+							activeRecords.find(
+								record =>
+									record.status === ParticipantStatus.WAITING &&
+									! record.is_reserve
+							)
+						}
 					/>
 					<section
 						className='flex min-w-0 flex-col gap-4 rounded-card border border-border-subtle bg-bg-surface p-6'
@@ -357,7 +344,10 @@ export const TeacherQueuePage = () => {
 						>
 							Участники очереди
 						</h2>
-						{ queue.studentRecords.length === 0 ? (
+						<p className='text-small text-text-secondary'>
+							Одна работа — одно место. Сначала приоритет 1, затем приоритет 2.
+						</p>
+						{ activeRecords.length === 0 ? (
 							<p className='text-body text-text-secondary'>
 								В очереди пока нет участников.
 							</p>
@@ -365,7 +355,7 @@ export const TeacherQueuePage = () => {
 							<div className='overflow-x-auto'>
 								<div className='min-w-[900px]'>
 									<QueueRows
-										records={ queue.studentRecords }
+										records={ activeRecords }
 										currentUser={ currentUser }
 									/>
 								</div>
@@ -382,6 +372,20 @@ export const TeacherQueuePage = () => {
 						>
 							Удалённые записи
 						</h2>
+						{ deletedRecords.length === 0 ? (
+							<p className='text-body text-text-secondary'>
+								Удалённых записей нет.
+							</p>
+						) : (
+							<div className='overflow-x-auto'>
+								<div className='min-w-[900px]'>
+									<QueueRows
+										records={ deletedRecords }
+										currentUser={ currentUser }
+									/>
+								</div>
+							</div>
+						) }
 					</section>
 				</div>
 			) }
@@ -404,29 +408,10 @@ export const TeacherQueuePage = () => {
 						>
 							Попытки и результаты
 						</h2>
-						<ul
-							aria-label='История попыток'
-							className='grid w-full min-w-0 grid-cols-1 gap-3 sm:gap-4'
-						>
-							{ testResults.map( ( { id, ...attempt } ) => (
-								<li key={ id }>
-									<UIStudentWorkResult
-										{ ...attempt }
-										OnClick={ () =>
-											window.alert(
-												[
-													`${ attempt.WorkName } · ${ attempt.Subject }`,
-													`${ attempt.date } · ${ attempt.startTime }–${ attempt.endTime }`,
-													`Сеанс: ${ attempt.Session }`,
-													`Преподаватель: ${ attempt.Teacher }`,
-													`Результат: ${ attempt.result ?? 'не указан' }`
-												].join( '\n' )
-											)
-										}
-									/>
-								</li>
-							) ) }
-						</ul>
+						<QueueHistory
+							key={ queue.id }
+							queueId={ queue.id }
+						/>
 					</section>
 					<section
 						className='flex min-w-0 self-start shrink-0 basis-[calc((100%_-_--spacing(4))/3)] flex-col gap-4 rounded-card border border-border-subtle bg-bg-surface p-6'
