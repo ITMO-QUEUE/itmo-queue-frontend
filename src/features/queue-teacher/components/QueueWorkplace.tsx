@@ -19,6 +19,7 @@ export type UIWorkPlaceProps = {
 	SaveResult: () => void | Promise< void >
 	CallNext: () => void | Promise< void >
 	StartDefence: () => void | Promise< void >
+	OpenAbsent: () => void
 	FinishDefence: () => void | Promise< void >
 }
 
@@ -79,6 +80,7 @@ export const UIWorkPlace = ( {
 	onScoreChange,
 	CallNext,
 	StartDefence,
+	OpenAbsent,
 	SaveResult,
 	FinishDefence
 }: UIWorkPlaceProps ) => {
@@ -118,7 +120,7 @@ export const UIWorkPlace = ( {
 			) }
 			{ message && (
 				<UIAlert
-					tone={ UIAlertTone.INFO }
+					tone={ UIAlertTone.ERROR }
 					message={ message }
 				/>
 			) }
@@ -179,15 +181,28 @@ export const UIWorkPlace = ( {
 					) }
 				</>
 			) : (
-				<div className='w-64 max-w-full'>
-					<UIButton
-						label={ isFree ? 'Вызвать следующего' : 'Начать защиту' }
-						tone={ UIButtonTone.PRIMARY }
-						fullWidth
-						loading={ isPending }
-						disabled={ ! isFree && ! student }
-						onClick={ isFree ? CallNext : StartDefence }
-					/>
+				<div className='flex flex-wrap gap-4'>
+					<div className='w-64 max-w-full'>
+						<UIButton
+							label={ isFree ? 'Вызвать следующего' : 'Начать защиту' }
+							tone={ UIButtonTone.PRIMARY }
+							fullWidth
+							loading={ isPending }
+							disabled={ ! isFree && ! student }
+							onClick={ isFree ? CallNext : StartDefence }
+						/>
+					</div>
+					{ status === UIWorkPlaceStatus.CALLING && (
+						<div className='w-64 max-w-full'>
+							<UIButton
+								label='Отметить неявку'
+								tone={ UIButtonTone.SECONDARY }
+								fullWidth
+								disabled={ isPending || ! student }
+								onClick={ OpenAbsent }
+							/>
+						</div>
+					) }
 				</div>
 			) }
 		</section>

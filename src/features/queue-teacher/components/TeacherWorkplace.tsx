@@ -1,5 +1,4 @@
 import { useQueryClient } from '@tanstack/react-query'
-import { isAxiosError } from 'axios'
 import { useRef, useState } from 'react'
 import {
 	callNextStudent,
@@ -15,6 +14,8 @@ import type {
 	ParticipantStatus,
 	StudentRecord
 } from '../../../types/StudentRecord'
+import { getQueueErrorMessage } from '../utils/queueError'
+import { DialogAbsent } from './DialogAbsent'
 import {
 	UIWorkPlace,
 	type UIWorkPlaceProps,
@@ -53,7 +54,7 @@ const getOtherWorkplaces = ( queue: QueueDetail, teacherId?: string ) =>
 		.map( teacher => {
 			const student = getTeacherStudent( queue, teacher.id )
 			const message = student
-				? `${ teacher.name } ${ student.status === 'called' ? 'вызывает' : 'принимает' }: ${ student.student_name }.`
+				? `${ teacher.name } ${ student.status === 'called' ? 'вызывает' : 'принимает' } ${ student.student_name }.`
 				: `${ teacher.name } ${ teacher.is_busy ? 'принимает студента' : teacher.is_active ? 'свободен' : 'неактивен' }.`
 			return { id: teacher.id, message }
 		} )
@@ -71,6 +72,9 @@ export const TeacherWorkplace = ( {
 	const [ isPending, setIsPending ] = useState( false )
 	const [ message, setMessage ] = useState< string >()
 	const [ savedStudent, setSavedStudent ] = useState< Participant >()
+	const [ absentAttemptId, setAbsentAttemptId ] = useState< string | null >(
+		null
+	)
 	const [ draft, setDraft ] = useState< {
 		attemptId?: string | null
 		scores: Record< string, string >
@@ -87,15 +91,8 @@ export const TeacherWorkplace = ( {
 				? UIWorkPlaceStatus.CALLING
 				: UIWorkPlaceStatus.FREE
 
-	const refreshQueue = async () => {
-		await queryClient.cancelQueries( { queryKey, exact: true } )
-		return queryClient.fetchQuery( {
-			queryKey,
-			queryFn: () => getQueueById( queue.id ),
-			staleTime: 0,
-			retry: false
-		} )
-	}
+	const refreshQueue = () =>
+		queryClient.invalidateQueries( { queryKey, exact: true } )
 	const updateStudent = ( updated: Participant ) => {
 		queryClient.setQueryData< QueueDetail >( queryKey, previous =>
 			previous
@@ -116,13 +113,7 @@ export const TeacherWorkplace = ( {
 		try {
 			await action()
 		} catch ( error ) {
-			setMessage(
-				isAxiosError( error ) && error.response?.status === 409
-					? 'Состояние очереди изменилось. Обновите данные повторным нажатием.'
-					: error instanceof Error && ! isAxiosError( error )
-						? error.message
-						: 'Не удалось выполнить действие. Попробуйте ещё раз.'
-			)
+			setMessage( getQueueErrorMessage( error ) )
 		} finally {
 			actionLock.current = false
 			setIsPending( false )
@@ -130,60 +121,13 @@ export const TeacherWorkplace = ( {
 	}
 	const callNext = () =>
 		runAction( async () => {
-			if ( student || ! teacherId ) return
-			const freshQueue = await refreshQueue()
-			if ( getTeacherStudent( freshQueue, teacherId ) ) {
-				callKey.current = null
-				return
-			}
-			if (
-				! freshQueue.students.some(
-					item => item.status === 'waiting' && ! item.is_reserve
-				)
-			) {
-				setMessage( 'Нет студентов в основной очереди со статусом «Ожидание».' )
-				return
-			}
 			callKey.current ??= crypto.randomUUID()
-			let attempt: Awaited< ReturnType< typeof callNextStudent > >
-			try {
-				// Порядок и назначение преподавателю определяет сервер, а не устаревший список.
-				attempt = await callNextStudent( queue.id, callKey.current )
-			} catch ( error ) {
-				if (
-					isAxiosError( error ) &&
-					error.response &&
-					error.response.status < 500
-				) {
-					callKey.current = null
-				}
-				throw error
-			}
-			if ( attempt.status !== 'called' && attempt.status !== 'in_progress' ) {
-				callKey.current = null
-				await refreshQueue()
-				setMessage(
-					'Предыдущая попытка уже завершена. Вызовите следующего студента.'
-				)
-				return
-			}
-			const calledStudent = freshQueue.students.find(
-				item => item.id === attempt.entry_id
-			)
-			if ( calledStudent ) {
-				updateStudent( {
-					...calledStudent,
-					status: attempt.status === 'in_progress' ? 'in_defense' : 'called',
-					teacher_id: attempt.teacher_id,
-					attempt_id: attempt.id
-				} )
-			}
-			const updatedQueue = await refreshQueue()
-			if (
-				getTeacherStudent( updatedQueue, teacherId )?.attempt_id === attempt.id
-			) {
-				callKey.current = null
-			}
+			// call-next сам назначает преподавателя и устанавливает статус called.
+			await callNextStudent( queue.id, callKey.current )
+			const freshQueue = await getQueueById( queue.id )
+			await queryClient.cancelQueries( { queryKey, exact: true } )
+			queryClient.setQueryData( queryKey, freshQueue )
+			callKey.current = null
 		} )
 	const startDefence = () =>
 		runAction( async () => {
@@ -253,34 +197,84 @@ export const TeacherWorkplace = ( {
 		setMessage( undefined )
 		callKey.current = null
 	}
+	const markAbsent = () =>
+		runAction( async () => {
+			if (
+				! student?.attempt_id ||
+				absentAttemptId !== student.attempt_id ||
+				status !== UIWorkPlaceStatus.CALLING
+			) return
+			await evaluateStudent( queue.id, student.student_id, {
+				attempt_id: student.attempt_id,
+				status: 'absent',
+				results: []
+			} )
+			setAbsentAttemptId( null )
+			setDraft( { scores: {}, saveStatus: 'idle' } )
+			callKey.current = null
+			// Сервер возвращает запись в ожидание и переносит её в конец очереди.
+			await Promise.all( [
+				refreshQueue(),
+				queryClient.invalidateQueries( {
+					queryKey: [ ...queryKey, 'history' ]
+				} )
+			] )
+		} )
 
 	return (
-		<UIWorkPlace
-			Name={ name }
-			CurentStudent={ student ? toStudentRecord( student ) : undefined }
-			otherWorkplaces={ getOtherWorkplaces( queue, teacherId ) }
-			status={ status }
-			saveStatus={ saveStatus }
-			isPending={ isPending }
-			message={ message }
-			scores={ scores }
-			onScoreChange={ ( workId, value ) => {
-				if ( isPending || savedStudent ) return
-				setDraft( previous => ( {
-					attemptId: student?.attempt_id,
-					scores: {
-						...( previous.attemptId === student?.attempt_id
-							? previous.scores
-							: {} ),
-						[ workId ]: value
-					},
-					saveStatus: 'idle'
-				} ) )
-			} }
-			CallNext={ callNext }
-			StartDefence={ startDefence }
-			SaveResult={ saveResults }
-			FinishDefence={ finishDefence }
-		/>
+		<>
+			<UIWorkPlace
+				Name={ name }
+				CurentStudent={ student ? toStudentRecord( student ) : undefined }
+				otherWorkplaces={ getOtherWorkplaces( queue, teacherId ) }
+				status={ status }
+				saveStatus={ saveStatus }
+				isPending={ isPending }
+				message={ message }
+				scores={ scores }
+				onScoreChange={ ( workId, value ) => {
+					if ( isPending || savedStudent ) return
+					setDraft( previous => ( {
+						attemptId: student?.attempt_id,
+						scores: {
+							...( previous.attemptId === student?.attempt_id
+								? previous.scores
+								: {} ),
+							[ workId ]: value
+						},
+						saveStatus: 'idle'
+					} ) )
+				} }
+				CallNext={ callNext }
+				StartDefence={ startDefence }
+				OpenAbsent={ () => {
+					if (
+						! actionLock.current &&
+						status === UIWorkPlaceStatus.CALLING &&
+						student?.attempt_id
+					) {
+						setMessage( undefined )
+						setAbsentAttemptId( student.attempt_id )
+					}
+				} }
+				SaveResult={ saveResults }
+				FinishDefence={ finishDefence }
+			/>
+			{ status === UIWorkPlaceStatus.CALLING &&
+				student &&
+				absentAttemptId !== null &&
+				absentAttemptId === student.attempt_id && (
+					<DialogAbsent
+						name={ student.student_name }
+						works={ student.works.map( work => work.title ) }
+						MarkAbsent={ markAbsent }
+						isPending={ isPending }
+						message={ message }
+						cancel={ () => {
+							if ( ! actionLock.current ) setAbsentAttemptId( null )
+						} }
+					/>
+				) }
+		</>
 	)
 }

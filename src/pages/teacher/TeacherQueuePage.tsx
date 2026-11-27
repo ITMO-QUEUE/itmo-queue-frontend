@@ -1,9 +1,19 @@
-import { skipToken, useQuery } from '@tanstack/react-query'
+import {
+	skipToken,
+	useMutation,
+	useQuery,
+	useQueryClient
+} from '@tanstack/react-query'
 import { isAxiosError } from 'axios'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router'
-import { getQueueById } from '../../app/api/queues/queues.api'
+import {
+	activateQueueSession,
+	getQueueById
+} from '../../app/api/queues/queues.api'
 import type { QueueDetail } from '../../app/api/queues/queues.api.d'
+import { createQueueEventSource } from '../../app/api/system/system.api'
+import type { QueueStreamEventType } from '../../app/api/system/system.api.d'
 import { Page } from '../../components/common/Page.tsx'
 import { QueueRows } from '../../components/common/QueueRows'
 import { QueueStatus } from '../../components/common/QueueStatus'
@@ -18,6 +28,7 @@ import type {
 	fullQueue,
 	QueueChanges
 } from '../../features/queue-teacher/types/queue'
+import { getQueueErrorMessage } from '../../features/queue-teacher/utils/queueError'
 import { useAuthStore } from '../../stores/useAuthStore'
 import {
 	ParticipantStatus,
@@ -25,6 +36,13 @@ import {
 } from '../../types/StudentRecord'
 
 type QueueTab = 'queue' | 'settings' | 'history'
+
+const queueEvents: QueueStreamEventType[] = [
+	'snapshot',
+	'queue.updated',
+	'participant.status_changed',
+	'queue.status_changed'
+]
 
 const queueStatuses = {
 	preliminary: QueueStatusEnum.PREREGISTRATION,
@@ -86,6 +104,7 @@ const timeFormatter = new Intl.DateTimeFormat( 'ru-RU', {
 } )
 
 export const TeacherQueuePage = () => {
+	const queryClient = useQueryClient()
 	const currentUser = useAuthStore( state => state.user )
 	const [ activeTab, setActiveTab ] = useState< QueueTab >( 'queue' )
 	const [ queueStates, setQueueStates ] = useState<
@@ -103,6 +122,34 @@ export const TeacherQueuePage = () => {
 		queryKey: [ 'queue', queueId ],
 		queryFn: queueId ? () => getQueueById( queueId ) : skipToken
 	} )
+	const activation = useMutation( {
+		mutationFn: activateQueueSession,
+		onSuccess: async ( session, activatedQueueId ) => {
+			const queryKey = [ 'queue', activatedQueueId ]
+			await queryClient.cancelQueries( { queryKey, exact: true } )
+			queryClient.setQueryData< QueueDetail >( queryKey, previous =>
+				previous ? { ...previous, ...session } : previous
+			)
+			setQueueStates( previous => {
+				const {
+					status: _status,
+					isRegistrationOpen: _isRegistrationOpen,
+					...changes
+				} = previous[ activatedQueueId ] ?? {}
+				return { ...previous, [ activatedQueueId ]: changes }
+			} )
+			await queryClient.invalidateQueries( { queryKey, exact: true } )
+		}
+	} )
+	useEffect( () => {
+		if ( ! queueId ) return
+		const events = createQueueEventSource( queueId )
+		const refresh = () => {
+			void refetch()
+		}
+		for ( const event of queueEvents ) events.addEventListener( event, refresh )
+		return () => events.close()
+	}, [ queueId, refetch ] )
 	const initialQueue = queueDetail ? toPageQueue( queueDetail ) : undefined
 	const queue = initialQueue
 		? { ...initialQueue, ...queueStates[ initialQueue.id ] }
@@ -273,12 +320,8 @@ export const TeacherQueuePage = () => {
 									tone={ UIButtonTone.PRIMARY }
 									fullWidth
 									disabled={ isCompleted }
-									onClick={ () =>
-										updateQueueState( {
-											status: QueueStatusEnum.ACTIVE,
-											isRegistrationOpen: false
-										} )
-									}
+									loading={ activation.isPending }
+									onClick={ () => activation.mutate( queue.id ) }
 								/>
 							</div>
 						) }
@@ -299,6 +342,13 @@ export const TeacherQueuePage = () => {
 							</div>
 						) }
 					</div>
+					{ activation.isError && activation.variables === queue.id && (
+						<UIAlert
+							tone={ UIAlertTone.ERROR }
+							title='Не удалось начать активную защиту'
+							message={ getQueueErrorMessage( activation.error ) }
+						/>
+					) }
 					{ isPreregistration && (
 						<UIAlert
 							tone={ UIAlertTone.INFO }
