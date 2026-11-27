@@ -3,13 +3,10 @@ import {
 	QueueStatus,
 	UIQueueStatus
 } from '../../../components/ui/UIQueueStatus'
-import type {
-	QueueWork,
-	TeacherQueue as TeacherQueueType
-} from '../../queue-student/types/queue'
+import type { TeacherQueue as TeacherQueueType } from '../../queue-student/types/queue'
 
 export interface TeacherQueueProps {
-	teacherQueue: TeacherQueueType & { works: QueueWork[] }
+	teacherQueue: TeacherQueueType & { workTitles: string[] }
 	isNearest?: boolean
 	onOpenQueue: () => void
 }
@@ -53,8 +50,9 @@ export const TeacherQueue = ( {
 							: 'Следующая защита' }
 				</p>
 				<h2 className='text-subheading font-bold'>
-					{ queue.subject } ·{ ' ' }
-					{ queue.works.map( work => `ЛР № ${ work.number }` ).join( ', ' ) }
+					{ queue.subject }
+					{ queue.workTitles.length > 0 &&
+						` · ${ queue.workTitles.join( ', ' ) }` }
 				</h2>
 				<p className='text-body'>
 					{ queue.status === QueueStatus.PREREGISTRATION

@@ -1323,8 +1323,8 @@ export interface components {
 			disciplines: components[ 'schemas' ][ 'Option' ][]
 			/** Teachers */
 			teachers: components[ 'schemas' ][ 'TeacherOption' ][]
-			/** Works */
-			works: components[ 'schemas' ][ 'WorkOption' ][]
+			/** Stream Id */
+			stream_id: string | null
 		}
 		/** SessionRead */
 		SessionRead: {
