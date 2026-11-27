@@ -25,7 +25,7 @@ const noop = () => {
 	// Поля только для чтения не изменяют черновик.
 }
 const iconButtonClasses =
-	'flex h-11 min-w-0 items-center justify-center rounded-control cursor-pointer hover:bg-action-subtle-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-border-focus'
+	'flex h-11 min-w-0 items-center justify-center rounded-control cursor-pointer enabled:hover:bg-action-subtle-hover disabled:cursor-not-allowed disabled:opacity-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-border-focus'
 
 const QueueWorkRow = ( {
 	title,
@@ -58,6 +58,7 @@ const QueueWorkRow = ( {
 					placeholder='Введите название работы'
 					onChange={ onTitleChange }
 					readOnly={ ! isNew || ! isEditing || disabled }
+					disabled={ disabled }
 				/>
 			</div>
 			<div
@@ -70,6 +71,7 @@ const QueueWorkRow = ( {
 					value={ priority }
 					onChange={ onPriorityChange }
 					readOnly={ ! isEditing || disabled }
+					disabled={ disabled }
 				/>
 			</div>
 			<button
@@ -109,10 +111,12 @@ const QueueWorkRow = ( {
 
 export const QueueSettings = ( {
 	queue,
+	isCompleted = false,
 	settingsDraft,
 	onDraftChange
 }: {
 	queue: QueueDetail
+	isCompleted?: boolean
 	settingsDraft: QueueSettingsDraft
 	onDraftChange: ( draft: QueueSettingsDraft ) => void
 } ) => {
@@ -182,7 +186,7 @@ export const QueueSettings = ( {
 			] )
 		}
 	} )
-	const disabled = queue.stage === 'finished' || save.isPending
+	const disabled = isCompleted || queue.stage === 'finished' || save.isPending
 	const saveChanges = () => {
 		if ( disabled ) return
 		setValidationError( '' )

@@ -9,6 +9,7 @@ import { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router'
 import {
 	activateQueueSession,
+	finishQueueSession,
 	getQueueById,
 	setQueueRegistration
 } from '../../app/api/queues/queues.api'
@@ -22,15 +23,14 @@ import { UIAlert, UIAlertTone } from '../../components/ui/UIAlert'
 import { UIButton, UIButtonTone } from '../../components/ui/UIButton.tsx'
 import { QueueStatus as QueueStatusEnum } from '../../components/ui/UIQueueStatus'
 import { UITab } from '../../components/ui/UITab'
+import { EmptyQueue } from '../../features/queue-teacher/components/EmptyQueue'
+import { FinishQueueDialog } from '../../features/queue-teacher/components/FinishQueueDialog'
 import { QueueBans } from '../../features/queue-teacher/components/QueueBans'
 import { QueueHistory } from '../../features/queue-teacher/components/QueueHistory'
-import { QueueSettings } from '../../features/queue-teacher/components/QueueSettings'
 import { QueueParticipantDialog } from '../../features/queue-teacher/components/QueueParticipantDialog'
+import { QueueSettings } from '../../features/queue-teacher/components/QueueSettings'
 import { TeacherWorkplace } from '../../features/queue-teacher/components/TeacherWorkplace'
-import type {
-	fullQueue,
-	QueueChanges
-} from '../../features/queue-teacher/types/queue'
+import type { fullQueue } from '../../features/queue-teacher/types/queue'
 import { getQueueErrorMessage } from '../../features/queue-teacher/utils/queueError'
 import {
 	createQueueSettingsDraft,
@@ -114,13 +114,13 @@ export const TeacherQueuePage = () => {
 	const queryClient = useQueryClient()
 	const currentUser = useAuthStore( state => state.user )
 	const [ activeTab, setActiveTab ] = useState< QueueTab >( 'queue' )
-	const [ managedRecord, setManagedRecord ] = useState< StudentRecord | null >( null )
+	const [ managedRecord, setManagedRecord ] = useState< StudentRecord | null >(
+		null
+	)
 	const [ settingsDrafts, setSettingsDrafts ] = useState<
 		Record< string, QueueSettingsDraft >
 	>( {} )
-	const [ queueStates, setQueueStates ] = useState<
-		Record< string, QueueChanges >
-	>( {} )
+	const [ finishing, setFinishing ] = useState( false )
 	const navigate = useNavigate()
 	const { queueId } = useParams< { queueId: string } >()
 	const {
@@ -141,14 +141,7 @@ export const TeacherQueuePage = () => {
 			queryClient.setQueryData< QueueDetail >( queryKey, previous =>
 				previous ? { ...previous, ...session } : previous
 			)
-			setQueueStates( previous => {
-				const {
-					status: _status,
-					isRegistrationOpen: _isRegistrationOpen,
-					...changes
-				} = previous[ activatedQueueId ] ?? {}
-				return { ...previous, [ activatedQueueId ]: changes }
-			} )
+
 			await queryClient.invalidateQueries( { queryKey, exact: true } )
 		}
 	} )
@@ -163,12 +156,26 @@ export const TeacherQueuePage = () => {
 					? { ...previous, registration_open: session.registration_open }
 					: previous
 			)
-			setQueueStates( previous => {
-				const { isRegistrationOpen: _isRegistrationOpen, ...changes } =
-					previous[ queueId ] ?? {}
-				return { ...previous, [ queueId ]: changes }
-			} )
+
 			await queryClient.invalidateQueries( { queryKey, exact: true } )
+		}
+	} )
+	const finish = useMutation( {
+		mutationFn: ( { id, reason }: { id: string; reason?: string } ) =>
+			finishQueueSession( id, reason ),
+		onSuccess: async ( session, { id } ) => {
+			const queryKey = [ 'queue', id ]
+			await queryClient.cancelQueries( { queryKey, exact: true } )
+			queryClient.setQueryData< QueueDetail >( queryKey, previous =>
+				previous ? { ...previous, ...session } : previous
+			)
+			setFinishing( false )
+			await Promise.all( [
+				queryClient.invalidateQueries( { queryKey } ),
+				queryClient.invalidateQueries( {
+					queryKey: [ 'teacher', 'my-queues' ]
+				} )
+			] )
 		}
 	} )
 	useEffect( () => {
@@ -176,15 +183,15 @@ export const TeacherQueuePage = () => {
 		const events = createQueueEventSource( queueId )
 		const refresh = () => {
 			void refetch()
-			void queryClient.invalidateQueries( { queryKey: [ 'queue', queueId, 'bans' ], exact: true } )
+			void queryClient.invalidateQueries( {
+				queryKey: [ 'queue', queueId, 'bans' ],
+				exact: true
+			} )
 		}
 		for ( const event of queueEvents ) events.addEventListener( event, refresh )
 		return () => events.close()
 	}, [ queueId, refetch, queryClient ] )
-	const initialQueue = queueDetail ? toPageQueue( queueDetail ) : undefined
-	const queue = initialQueue
-		? { ...initialQueue, ...queueStates[ initialQueue.id ] }
-		: undefined
+	const queue = queueDetail ? toPageQueue( queueDetail ) : undefined
 
 	if ( isLoading ) {
 		return (
@@ -233,15 +240,6 @@ export const TeacherQueuePage = () => {
 			ParticipantStatus.IN_DEFENSE
 		].includes( record.status )
 	)
-	const updateQueueState = ( changes: QueueChanges ) => {
-		setQueueStates( previous => ( {
-			...previous,
-			[ queue.id ]: {
-				...previous[ queue.id ],
-				...changes
-			}
-		} ) )
-	}
 
 	return (
 		<div className='flex min-h-full w-full flex-col gap-8 bg-bg-page p-content'>
@@ -323,10 +321,15 @@ export const TeacherQueuePage = () => {
 								tone={ UIButtonTone.SECONDARY }
 								fullWidth
 								disabled={
-									isCompleted || queue.isRegistrationOpen ||
-									registration.isPending || activation.isPending
+									isCompleted ||
+									queue.isRegistrationOpen ||
+									registration.isPending ||
+									activation.isPending
 								}
-								loading={ registration.isPending && registration.variables?.open === true }
+								loading={
+									registration.isPending &&
+									registration.variables?.open === true
+								}
 								onClick={ () =>
 									registration.mutate( { queueId: queue.id, open: true } )
 								}
@@ -338,10 +341,15 @@ export const TeacherQueuePage = () => {
 								tone={ UIButtonTone.SECONDARY }
 								fullWidth
 								disabled={
-									isCompleted || ! queue.isRegistrationOpen ||
-									registration.isPending || activation.isPending
+									isCompleted ||
+									! queue.isRegistrationOpen ||
+									registration.isPending ||
+									activation.isPending
 								}
-								loading={ registration.isPending && registration.variables?.open === false }
+								loading={
+									registration.isPending &&
+									registration.variables?.open === false
+								}
 								onClick={ () =>
 									registration.mutate( { queueId: queue.id, open: false } )
 								}
@@ -366,25 +374,27 @@ export const TeacherQueuePage = () => {
 									tone={ UIButtonTone.DANGER }
 									fullWidth
 									disabled={ isCompleted || registration.isPending }
-									onClick={ () =>
-										updateQueueState( {
-											status: QueueStatusEnum.COMPLETED,
-											isRegistrationOpen: false
-										} )
-									}
+									loading={ finish.isPending }
+									onClick={ () => {
+										finish.reset()
+										setFinishing( true )
+									} }
 								/>
 							</div>
 						) }
 					</div>
-					{ registration.isError && registration.variables?.queueId === queue.id && (
-						<UIAlert
-							tone={ UIAlertTone.ERROR }
-							title={ registration.variables.open
-								? 'Не удалось открыть запись'
-								: 'Не удалось закрыть запись' }
-							message={ getQueueErrorMessage( registration.error ) }
-						/>
-					) }
+					{ registration.isError &&
+						registration.variables?.queueId === queue.id && (
+							<UIAlert
+								tone={ UIAlertTone.ERROR }
+								title={
+									registration.variables.open
+										? 'Не удалось открыть запись'
+										: 'Не удалось закрыть запись'
+								}
+								message={ getQueueErrorMessage( registration.error ) }
+							/>
+						) }
 					{ activation.isError && activation.variables === queue.id && (
 						<UIAlert
 							tone={ UIAlertTone.ERROR }
@@ -407,24 +417,23 @@ export const TeacherQueuePage = () => {
 							name={ currentUser?.name }
 						/>
 					) }
-					<section
-						className='flex min-w-0 flex-col gap-4 rounded-card border border-border-subtle bg-bg-surface p-6'
-						aria-labelledby='queue-participants-title'
-					>
-						<h2
-							id='queue-participants-title'
-							className='text-section text-text-primary'
+					{ activeRecords.length === 0 ? (
+						<EmptyQueue />
+					) : (
+						<section
+							className='flex min-w-0 flex-col gap-4 rounded-card border border-border-subtle bg-bg-surface p-6'
+							aria-labelledby='queue-participants-title'
 						>
-							Участники очереди
-						</h2>
-						<p className='text-small text-text-secondary'>
-							Одна работа — одно место. Сначала приоритет 1, затем приоритет 2.
-						</p>
-						{ activeRecords.length === 0 ? (
-							<p className='text-body text-text-secondary'>
-								В очереди пока нет участников.
+							<h2
+								id='queue-participants-title'
+								className='text-section text-text-primary'
+							>
+								Участники очереди
+							</h2>
+							<p className='text-small text-text-secondary'>
+								Одна работа — одно место. Сначала приоритет 1, затем приоритет
+								2.
 							</p>
-						) : (
 							<div className='overflow-x-auto'>
 								<div className='min-w-[900px]'>
 									<QueueRows
@@ -434,8 +443,8 @@ export const TeacherQueuePage = () => {
 									/>
 								</div>
 							</div>
-						) }
-					</section>
+						</section>
+					) }
 					<section
 						className='flex min-w-0 flex-col gap-4 rounded-card border border-border-subtle bg-bg-surface p-6'
 						aria-labelledby='queue-deleted-records-title'
@@ -446,31 +455,58 @@ export const TeacherQueuePage = () => {
 						>
 							Удалённые записи
 						</h2>
-						<QueueBans key={ queue.id } queueId={ queue.id } />
+						<QueueBans
+							key={ queue.id }
+							queueId={ queue.id }
+						/>
 					</section>
 				</div>
+			) }
+			{ finishing && ! isCompleted && (
+				<FinishQueueDialog
+					hasParticipants={ activeRecords.length > 0 }
+					pending={ finish.isPending }
+					error={
+						finish.isError ? getQueueErrorMessage( finish.error ) : undefined
+					}
+					onCancel={ () => setFinishing( false ) }
+					onFinish={ reason => {
+						if ( ! finish.isPending ) finish.mutate( { id: queue.id, reason } )
+					} }
+				/>
 			) }
 			{ activeTab === 'settings' && (
 				<QueueSettings
 					key={ queue.id }
 					queue={ queueDetail }
+					isCompleted={ isCompleted }
 					settingsDraft={
-						settingsDrafts[ queue.id ] ?? createQueueSettingsDraft( queueDetail )
+						settingsDrafts[ queue.id ] ??
+						createQueueSettingsDraft( queueDetail )
 					}
 					onDraftChange={ draft =>
-						setSettingsDrafts( current => ( { ...current, [ queue.id ]: draft } ) )
+						setSettingsDrafts( current => ( {
+							...current,
+							[ queue.id ]: draft
+						} ) )
 					}
 				/>
 			) }
-			{ managedRecord && managedRecord.queue_id === queue.id && ! isCompleted && (
-				<QueueParticipantDialog
-					key={ managedRecord.id }
-					record={ activeRecords.find( record => record.id === managedRecord.id ) ?? managedRecord }
-					canCall={ isActive }
-					onClose={ () => setManagedRecord( null ) }
-				/>
-			) }
-			{ ( activeTab === 'history' || isCompleted ) && (
+			{ managedRecord &&
+				managedRecord.queue_id === queue.id &&
+				! isCompleted && (
+					<QueueParticipantDialog
+						key={ managedRecord.id }
+						record={
+							activeRecords.find( record => record.id === managedRecord.id ) ??
+							managedRecord
+						}
+						canCall={ isActive }
+						onClose={ () => setManagedRecord( null ) }
+					/>
+				) }
+			{ ( activeTab === 'history' ||
+				( activeTab === 'queue' && isCompleted ) ) && (
 				<div className='flex min-w-0 flex-row gap-4'>
 					<section
 						className='flex min-w-0 flex-1 flex-col gap-4 rounded-card border border-border-subtle bg-bg-surface p-6'

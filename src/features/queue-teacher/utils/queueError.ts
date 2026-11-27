@@ -1,6 +1,12 @@
 import { isAxiosError } from 'axios'
 
 const queueErrorMessages: Record< string, string > = {
+	'Complete the current attempts first':
+		'Сначала завершите текущие попытки защиты у всех преподавателей.',
+	'Only active sessions can be finished':
+		'Завершить можно только сеанс активной защиты.',
+	'A cancellation reason is required for remaining entries':
+		'Укажите причину отмены оставшихся записей.',
 	'Start the session before calling students':
 		'Сначала начните активную защиту, затем вызывайте студентов.',
 	'Finish your current attempt first':
