@@ -108,9 +108,11 @@ export const TeacherQueuesPage = () => {
 	const { data: works } = useQuery( {
 		queryKey: [ 'teacher', 'works' ],
 		queryFn: getAllWorks,
-		enabled: ! queueId && !! data?.pages.some( page =>
-			page.some( queue => queue.works.length > 0 )
-		)
+		enabled:
+			! queueId &&
+			!! data?.pages.some( page =>
+				page.some( queue => queue.works.length > 0 )
+			)
 	} )
 	const workTitles = new Map(
 		works?.map( work => [ work.id, work.title ] as const )

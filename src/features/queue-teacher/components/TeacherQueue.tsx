@@ -29,10 +29,11 @@ const timeFormatter = new Intl.DateTimeFormat( 'ru-RU', {
 
 const formatWorkTitles = ( titles: ( string | undefined )[] ) => {
 	if ( ! titles.length ) return ''
-	if ( titles.every( title => ! title ) ) return `Работ в очереди: ${ titles.length }`
+	if ( titles.every( title => ! title ) )
+		return `Работ в очереди: ${ titles.length }`
 
-	const numbers = titles.map( title =>
-		title?.match( /^(?:ЛР|Лабораторная работа)\s*№\s*(\d+)$/i )?.[ 1 ]
+	const numbers = titles.map(
+		title => title?.match( /^(?:ЛР|Лабораторная работа)\s*№\s*(\d+)$/i )?.[ 1 ]
 	)
 	if ( numbers.every( number => number !== undefined ) ) {
 		return `ЛР ${ numbers.map( number => `№ ${ number }` ).join( ', ' ) }`
@@ -63,9 +64,7 @@ export const TeacherQueue = ( {
 							? 'Ближайшая защита'
 							: 'Следующая защита' }
 				</p>
-				<h2 className='text-subheading font-bold'>
-					{ queue.subject }
-				</h2>
+				<h2 className='text-subheading font-bold'>{ queue.subject }</h2>
 				{ workLabel && <p className='text-label font-bold'>{ workLabel }</p> }
 				<p className='text-body'>
 					{ queue.status === QueueStatus.PREREGISTRATION

@@ -183,6 +183,8 @@ export const TeacherQueuePage = () => {
 		)
 	}
 
+	const isPreregistration = queue.status === QueueStatusEnum.PREREGISTRATION
+	const isActive = queue.status === QueueStatusEnum.ACTIVE
 	const isCompleted = queue.status === QueueStatusEnum.COMPLETED
 	const activeRecords = queue.studentRecords.filter( record =>
 		[
@@ -302,20 +304,38 @@ export const TeacherQueuePage = () => {
 								}
 							/>
 						</div>
-						<div className='w-[240px] shrink-0'>
-							<UIButton
-								label='Завершить сеанс'
-								tone={ UIButtonTone.DANGER }
-								fullWidth
-								disabled={ isCompleted }
-								onClick={ () =>
-									updateQueueState( {
-										status: QueueStatusEnum.COMPLETED,
-										isRegistrationOpen: false
-									} )
-								}
-							/>
-						</div>
+						{ isPreregistration && (
+							<div className='w-[240px] shrink-0'>
+								<UIButton
+									label='Начать активную защиту'
+									tone={ UIButtonTone.PRIMARY }
+									fullWidth
+									disabled={ isCompleted }
+									onClick={ () =>
+										updateQueueState( {
+											status: QueueStatusEnum.ACTIVE,
+											isRegistrationOpen: false
+										} )
+									}
+								/>
+							</div>
+						) }
+						{ isActive && (
+							<div className='w-[240px] shrink-0'>
+								<UIButton
+									label='Завершить сеанс'
+									tone={ UIButtonTone.DANGER }
+									fullWidth
+									disabled={ isCompleted }
+									onClick={ () =>
+										updateQueueState( {
+											status: QueueStatusEnum.COMPLETED,
+											isRegistrationOpen: false
+										} )
+									}
+								/>
+							</div>
+						) }
 					</div>
 					<TeacherWorkplace
 						key={ queue.id }
