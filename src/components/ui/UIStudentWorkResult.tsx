@@ -1,4 +1,5 @@
 export type UIStudentWorkResultProps = {
+	StudentName?: string
 	WorkName: string
 	Subject: string
 	date: string
@@ -11,6 +12,7 @@ export type UIStudentWorkResultProps = {
 }
 
 export const UIStudentWorkResult = ( {
+	StudentName,
 	WorkName,
 	Subject,
 	date,
@@ -21,11 +23,12 @@ export const UIStudentWorkResult = ( {
 	result,
 	OnClick
 }: UIStudentWorkResultProps ) => (
-	<article className='flex items-center justify-between gap-4 rounded-control border border-border-subtle bg-bg-surface p-4 font-nunito'>
-		<div className='min-w-0 wrap-break-word text-small text-text-secondary'>
+	<article className='flex flex-col gap-4 rounded-control border border-border-subtle bg-bg-surface p-4 font-nunito sm:flex-row sm:items-center sm:justify-between'>
+		<div className='min-w-0 break-words text-small text-text-secondary'>
 			<h3 className='mb-1 text-label text-text-primary'>
-				{ WorkName } · { Subject }
+				{ StudentName ? `${ StudentName } · ${ WorkName }` : WorkName }
 			</h3>
+			<p>{ Subject }</p>
 			<p>
 				{ date } · { startTime }–{ endTime }
 			</p>
@@ -41,7 +44,7 @@ export const UIStudentWorkResult = ( {
 		</div>
 		{ result && (
 			<p
-				className={ `shrink-0 text-subheading ${
+				className={ `shrink-0 self-end text-right text-subheading sm:self-auto ${
 					result === 'Принято'
 						? 'text-status-success'
 						: result === 'Неявка'

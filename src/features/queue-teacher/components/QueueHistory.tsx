@@ -9,6 +9,14 @@ import type {
 } from '../../../types/HistoryAttempt'
 
 const PAGE_SIZE = 50
+// Максимумы передаются отдельно: текущий API истории их не возвращает.
+type MaxScoresByWorkId = Readonly< Record< string, number | null | undefined > >
+
+type QueueHistoryProps = {
+	queueId: string
+	maxScoresByWorkId?: MaxScoresByWorkId
+}
+
 const statusLabels: Record< AttemptStatus, string > = {
 	called: 'Вызван',
 	in_progress: 'На защите',
@@ -26,14 +34,28 @@ const timeFormatter = new Intl.DateTimeFormat( 'ru-RU', {
 	minute: '2-digit'
 } )
 
-const formatResult = ( status: AttemptStatus, result?: HistoryWorkResult ) => {
+const formatResult = (
+	status: AttemptStatus,
+	result?: HistoryWorkResult,
+	maxScore?: number | null
+) => {
 	if ( status === 'no_show' ) return statusLabels.no_show
 	if ( ! result ) return statusLabels[ status ]
 	if ( result.kind === 'accepted' ) return 'Принято'
-	return result.score?.replace( '.', ',' ) ?? 'Оценка не указана'
+	if ( result.score == null ) return 'Оценка не указана'
+	const score = result.score.replace( '.', ',' )
+	return maxScore != null && Number.isFinite( maxScore ) && maxScore >= 0
+		? `${ score } / ${ String( maxScore ).replace( '.', ',' ) }`
+		: score
 }
 
-const HistoryAttemptRow = ( { attempt }: { attempt: HistoryAttempt } ) => {
+const HistoryAttemptRow = ( {
+	attempt,
+	maxScoresByWorkId
+}: {
+	attempt: HistoryAttempt
+	maxScoresByWorkId?: MaxScoresByWorkId
+} ) => {
 	const startedAt = new Date( attempt.started_at ?? attempt.called_at )
 	const date = dateFormatter.format( startedAt )
 	const startTime = timeFormatter.format( startedAt )
@@ -48,18 +70,22 @@ const HistoryAttemptRow = ( { attempt }: { attempt: HistoryAttempt } ) => {
 	)
 
 	return (
-		<li className='flex min-w-0 flex-col gap-2'>
-			<p className='text-label text-text-primary'>{ attempt.student_name }</p>
+		<li className='flex min-w-0 flex-col gap-4'>
 			{ ( workIds.length ? workIds : [ null ] ).map( workId => {
 				const work = attempt.works.find( item => item.work_id === workId )
 				const workResult = attempt.results.find(
 					item => item.work_id === workId
 				)
 				const workName = work?.title ?? 'Работа не указана'
-				const result = formatResult( attempt.status, workResult )
+				const result = formatResult(
+					attempt.status,
+					workResult,
+					workId ? maxScoresByWorkId?.[ workId ] : undefined
+				)
 				return (
 					<UIStudentWorkResult
 						key={ workId ?? attempt.id }
+						StudentName={ attempt.student_name }
 						WorkName={ workName }
 						Subject={ attempt.discipline_name }
 						date={ date }
@@ -92,7 +118,10 @@ const HistoryAttemptRow = ( { attempt }: { attempt: HistoryAttempt } ) => {
 	)
 }
 
-export const QueueHistory = ( { queueId }: { queueId: string } ) => {
+export const QueueHistory = ( {
+	queueId,
+	maxScoresByWorkId
+}: QueueHistoryProps ) => {
 	const {
 		data,
 		isPending,
@@ -147,6 +176,7 @@ export const QueueHistory = ( { queueId }: { queueId: string } ) => {
 						<HistoryAttemptRow
 							key={ attempt.id }
 							attempt={ attempt }
+							maxScoresByWorkId={ maxScoresByWorkId }
 						/>
 					) ) }
 				</ul>
