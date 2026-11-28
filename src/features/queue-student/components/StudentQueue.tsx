@@ -12,6 +12,7 @@ const timeFormat = new Intl.DateTimeFormat( 'ru-RU', {
 	hour: '2-digit',
 	minute: '2-digit'
 } )
+const LAB_PREFIX = /^Лабораторная работа №\s*/iu
 const stages = {
 	preliminary: 'Предварительная запись',
 	active: 'Активная защита',
@@ -38,11 +39,12 @@ export const StudentQueue = ( { queue }: { queue: QueueDetail } ) => {
 	const total = queue.students.filter(
 		person => person.position !== null
 	).length
-	const metaTone = isNow ? 'text-text-inverse/85' : 'text-text-secondary'
+	const metaTone = isNow ? 'text-text-inverse' : 'text-text-secondary'
+	const wait = isNow ? 0 : queue.estimated_wait_minutes
 
 	return (
 		<article
-			className={ `flex flex-col gap-3 rounded-card border-l-4 border-action-primary p-6 ${ isNow ? 'bg-action-primary text-text-inverse' : 'bg-bg-surface text-text-primary' }` }
+			className={ `flex flex-col gap-3 rounded-card border-l-4 p-6 ${ isNow ? 'border-transparent bg-action-primary text-text-inverse' : 'border-action-primary bg-bg-surface text-text-primary' }` }
 		>
 			<div className='flex flex-wrap items-center justify-between gap-2 text-label'>
 				<span>
@@ -85,7 +87,8 @@ export const StudentQueue = ( { queue }: { queue: QueueDetail } ) => {
 					className='text-label'
 					key={ work.work_id }
 				>
-					{ work.title } · приоритет { work.priority }
+					{ work.title.replace( LAB_PREFIX, 'ЛР № ' ) } · приоритет{ ' ' }
+					{ work.priority }
 				</p>
 			) ) }
 			{ isNow && teacher && (
@@ -98,7 +101,8 @@ export const StudentQueue = ( { queue }: { queue: QueueDetail } ) => {
 					{ entry.is_reserve ? 'Резерв · место ' : 'Место ' }
 					{ entry.position }
 					{ total >= entry.position && ` из ${ total }` }
-					{ ! entry.is_reserve && ' · основная группа' }
+					{ ! entry.is_reserve &&
+						( entry.is_top3 ? ' · Топ-3' : ' · основная группа' ) }
 				</p>
 			) }
 			<div className={ `flex flex-col gap-1 text-small ${ metaTone }` }>
@@ -113,14 +117,12 @@ export const StudentQueue = ( { queue }: { queue: QueueDetail } ) => {
 				{ queue.avg_duration_min !== null && (
 					<p>Примерное время защиты — { queue.avg_duration_min } мин</p>
 				) }
-				{ queue.estimated_wait_minutes !== null && (
-					<p>Примерное время ожидания — { queue.estimated_wait_minutes } мин</p>
-				) }
+				{ wait !== null && <p>Примерное время ожидания — { wait } мин</p> }
 			</div>
 
-			<div className='flex flex-wrap items-start gap-2'>
+			<div className='mt-1 flex flex-wrap items-start gap-2'>
 				<div
-					className={ `w-full sm:w-56 ${ isNow ? '[&_button]:border-transparent' : '' }` }
+					className={ `w-full sm:w-56 ${ isNow ? '[&_button]:border-transparent [&_button:not(:hover)]:bg-bg-surface' : '' }` }
 				>
 					<UIButton
 						label='Открыть очередь'
@@ -144,9 +146,13 @@ export const StudentQueue = ( { queue }: { queue: QueueDetail } ) => {
 					После вызова отмена записи и перенос в конец недоступны.
 				</p>
 			) }
-			{ ! isNow && entry.is_top3 && (
+			{ ! isNow && (
 				<p className='text-caption text-text-secondary'>
-					В топ-3 отмена записи и перенос в конец недоступны.
+					{ entry.is_top3
+						? 'В топ-3 отмена записи и перенос в конец недоступны.'
+						: entry.works.length === 1
+							? 'Эта работа занимает отдельное место в очереди.'
+							: 'Выбранные работы объединены в одну запись.' }
 				</p>
 			) }
 		</article>

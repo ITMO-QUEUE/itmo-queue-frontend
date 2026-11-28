@@ -3,6 +3,7 @@ import { useState } from 'react'
 import { getAllWorks, getMyQueues } from '../../app/api/queues/queues.api'
 import type { QueueDetail } from '../../app/api/queues/queues.api.d'
 import { Page } from '../../components/common/Page'
+import { UIButton, UIButtonTone } from '../../components/ui/UIButton'
 import { UISelect } from '../../components/ui/UISelect'
 import {
 	isDefenseNow,
@@ -38,6 +39,19 @@ const getWorkNumbers = (
 	}
 	return numbers
 }
+
+const RetryWorkNumbers = ( { onRetry }: { onRetry: () => unknown } ) => (
+	<div>
+		<UIButton
+			label='Повторить загрузку номеров работ'
+			tone={ UIButtonTone.GHOST }
+			onClick={ () => {
+				void onRetry()
+			} }
+			compact
+		/>
+	</div>
+)
 
 const UpcomingQueues = ( { queues }: { queues: QueueDetail[] } ) => {
 	const [ discipline, setDiscipline ] = useState( ALL )
@@ -76,7 +90,7 @@ const UpcomingQueues = ( { queues }: { queues: QueueDetail[] } ) => {
 	)
 
 	return (
-		<section className='flex flex-col gap-4'>
+		<section className='flex flex-col gap-6'>
 			<h2 className='text-section'>Остальные записи</h2>
 			<div className='grid gap-4 sm:max-w-[44rem] sm:grid-cols-2'>
 				<UISelect
@@ -107,13 +121,15 @@ const UpcomingQueues = ( { queues }: { queues: QueueDetail[] } ) => {
 				/>
 			</div>
 			{ worksQuery.isError && (
-				<button
-					type='button'
-					className='self-start text-action-primary'
-					onClick={ () => worksQuery.refetch() }
+				<RetryWorkNumbers onRetry={ worksQuery.refetch } />
+			) }
+			{ visibleQueues.length === 0 && (
+				<p
+					role='status'
+					className='text-small text-text-secondary'
 				>
-					Не удалось загрузить номера работ. Повторить
-				</button>
+					По выбранным фильтрам записей нет.
+				</p>
 			) }
 			{ visibleQueues.map( queue => (
 				<StudentQueue
@@ -125,16 +141,31 @@ const UpcomingQueues = ( { queues }: { queues: QueueDetail[] } ) => {
 	)
 }
 
+const EmptyMyQueues = () => (
+	<section className='flex min-h-32 flex-col items-center justify-center gap-1 rounded-card border border-border-subtle bg-bg-surface px-6 py-8 text-center text-text-primary'>
+		<h2 className='text-section'>Вы пока не записаны</h2>
+		<p className='text-body'>
+			Найдите подходящую очередь и выберите работы для защиты.
+		</p>
+	</section>
+)
+
 export const StudentActiveQueuesPage = () => {
 	const userId = useAuthStore( state => state.user?.id )
 	const { data, isPending, isError, refetch } = useQuery( {
 		queryKey: [ ...myQueuesQueryKey, userId ],
 		queryFn: () => loadMyQueues(),
 		enabled: Boolean( userId ),
-		refetchOnMount: 'always'
+		refetchOnMount: 'always',
+		refetchInterval: 5000
 	} )
 	const queues = ( data ?? [] )
-		.filter( queue => queue.stage !== 'finished' && queue.my_entry )
+		.filter(
+			queue =>
+				queue.stage !== 'finished' &&
+				queue.my_entry &&
+				[ 'waiting', 'called', 'in_defense' ].includes( queue.my_entry.status )
+		)
 		.sort(
 			( first, second ) =>
 				new Date( first.planned_start ).getTime() -
@@ -144,41 +175,45 @@ export const StudentActiveQueuesPage = () => {
 	const upcoming = queues.filter( queue => ! isDefenseNow( queue ) )
 
 	return (
-		<Page
-			title='Мои записи'
-			subtitle='Все ваши текущие и предстоящие защиты'
-			sidebutton='find-queue'
-		>
-			{ isPending && <p>Загрузка записей…</p> }
-			{ isError && (
-				<button
-					type='button'
-					onClick={ () => refetch() }
-					className='self-start cursor-pointer text-action-primary'
-				>
-					Не удалось загрузить записи. Повторить
-				</button>
-			) }
-			{ ! isError && data && queues.length === 0 && (
-				<div className='flex flex-col items-center gap-3 rounded-card border border-border-subtle bg-bg-surface p-6 text-center'>
-					<p className='text-subheading'>Вы пока не записаны</p>
-					<p className='text-small text-text-secondary'>
-						Найдите подходящую очередь и выберите работы для защиты.
-					</p>
-				</div>
-			) }
-			{ current.length > 0 && (
-				<section className='flex flex-col gap-4'>
-					<h2 className='text-section'>Защита идёт сейчас</h2>
-					{ current.map( queue => (
-						<StudentQueue
-							key={ queue.id }
-							queue={ queue }
+		<div className='min-h-full text-text-primary'>
+			<Page
+				title='Мои записи'
+				subtitle='Все ваши текущие и предстоящие защиты'
+				sidebutton='find-queue'
+			>
+				{ ! userId && (
+					<p role='status'>Войдите как студент, чтобы увидеть свои записи.</p>
+				) }
+				{ userId && isPending && <p role='status'>Загрузка записей…</p> }
+				{ isError && (
+					<div role='alert'>
+						<p className='text-small text-status-danger'>
+							Не удалось загрузить записи.
+						</p>
+						<UIButton
+							label='Повторить'
+							tone={ UIButtonTone.SECONDARY }
+							compact
+							onClick={ () => {
+								void refetch()
+							} }
 						/>
-					) ) }
-				</section>
-			) }
-			{ upcoming.length > 0 && <UpcomingQueues queues={ upcoming } /> }
-		</Page>
+					</div>
+				) }
+				{ ! isError && data && queues.length === 0 && <EmptyMyQueues /> }
+				{ current.length > 0 && (
+					<section className='flex flex-col gap-4'>
+						<h2 className='text-section'>Защита идёт сейчас</h2>
+						{ current.map( queue => (
+							<StudentQueue
+								key={ queue.id }
+								queue={ queue }
+							/>
+						) ) }
+					</section>
+				) }
+				{ upcoming.length > 0 && <UpcomingQueues queues={ upcoming } /> }
+			</Page>
+		</div>
 	)
 }
