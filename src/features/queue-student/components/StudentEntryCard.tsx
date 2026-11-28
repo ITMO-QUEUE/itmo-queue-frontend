@@ -1,8 +1,22 @@
 import type { QueueDetail } from '../../../app/api/queues/queues.api.d'
+import { UIParticipantStatus } from '../../../components/ui/UIParticipantStatus'
+import { ParticipantStatus } from '../../../types/StudentRecord'
 import { CancelQueueEntry } from './CancelQueueEntry'
 import { EditQueueEntry } from './EditQueueEntry'
 import { MoveQueueEntry } from './MoveQueueEntry'
 import { ProposeQueueSwap } from './ProposeQueueSwap'
+
+const statusAppearance: Record<
+	QueueDetail[ 'students' ][ number ][ 'status' ],
+	ParticipantStatus
+> = {
+	waiting: ParticipantStatus.WAITING,
+	called: ParticipantStatus.CALLED,
+	in_defense: ParticipantStatus.IN_DEFENSE,
+	completed: ParticipantStatus.COMPLETED,
+	cancelled: ParticipantStatus.CANCELLED,
+	removed: ParticipantStatus.REMOVED
+}
 
 const statusLabels = {
 	waiting: 'Ожидает',
@@ -89,11 +103,10 @@ export const StudentEntryCard = ( { queue }: { queue: QueueDetail } ) => {
 			</h2>
 
 			<div className='flex flex-wrap items-center gap-4 text-label'>
-				<span
-					className={ `inline-flex min-h-9 w-52 max-w-full items-center justify-center rounded-control px-3 py-1 ${ entry.status === 'called' ? 'bg-status-warning-bg text-status-warning' : 'bg-bg-page text-text-secondary' }` }
-				>
-					{ statusLabels[ entry.status ] }
-				</span>
+				<UIParticipantStatus
+					status={ statusAppearance[ entry.status ] }
+					label={ statusLabels[ entry.status ] }
+				/>
 				{ entry.position !== null && (
 					<span className='text-action-primary'>
 						<span aria-hidden='true'>● </span>
