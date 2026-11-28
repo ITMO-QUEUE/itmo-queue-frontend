@@ -1,7 +1,11 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useId, useState } from 'react'
-import {enrollInQueue,getAllWorks} from '../../../app/api/queues/queues.api'
-import type {QueueDetail,WorkRead} from '../../../app/api/queues/queues.api.d'
+import { enrollInQueue, getAllWorks } from '../../../app/api/queues/queues.api'
+import type {
+	QueueDetail,
+	WorkRead
+} from '../../../app/api/queues/queues.api.d'
+import { UIAlert, UIAlertTone } from '../../../components/ui/UIAlert'
 import { StudentEntryCard } from './StudentEntryCard'
 
 interface EnrollmentProps {
@@ -18,11 +22,11 @@ interface WorkFieldsProps {
 	selected: boolean
 	url: string
 	disabled: boolean
-	onToggle: (checked: boolean) => void
-	onUrlChange: (value: string) => void
+	onToggle: ( checked: boolean ) => void
+	onUrlChange: ( value: string ) => void
 }
 
-export const WorkFields = ({
+export const WorkFields = ( {
 	work,
 	priority,
 	selected,
@@ -30,154 +34,204 @@ export const WorkFields = ({
 	disabled,
 	onToggle,
 	onUrlChange
-}: WorkFieldsProps) => {
+}: WorkFieldsProps ) => {
 	const urlId = useId()
 
 	return (
-		<div className='grid gap-3 rounded-control border border-border-subtle p-4 md:grid-cols-2'>
-			<label className='flex items-start gap-2 text-small'>
+		<div className='grid items-start gap-3 sm:grid-cols-[minmax(0,1fr)_minmax(0,2fr)]'>
+			<label className='flex cursor-pointer items-start gap-2 py-2 text-small'>
 				<input
 					type='checkbox'
-					checked={selected}
-					disabled={disabled}
-					onChange={event => onToggle(event.target.checked)}
+					className='mt-0.5 size-4 shrink-0 accent-action-primary'
+					checked={ selected }
+					disabled={ disabled }
+					onChange={ event => onToggle( event.target.checked ) }
 				/>
-				{work.title} · приоритет {priority}
+				{ work.title } · приоритет { priority }
 			</label>
-			{selected && (
+			{ selected && (
 				<div className='flex flex-col gap-2'>
-					<label htmlFor={urlId} className='text-label'>
-						Ссылка на код / артефакт
+					<label
+						htmlFor={ urlId }
+						className='text-label'
+					>
+						Ссылка на код / артефакт *
 					</label>
 					<input
-						id={urlId}
+						id={ urlId }
 						type='url'
-						value={url}
+						value={ url }
 						required
-						disabled={disabled}
-						onChange={event => onUrlChange(event.target.value)}
+						disabled={ disabled }
+						onChange={ event => onUrlChange( event.target.value ) }
 						placeholder='https://github.com/...'
-						className='h-11 w-full rounded-control border border-border-control px-3'
+						aria-describedby={ `${ urlId }-hint` }
+						className='h-11 w-full rounded-control border border-border-control px-3 text-small'
 					/>
+					<p
+						id={ `${ urlId }-hint` }
+						className='text-caption text-text-secondary'
+					>
+						Ссылка обязательна для каждой выбранной работы.
+					</p>
 				</div>
-			)}
+			) }
 		</div>
 	)
 }
 
-const EnrollmentForm = ({ queue, works }: EnrollmentFormProps) => {
-	const [artifacts, setArtifacts] = useState<Record<string, string>>({})
+const EnrollmentForm = ( { queue, works }: EnrollmentFormProps ) => {
+	const [ artifacts, setArtifacts ] = useState< Record< string, string > >( {} )
 	const queryClient = useQueryClient()
+	const selectedCount = Object.keys( artifacts ).length
+	const registrationOpen = queue.registration_open && queue.stage !== 'finished'
+	const quota = queue.quota
+	const mainCount = queue.students.filter(
+		participant => participant.position !== null && ! participant.is_reserve
+	).length
 
-	const enrollment = useMutation({
+	const enrollment = useMutation( {
 		mutationFn: () =>
-			enrollInQueue(queue.id, {
-				works: Object.entries(artifacts).map(([work_id, url]) => ({
+			enrollInQueue( queue.id, {
+				works: Object.entries( artifacts ).map( ( [ work_id, url ] ) => ( {
 					work_id,
 					artifact_url: url.trim()
-				}))
-			}),
+				} ) )
+			} ),
 		onSuccess: async () => {
-			await queryClient.invalidateQueries({
-				queryKey: ['queue', queue.id]
-			})
+			await queryClient.invalidateQueries( {
+				queryKey: [ 'queue', queue.id ]
+			} )
 		}
-	})
+	} )
 
-	const toggleWork = (id: string, checked: boolean) => {
-		setArtifacts(previous => {
+	const toggleWork = ( id: string, checked: boolean ) => {
+		setArtifacts( previous => {
 			const next = { ...previous }
-			if (checked) {
-				next[id] = ''
+			if ( checked ) {
+				next[ id ] = ''
 			} else {
-				delete next[id]
+				delete next[ id ]
 			}
 			return next
-		})
+		} )
 	}
 
 	return (
 		<form
 			className='flex flex-col gap-4'
-			onSubmit={event => {
+			onSubmit={ event => {
 				event.preventDefault()
-				if (Object.keys(artifacts).length > 0 && !enrollment.isPending) {
+				if ( registrationOpen && selectedCount > 0 && ! enrollment.isPending ) {
 					enrollment.mutate()
 				}
-			}}
+			} }
 		>
-			{works.map(work => (
+			{ works.map( work => (
 				<WorkFields
-					key={work.id}
-					work={work}
-					priority={queue.works.find(item => item.work_id === work.id)?.priority ?? 0}
-					selected={Object.hasOwn(artifacts, work.id)}
-					url={artifacts[work.id] ?? ''}
-					disabled={enrollment.isPending}
-					onToggle={checked => toggleWork(work.id, checked)}
-					onUrlChange={value =>
-						setArtifacts(previous => ({ ...previous, [work.id]: value }))
+					key={ work.id }
+					work={ work }
+					priority={
+						queue.works.find( item => item.work_id === work.id )?.priority ?? 0
+					}
+					selected={ Object.hasOwn( artifacts, work.id ) }
+					url={ artifacts[ work.id ] ?? '' }
+					disabled={ ! registrationOpen || enrollment.isPending }
+					onToggle={ checked => toggleWork( work.id, checked ) }
+					onUrlChange={ value =>
+						setArtifacts( previous => ( { ...previous, [ work.id ]: value } ) )
 					}
 				/>
-			))}
-			{enrollment.isError && (
-				<p role='alert' className='text-small text-status-danger'>
-					Не удалось записаться. Возможно, запись уже закрыта
-					или вы уже записаны. Обновите страницу и повторите попытку.
+			) ) }
+			{ registrationOpen && quota !== null && mainCount >= quota && (
+				<UIAlert
+					tone={ UIAlertTone.WARNING }
+					title='Основная группа заполнена'
+					message={ `Квота: ${ quota }. Новая запись попадёт в резерв. Участие не гарантировано.` }
+				/>
+			) }
+			{ registrationOpen && enrollment.isError && (
+				<p
+					role='alert'
+					className='text-small text-status-danger'
+				>
+					Не удалось записаться. Возможно, запись уже закрыта или вы уже
+					записаны. Обновите страницу и повторите попытку.
 				</p>
-			)}
+			) }
 			<button
 				type='submit'
-				disabled={enrollment.isPending || Object.keys(artifacts).length === 0}
-				className='self-start rounded-control bg-action-primary px-4 py-2 text-text-inverse disabled:opacity-50'
+				disabled={
+					! registrationOpen || enrollment.isPending || selectedCount === 0
+				}
+				className='min-h-11 self-start rounded-control bg-action-primary px-5 py-2 text-label text-text-inverse enabled:cursor-pointer enabled:hover:bg-action-hover disabled:bg-disabled-bg disabled:text-disabled-text'
 			>
-				{enrollment.isPending ? <span>Отправляем…</span> : 'Записаться на защиту'}
+				{ enrollment.isPending ? (
+					<span>Отправляем…</span>
+				) : selectedCount ? (
+					`Записаться · выбрано работ: ${ selectedCount }`
+				) : (
+					'Записаться на защиту'
+				) }
 			</button>
 		</form>
 	)
 }
 
-export const QueueEnrollment = ({ queue }: EnrollmentProps) => {
-	const { data, isPending, isError, refetch } = useQuery({
-		queryKey: ['works'],
+export const QueueEnrollment = ( { queue }: EnrollmentProps ) => {
+	const { data, isPending, isError, refetch } = useQuery( {
+		queryKey: [ 'works' ],
 		queryFn: getAllWorks,
-		enabled: !queue.my_entry && queue.registration_open && queue.stage !== 'finished'
-	})
+		enabled: ! queue.my_entry
+	} )
 
-	if (queue.my_entry) {
-	return <StudentEntryCard queue={queue} />
-}
-
-	if (!queue.registration_open || queue.stage === 'finished') {
-		return <p className='text-small'>Запись на эту очередь закрыта.</p>
+	if ( queue.my_entry ) {
+		return <StudentEntryCard queue={ queue } />
 	}
 
-	const works = (data ?? [])
-		.filter(work =>
-			work.is_active && queue.works.some(item => item.work_id === work.id)
+	const registrationOpen = queue.registration_open && queue.stage !== 'finished'
+
+	const works = ( data ?? [] )
+		.filter(
+			work =>
+				work.is_active && queue.works.some( item => item.work_id === work.id )
 		)
-		.sort((first, second) => {
-			const priority = (id: string) =>
-				queue.works.find(item => item.work_id === id)?.priority ?? 0
-			return priority(first.id) - priority(second.id)
-		})
+		.sort( ( first, second ) => {
+			const priority = ( id: string ) =>
+				queue.works.find( item => item.work_id === id )?.priority ?? 0
+			return priority( first.id ) - priority( second.id )
+		} )
 
 	return (
-		<section className='flex flex-col gap-4 rounded-card bg-bg-surface p-6'>
+		<section className='flex flex-col gap-4 rounded-card border border-border-subtle bg-bg-surface p-6'>
 			<h2 className='text-section'>Запись на защиту</h2>
 			<p className='text-small text-text-secondary'>
 				Выберите работы и добавьте ссылку на артефакт для каждой.
 			</p>
-			{isPending && <p>Загрузка работ…</p>}
-			{isError && (
-				<button type='button' onClick={() => refetch()}>
+			{ isPending && <p>Загрузка работ…</p> }
+			{ isError && (
+				<button
+					type='button'
+					onClick={ () => refetch() }
+				>
 					Не удалось загрузить работы. Повторить
 				</button>
-			)}
-			{data && works.length === 0 && <p>Нет доступных работ.</p>}
-			{data && works.length > 0 && (
-				<EnrollmentForm key={queue.id} queue={queue} works={works} />
-			)}
+			) }
+			{ data && works.length === 0 && <p>Нет доступных работ.</p> }
+			{ ! registrationOpen && (
+				<UIAlert
+					tone={ UIAlertTone.WARNING }
+					title='Запись закрыта'
+					message='На эту защиту больше нельзя записаться.'
+				/>
+			) }
+			{ ( works.length > 0 || ! registrationOpen ) && (
+				<EnrollmentForm
+					key={ queue.id }
+					queue={ queue }
+					works={ works }
+				/>
+			) }
 		</section>
 	)
 }

@@ -13,67 +13,97 @@ const statusLabels = {
 	removed: 'Удалён из очереди'
 }
 
-export const StudentEntryCard = ({ queue }: { queue: QueueDetail }) => {
+export const StudentEntryCard = ( { queue }: { queue: QueueDetail } ) => {
 	const entry = queue.my_entry
 
-	if (!entry) {
+	if ( ! entry ) {
 		return null
 	}
 
-	return (
-		<section className='flex flex-col gap-4 rounded-card bg-bg-surface p-6'>
-			<h2 className='text-section'>Ваша запись</h2>
+	const total = queue.students.filter(
+		participant => participant.position !== null
+	).length
+	const singleWork = entry.works.length === 1 ? entry.works[ 0 ] : undefined
+	const place =
+		entry.position === null
+			? 'Место пока не назначено'
+			: `Место ${ entry.position }${ total >= entry.position ? ` из ${ total }` : '' }`
 
-			<div className='flex flex-wrap gap-2 text-small'>
-				<span className='rounded-control bg-bg-selected px-3 py-2'>
-					{statusLabels[entry.status]}
+	return (
+		<section className='flex flex-col gap-4 rounded-card border border-border-subtle bg-bg-surface p-6 text-text-primary'>
+			<h2 className='text-section'>
+				Ваша запись{ singleWork && ` · ${ singleWork.title }` }
+			</h2>
+
+			<div className='flex flex-wrap items-center gap-3 text-label'>
+				<span
+					className={
+						entry.status === 'called'
+							? 'rounded-control bg-status-warning-bg px-3 py-1 text-status-warning'
+							: 'rounded-control bg-bg-page px-3 py-1 text-text-secondary'
+					}
+				>
+					{ statusLabels[ entry.status ] }
 				</span>
-				<span className='rounded-control bg-bg-selected px-3 py-2'>
-					{entry.is_reserve ? 'Резерв' : 'Основная группа'}
-				</span>
+				{ entry.position !== null && (
+					<span
+						className={
+							entry.is_reserve ? 'text-action-primary' : 'text-status-warning'
+						}
+					>
+						<span aria-hidden='true'>● </span>
+						{ entry.is_reserve ? 'Резерв' : 'Основная группа' }
+					</span>
+				) }
 			</div>
 
-			<p className='text-section'>
-				{entry.position === null
-					? 'Место пока не назначено'
-					: `Место ${entry.position}`}
+			<p className='text-heading'>
+				{ entry.is_reserve && 'Резерв · ' }
+				{ place }
 			</p>
 
-			{entry.is_top3 && (
-				<p className='text-small text-text-secondary'>
-					Вы в топ-3 очереди.
-				</p>
-			)}
+			{ entry.is_top3 && (
+				<p className='text-small text-text-secondary'>Вы в топ-3 очереди.</p>
+			) }
 
 			<div className='flex flex-col gap-3'>
-				{entry.works.map(work => (
+				{ entry.works.map( work => (
 					<div
-						key={work.work_id}
-						className='flex flex-col gap-2 rounded-control border border-border-subtle p-4'
+						key={ work.work_id }
+						className='flex flex-col gap-1'
 					>
-						<p className='text-label'>{work.title}</p>
 						<p className='text-small text-text-secondary'>
-							Приоритет: {work.priority}
+							{ ! singleWork && `${ work.title } · ` }Приоритет:{ ' ' }
+							{ work.priority }
 						</p>
-						{work.artifact_url && (
-							<a
-								href={work.artifact_url}
-								target='_blank'
-								rel='noopener noreferrer'
-								className='break-all text-small text-action-primary underline'
-							>
-								Открыть артефакт
-							</a>
-						)}
+						{ work.artifact_url && (
+							<p className='text-small'>
+								<span className='text-label'>Артефакт: </span>
+								<a
+									href={ work.artifact_url }
+									target='_blank'
+									rel='noopener noreferrer'
+									className='break-all text-action-primary underline'
+								>
+									{ work.artifact_url }
+								</a>
+							</p>
+						) }
 					</div>
-				))}
+				) ) }
 			</div>
-            <div className='flex flex-wrap gap-4'>
-	<CancelQueueEntry queue={queue} />
-	<MoveQueueEntry queue={queue} />
-</div>
-<ProposeQueueSwap queue={queue} />
-<EditQueueEntry key={entry.id} queue={queue} />
+
+			<EditQueueEntry
+				key={ entry.id }
+				queue={ queue }
+			/>
+
+			<div className='flex flex-wrap items-start gap-4'>
+				<CancelQueueEntry queue={ queue } />
+				<MoveQueueEntry queue={ queue } />
+			</div>
+
+			<ProposeQueueSwap queue={ queue } />
 		</section>
 	)
 }

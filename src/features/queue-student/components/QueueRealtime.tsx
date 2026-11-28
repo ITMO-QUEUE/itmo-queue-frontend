@@ -16,49 +16,55 @@ interface ConnectionProps {
 	onReconnect: () => void
 }
 
-const QueueConnection = ({ queueId, onReconnect }: ConnectionProps) => {
+const QueueConnection = ( { queueId, onReconnect }: ConnectionProps ) => {
 	const queryClient = useQueryClient()
-	const [status, setStatus] = useState<ConnectionStatus>('connecting')
+	const [ status, setStatus ] = useState< ConnectionStatus >( 'connecting' )
 
-	useEffect(() => {
-		const source = createQueueEventSource(queueId)
+	useEffect( () => {
+		const source = createQueueEventSource( queueId )
 		const refresh = () => {
-			void queryClient.invalidateQueries({
-				queryKey: ['queue', queueId],
+			void queryClient.invalidateQueries( {
+				queryKey: [ 'queue', queueId ],
 				exact: true
-			})
+			} )
 		}
 
 		source.onopen = () => {
-			setStatus('connected')
+			setStatus( 'connected' )
 			refresh()
 		}
-		source.onerror = () => setStatus('disconnected')
+		source.onerror = () => setStatus( 'disconnected' )
 
-		for (const event of queueEvents) {
-			source.addEventListener(event, refresh)
+		for ( const event of queueEvents ) {
+			source.addEventListener( event, refresh )
 		}
-		source.addEventListener('auth.required', () => {
-			setStatus('auth')
+		source.addEventListener( 'auth.required', () => {
+			setStatus( 'auth' )
 			source.close()
-		})
+		} )
 
 		return () => source.close()
-	}, [queueId, queryClient])
+	}, [ queueId, queryClient ] )
 
-	if (status === 'connected') {
+	if ( status === 'connected' ) {
 		return (
-			<p role='status' className='text-small text-status-success'>
+			<p
+				role='status'
+				className='sr-only'
+			>
 				Очередь обновляется в реальном времени
 			</p>
 		)
 	}
 
-	if (status === 'auth') {
+	if ( status === 'auth' ) {
 		return (
-			<p role='alert' className='text-small text-status-danger'>
-				Сессия завершилась или доступ изменился.
-				Обновите страницу и при необходимости войдите снова.
+			<p
+				role='alert'
+				className='text-small text-status-danger'
+			>
+				Сессия завершилась или доступ изменился. Обновите страницу и при
+				необходимости войдите снова.
 			</p>
 		)
 	}
@@ -69,31 +75,31 @@ const QueueConnection = ({ queueId, onReconnect }: ConnectionProps) => {
 			className='flex flex-col items-start gap-3 rounded-control bg-status-warning-bg p-4 text-small'
 		>
 			<p>
-				{status === 'connecting'
+				{ status === 'connecting'
 					? 'Подключаем обновления очереди…'
-					: 'Связь потеряна. Данные могут быть устаревшими. Пробуем восстановить соединение.'}
+					: 'Связь потеряна. Данные могут быть устаревшими. Пробуем восстановить соединение.' }
 			</p>
-			{status === 'disconnected' && (
+			{ status === 'disconnected' && (
 				<button
 					type='button'
-					onClick={onReconnect}
+					onClick={ onReconnect }
 					className='cursor-pointer text-action-primary underline'
 				>
 					Переподключиться
 				</button>
-			)}
+			) }
 		</div>
 	)
 }
 
-export const QueueRealtime = ({ queueId }: { queueId: string }) => {
-	const [attempt, setAttempt] = useState(0)
+export const QueueRealtime = ( { queueId }: { queueId: string } ) => {
+	const [ attempt, setAttempt ] = useState( 0 )
 
 	return (
 		<QueueConnection
-			key={`${queueId}:${attempt}`}
-			queueId={queueId}
-			onReconnect={() => setAttempt(value => value + 1)}
+			key={ `${ queueId }:${ attempt }` }
+			queueId={ queueId }
+			onReconnect={ () => setAttempt( value => value + 1 ) }
 		/>
 	)
 }

@@ -1,27 +1,75 @@
+import { Bell, UserRound } from 'lucide-react'
+import { Link, useMatch } from 'react-router'
 import { useAuthStore } from '../../stores/useAuthStore'
 import { MyBreadcrumb } from './MyBreadcrumb'
 
+const roleLabels = {
+	student: 'Студент',
+	teacher: 'Преподаватель',
+	admin: 'Администратор'
+}
+
 export const Header = () => {
-	const { user } = useAuthStore()
-	const { name, type } = user || { name: 'Джон Дое', type: 'student' }
-	const shownType = type === 'student' ? 'Студент' : 'Преподаватель'
+	const user = useAuthStore( state => state.user )
+	const isQueuePage = useMatch( '/student/queues/:queueId' )
+
+	if ( isQueuePage ) {
+		return (
+			<div className='flex w-full items-center justify-between gap-4 bg-bg-surface px-6 py-4 text-text-primary'>
+				<span className='text-subheading'>Очередь на защиту</span>
+
+				<div className='flex shrink-0 items-center gap-6'>
+					<button
+						type='button'
+						aria-label='Уведомления'
+						className='cursor-pointer'
+					>
+						<Bell
+							size={ 20 }
+							aria-hidden='true'
+						/>
+					</button>
+
+					<Link
+						to='/student/profile'
+						className='flex items-center gap-2 text-label'
+					>
+						<UserRound
+							size={ 20 }
+							aria-hidden='true'
+						/>
+						Профиль
+					</Link>
+				</div>
+			</div>
+		)
+	}
+
+	const name = user?.name ?? 'Джон Дое'
+	const shownType = roleLabels[ user?.role ?? 'student' ]
 	const initials = name
 		.split( ' ' )
-		.map( n => n[ 0 ] )
+		.map( part => part[ 0 ] )
 		.join( '' )
 		.toUpperCase()
 
 	return (
-		<div className='p-6 w-full grid grid-cols-2'>
+		<div className='grid w-full grid-cols-2 p-6'>
 			<div className='flex justify-start'>
 				<MyBreadcrumb />
 			</div>
-			<div className='flex gap-6 justify-end align-center text-text-primary text-sm'>
-				<button className='cursor-pointer'>Уведомления</button>
-				<div className='p-2 rounded-full bg-bg-selected flex justify-center items-center text-text-primary font-bold'>
+
+			<div className='flex items-center justify-end gap-6 text-sm text-text-primary'>
+				<button
+					type='button'
+					className='cursor-pointer'
+				>
+					Уведомления
+				</button>
+				<div className='flex items-center justify-center rounded-full bg-bg-selected p-2 font-bold'>
 					{ initials }
 				</div>
-				<span className='h-full flex items-center'>
+				<span>
 					{ name } · { shownType }
 				</span>
 			</div>
