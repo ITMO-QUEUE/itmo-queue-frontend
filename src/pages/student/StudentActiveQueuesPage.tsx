@@ -1,12 +1,17 @@
 import { useQuery } from '@tanstack/react-query'
 import { useState } from 'react'
-import { getMyQueues } from '../../app/api/queues/queues.api'
+import { getAllWorks, getMyQueues } from '../../app/api/queues/queues.api'
 import type { QueueDetail } from '../../app/api/queues/queues.api.d'
 import { Page } from '../../components/common/Page'
 import { UISelect } from '../../components/ui/UISelect'
-import { QueueCatalogCard } from '../../features/queues/components/QueueCatalogCard'
+import {
+	isDefenseNow,
+	StudentQueue
+} from '../../features/queue-student/components/StudentQueue'
+import { myQueuesQueryKey } from '../../features/queue-student/myQueuesQuery'
+import { useAuthStore } from '../../stores/useAuthStore'
 
-const ALL_DISCIPLINES = '__all__'
+const ALL = '__all__'
 
 const loadMyQueues = async ( offset = 0 ): Promise< QueueDetail[] > => {
 	const limit = 100
@@ -20,11 +25,112 @@ const loadMyQueues = async ( offset = 0 ): Promise< QueueDetail[] > => {
 	return [ ...page, ...rest ]
 }
 
+const getWorkNumbers = (
+	queues: QueueDetail[],
+	workNumbers: Map< string, number >
+) => {
+	const numbers = new Set< number >()
+	for ( const queue of queues ) {
+		for ( const work of queue.my_entry?.works ?? [] ) {
+			const number = workNumbers.get( work.work_id )
+			if ( number !== undefined ) numbers.add( number )
+		}
+	}
+	return numbers
+}
+
+const UpcomingQueues = ( { queues }: { queues: QueueDetail[] } ) => {
+	const [ discipline, setDiscipline ] = useState( ALL )
+	const [ workNumber, setWorkNumber ] = useState( ALL )
+	const worksQuery = useQuery( { queryKey: [ 'works' ], queryFn: getAllWorks } )
+	const workNumbers = new Map(
+		worksQuery.data?.map( work => [ work.id, work.position_no ] )
+	)
+	const disciplineOptions = Array.from(
+		new Map(
+			queues.map( queue => [ queue.discipline_id, queue.discipline_name ] )
+		),
+		( [ value, label ] ) => ( { value, label } )
+	).sort( ( first, second ) => first.label.localeCompare( second.label, 'ru' ) )
+	const currentDiscipline = disciplineOptions.some(
+		option => option.value === discipline
+	)
+		? discipline
+		: ALL
+	const disciplineQueues = queues.filter(
+		queue =>
+			currentDiscipline === ALL || queue.discipline_id === currentDiscipline
+	)
+	const numbers = getWorkNumbers( disciplineQueues, workNumbers )
+	const currentWork = [ ...numbers ].some(
+		number => String( number ) === workNumber
+	)
+		? workNumber
+		: ALL
+	const visibleQueues = disciplineQueues.filter(
+		queue =>
+			currentWork === ALL ||
+			queue.my_entry?.works.some(
+				work => workNumbers.get( work.work_id ) === Number( currentWork )
+			)
+	)
+
+	return (
+		<section className='flex flex-col gap-4'>
+			<h2 className='text-section'>Остальные записи</h2>
+			<div className='grid gap-4 sm:max-w-[44rem] sm:grid-cols-2'>
+				<UISelect
+					fullWidth
+					label='Дисциплина'
+					value={ currentDiscipline }
+					onChange={ value => {
+						setDiscipline( value )
+						setWorkNumber( ALL )
+					} }
+					options={ [ { value: ALL, label: 'Все' }, ...disciplineOptions ] }
+				/>
+				<UISelect
+					fullWidth
+					label='Номер работы'
+					value={ currentWork }
+					onChange={ setWorkNumber }
+					disabled={ numbers.size === 0 }
+					options={ [
+						{ value: ALL, label: 'Все' },
+						...[ ...numbers ]
+							.sort( ( a, b ) => a - b )
+							.map( number => ( {
+								value: String( number ),
+								label: `№ ${ number }`
+							} ) )
+					] }
+				/>
+			</div>
+			{ worksQuery.isError && (
+				<button
+					type='button'
+					className='self-start text-action-primary'
+					onClick={ () => worksQuery.refetch() }
+				>
+					Не удалось загрузить номера работ. Повторить
+				</button>
+			) }
+			{ visibleQueues.map( queue => (
+				<StudentQueue
+					key={ queue.id }
+					queue={ queue }
+				/>
+			) ) }
+		</section>
+	)
+}
+
 export const StudentActiveQueuesPage = () => {
-	const [ discipline, setDiscipline ] = useState( ALL_DISCIPLINES )
+	const userId = useAuthStore( state => state.user?.id )
 	const { data, isPending, isError, refetch } = useQuery( {
-		queryKey: [ 'student', 'my-queues' ],
+		queryKey: [ ...myQueuesQueryKey, userId ],
 		queryFn: () => loadMyQueues(),
+		enabled: Boolean( userId ),
 		refetchOnMount: 'always'
 	} )
 	const queues = ( data ?? [] )
@@ -34,21 +140,8 @@ export const StudentActiveQueuesPage = () => {
 				new Date( first.planned_start ).getTime() -
 				new Date( second.planned_start ).getTime()
 		)
-	const disciplines = [
-		{ value: ALL_DISCIPLINES, label: 'Все' },
-		...Array.from(
-			new Map(
-				queues.map( queue => [ queue.discipline_id, queue.discipline_name ] )
-			),
-			( [ value, label ] ) => ( { value, label } )
-		).sort( ( first, second ) =>
-			first.label.localeCompare( second.label, 'ru' )
-		)
-	]
-	const visibleQueues = queues.filter(
-		queue =>
-			discipline === ALL_DISCIPLINES || queue.discipline_id === discipline
-	)
+	const current = queues.filter( isDefenseNow )
+	const upcoming = queues.filter( queue => ! isDefenseNow( queue ) )
 
 	return (
 		<Page
@@ -61,37 +154,31 @@ export const StudentActiveQueuesPage = () => {
 				<button
 					type='button'
 					onClick={ () => refetch() }
-					className='self-start text-action-primary'
+					className='self-start cursor-pointer text-action-primary'
 				>
 					Не удалось загрузить записи. Повторить
 				</button>
 			) }
-			{ data && queues.length === 0 && (
-				<div className='rounded-card border border-border-subtle bg-bg-surface p-6 text-center'>
+			{ ! isError && data && queues.length === 0 && (
+				<div className='flex flex-col items-center gap-3 rounded-card border border-border-subtle bg-bg-surface p-6 text-center'>
 					<p className='text-subheading'>Вы пока не записаны</p>
-					<p className='text-small'>
+					<p className='text-small text-text-secondary'>
 						Найдите подходящую очередь и выберите работы для защиты.
 					</p>
 				</div>
 			) }
-			{ queues.length > 0 && (
-				<UISelect
-					label='Дисциплина'
-					value={ discipline }
-					onChange={ setDiscipline }
-					options={ disciplines }
-				/>
+			{ current.length > 0 && (
+				<section className='flex flex-col gap-4'>
+					<h2 className='text-section'>Защита идёт сейчас</h2>
+					{ current.map( queue => (
+						<StudentQueue
+							key={ queue.id }
+							queue={ queue }
+						/>
+					) ) }
+				</section>
 			) }
-			{ queues.length > 0 && visibleQueues.length === 0 && (
-				<p>По этой дисциплине нет записей.</p>
-			) }
-			{ visibleQueues.map( ( queue, index ) => (
-				<QueueCatalogCard
-					key={ queue.id }
-					queue={ queue }
-					isNearest={ index === 0 }
-				/>
-			) ) }
+			{ upcoming.length > 0 && <UpcomingQueues queues={ upcoming } /> }
 		</Page>
 	)
 }

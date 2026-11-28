@@ -2,6 +2,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { cancelMyQueueEntry } from '../../../app/api/queues/queues.api'
 import type { QueueDetail } from '../../../app/api/queues/queues.api.d'
 import { UIButton, UIButtonTone } from '../../../components/ui/UIButton'
+import { myQueuesQueryKey } from '../myQueuesQuery'
 
 export const CancelQueueEntry = ( {
 	queue,
@@ -16,9 +17,14 @@ export const CancelQueueEntry = ( {
 	const cancellation = useMutation( {
 		mutationFn: () => cancelMyQueueEntry( queue.id ),
 		onSuccess: async () => {
-			await queryClient.invalidateQueries( {
-				queryKey: [ 'queue', queue.id ]
-			} )
+			queryClient.setQueryData< QueueDetail[] >(
+				[ ...myQueuesQueryKey, entry?.student_id ],
+				queues => queues?.filter( item => item.id !== queue.id )
+			)
+			await Promise.all( [
+				queryClient.invalidateQueries( { queryKey: [ 'queue', queue.id ] } ),
+				queryClient.invalidateQueries( { queryKey: myQueuesQueryKey } )
+			] )
 		}
 	} )
 
