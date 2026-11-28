@@ -1,163 +1,178 @@
-# ITMO.Queue — Frontend Architecture
+# ITMO.Queue
 
-Документ описывает архитектуру клиентской части сервиса умных очередей для ИТМО: технологический стек, структуру проекта и маршрутизацию.
+Фронтенд-приложение системы управления электронными очередями для учебного процесса с ролевой моделью доступа (студент, преподаватель, администратор).
 
 ---
 
-## 1. Технологический стек
+## 0. Запуск
 
-Для реализации MVP выбран современный, типобезопасный и высокопроизводительный стек. Акцент сделан на скорость разработки, эффективность работы с данными в реальном времени и минимальную конфигурацию.
+Для работы используется пакетный менеджер **pnpm** и сборщик **Vite**.
 
-| Технология            | Применение               | Документация                                                                                 | Обоснование выбора                                                                                 |
-| :-------------------- | :----------------------- | :------------------------------------------------------------------------------------------- | :------------------------------------------------------------------------------------------------- |
-| TypeScript            | Типизация в JavaScript   | [typescriptlang.org](https://www.typescriptlang.org/docs/)                                   | Строгая типизация снижает количество runtime-ошибок и улучшает DX.                                 |
-| React                 | UI Library               | [react.dev](https://react.dev/learn)                                                         | Компонентный подход, хуки, огромная экосистема.                                                    |
-| Vite                  | Сборщик проекта          | [vite.dev](https://vite.dev/guide/)                                                          | Молниеносная холодная сборка и HMR, критично для быстрой итерации.                                 |
-| pnpm                  | Менеджер пакетов         | [pnpm.io](https://pnpm.io/motivation)                                                        | Экономия дискового пространства и ускорение установки зависимостей.                                |
-| Tailwind CSS          | Утилитарные CSS-стили    | [tailwindcss.com](https://v2.tailwindcss.com/docs)                                           | Утилитарный подход позволяет верстать быстро, не переключаясь между файлами.                       |
-| shadcn/ui             | UI Kit с исходниками     | [ui.shadcn.com](https://ui.shadcn.com/docs/installation)                                     | Готовые доступные компоненты на базе Radix UI. Копируются в проект, а не являются "чёрным ящиком". |
-| Zustand               | Клиентское состояние     | [zustand.docs](https://zustand.docs.pmnd.rs/learn)                                           | Легковесное управление глобальным состоянием без бойлерплейта Redux.                               |
-| TanStack Query        | Серверное состояние      | [tanstack.com/query](https://tanstack.com/query/latest/docs/framework/react)                 | Кеширование, дедупликация запросов, обработка статусов загрузки/ошибок.                            |
-| axios                 | HTTP-клиент              | [axios-http.com](https://axios.rest/pages/getting-started/first-steps.html)                  | Интерцепторы для автоматической подстановки токенов авторизации.                                   |
-| socket.io-client      | WebSockets               | [socket.io](https://socket.io/docs/v4/client-api/)                                           | Двусторонняя связь для мгновенного обновления статуса очереди без HTTP-поллинга.                   |
-| Zod + React Hook Form | Работа с формами         | [zod.dev](https://zod.dev/) / [react-hook-form.com](https://react-hook-form.com/get-started) | Эффективная валидация форм. Zod обеспечивает схему, синхронизированную с типами TS.                |
-| React Router          | Маршрутизация            | [reactrouter.com](https://reactrouter.com/home)                                              | Декларативная маршрутизация, защита роутов, вложенные лейауты.                                     |
-| Biome                 | Линтинг и форматирование | [biomejs.dev](https://biomejs.dev/ru/introduction/why-biome/)                                | Единый инструмент для линтинга и форматирования. Работает быстрее ESLint+Prettier.                 |
+### 1. Установка зависимостей
+```bash
+pnpm install
+```
 
-> Исключено из MVP: библиотеки для тестирования (Vitest, React Testing Library) и анимаций (Motion) убраны из скоупа, чтобы сфокусироваться на базовом функционале в рамках 1 месяца.
+### 2. Настройка переменных окружения
+Создайте файл конфигурации на основе примера `.env.example` (для dev-режима используются переменные окружения Vite):
+```bash
+cp .env.example .env
+```
+
+### 3. Доступные скрипты
+* **Запуск сервера разработки (`--mode dev`):**
+  ```bash
+  pnpm dev
+  ```
+* **Сборка для production (`tsc -b && vite build --mode prod`):**
+  ```bash
+  pnpm build
+  ```
+* **Предпросмотр production-сборки:**
+  ```bash
+  pnpm preview
+  ```
+* **Форматирование и линтинг кода (Biome):**
+  ```bash
+  pnpm format
+  ```
+* **Генерация TypeScript-типов из OpenAPI-схемы бэкенда** (требует запущенный бэкенд на `http://localhost:8000`):
+  ```bash
+  pnpm gen:api
+  ```
+
+*(Дополнительно в `src/enroll_queue_students.py` находится вспомогательный Python-скрипт для тестовой/пакетной записи студентов в очереди.)*
+
+---
+
+## 1. Стек технологий
+
+В проекте используются только следующие библиотеки и инструменты:
+
+* **Ядро:** React 19 (`^19.2.8`), TypeScript (`~6.0.2`), Vite (`^8.3.0`)
+* **Роутинг:** React Router (`^8.4.0`)
+* **Управление состоянием:**
+  * Серверный стейт и кэширование: TanStack React Query (`5.104.2`) + React Query Devtools
+  * Клиентский глобальный стейт: Zustand (`^5.0.15`)
+* **Сетевое взаимодействие:**
+  * REST API: Axios (`1.20.0`)
+  * Real-time (WebSockets): Socket.IO Client (`4.8.4`)
+  * Кодогенерация контрактов: `openapi-typescript` (`^7.13.0`)
+* **Формы и валидация:** React Hook Form (`7.90.0`), Zod (`4.6.7`), `@hookform/resolvers` (`5.9.1`)
+* **UI и стилизация:** Tailwind CSS (`4.3.3`, `@tailwindcss/vite`), Base UI (`@base-ui/react` `^1.9.0`), shadcn (`^4.22.1`), `class-variance-authority`, `tw-animate-css`, иконки Lucide React (`^1.61.0`), шрифт Geist (`@fontsource-variable/geist`)
+* **Качество кода и пакетный менеджер:** Biome (`2.5.15`), pnpm
 
 ---
 
 ## 2. Файловая структура
 
-Структура построена по модульному принципу, разделяя ответственность между общими компонентами, фичами (бизнес-логикой) и страницами.
 ```text
-src/
-├── app/ # Инициализация приложения
-│ ├── providers/ # Провайдеры контекстов (QueryClient, Socket, Theme, Auth)
-│ ├── router/ # Конфигурация React Router
-│ └── App.tsx # Корневой компонент
-│
-├── assets/ # Статика (логотипы, иконки)
-│
-├── components/ # Shared UI компоненты
-│ ├── ui/ # Базовые компоненты shadcn/ui (Button, Input, Card...)
-│ ├── common/ # Общие элементы (Header, Footer, Loader, ErrorBoundary)
-│ └── layout/ # Лейауты (StudentLayout, TeacherLayout)
-│
-├── features/ # Бизнес-модули (Feature-Sliced Design light)
-│ ├── auth/ # Авторизация через ITMO ID
-│ │ ├── api/ # Axios-запросы для авторизации
-│ │ ├── components/ # LoginForm, OAuthCallback
-│ │ └── hooks/ # useAuth, useLogin
-│ │
-│ ├── queue-student/ # Логика студента
-│ │ ├── api/ # REST endpoints (получение предметов, взятие талона)
-│ │ ├── socket/ # WebSocket listeners для обновления статуса студента
-│ │ ├── components/ # TakeTicketForm, CurrentTicketStatus, SubjectList
-│ │ └── hooks/ # useMyTicket, useSubjects
-│ │
-│ └── queue-teacher/ # Логика преподавателя
-│ ├── api/ # REST endpoints (открыть/закрыть очередь, вызвать следующего)
-│ ├── socket/ # WebSocket listeners для изменений очереди
-│ ├── components/ # QueueControlPanel, StudentListItem, CallNextBtn
-│ └── hooks/ # useQueueState, useCallStudent
-│
-├── lib/ # Утилиты и конфигурации
-│ ├── axios.ts # Настроенный экземпляр axios
-│ ├── socket.ts # Настройка подключения к WebSocket
-│ ├── utils.ts # cn() helper, date formatters
-│ └── constants.ts # Enum'ы статусов, роли
-│
-├── pages/ # Страницы (композиция фич и лейаутов)
-│ ├── LoginPage.tsx
-│ ├── student/
-│ │ ├── StudentDashboard.tsx
-│ │ ├── SubjectSelectionPage.tsx
-│ │ └── MyTicketPage.tsx
-│ ├── teacher/
-│ │ ├── TeacherDashboard.tsx
-│ │ └── QueueManagementPage.tsx
-│ └── NotFoundPage.tsx
-│
-├── stores/ # Global State (Zustand)
-│ ├── useAuthStore.ts # Токен, профиль пользователя
-│ └── useUIStore.ts # Состояние интерфейса (sidebar open/close)
-│
-├── types/ # TypeScript definitions
-│ ├── api.ts # Типы ответов API
-│ └── index.ts # Re-exports
-│
-└── main.tsx # Entry point
+├── biome.json                   # Конфигурация линтера и форматтера Biome
+├── components.json              # Конфигурация UI-компонентов (shadcn / Base UI)
+├── index.html                   # Корневой HTML-шаблон
+├── package.json                 # Зависимости и npm-скрипты
+├── tsconfig.json                # Настройки компилятора TypeScript
+├── vite.config.ts               # Конфигурация сборщика Vite
+└── src/
+    ├── main.tsx                 # Точка входа приложения
+    ├── index.css                # Глобальные стили и импорты Tailwind CSS
+    ├── app/                     # Слой инициализации приложения
+    │   ├── App.tsx              # Корневой компонент с провайдерами и роутером
+    │   ├── api/                 # Модули запросов к REST API (academic, auth, queues, system, users)
+    │   ├── providers/           # Глобальные провайдеры (AuthProvider.tsx)
+    │   └── router/              # Конфигурация роутера (index.tsx) и гарды (ProtectedRoute.tsx)
+    ├── assets/                  # Статические ресурсы: Logo.svg и набор SVG-иконок
+    ├── components/              # Общие переиспользуемые компоненты
+    │   ├── common/              # Бизнес-независимые элементы интерфейса (Header, Sidebar, Profile, MyBreadcrumb)
+    │   ├── layout/              # Общие макеты страниц (CommonLayout.tsx)
+    │   └── ui/                  # Атомарные компоненты дизайн-системы (UIButton, UIDialog, UIInput, UIQueueCard и др.)
+    ├── features/                # Изолированные функциональные модули по ролям и задачам
+    │   ├── auth/                # Авторизация (LoginForm, Alerts)
+    │   ├── queue-admin/         # Функционал администратора (получение и регистрация пользователей)
+    │   ├── queue-student/       # Функционал студента в очереди
+    │   └── queue-teacher/       # Функционал преподавателя и управления очередью
+    ├── libs/                    # Конфигурация библиотек и утилиты (axios.ts, utils.ts)
+    ├── pages/                   # Компоненты страниц (admin, student, teacher, test, AuthPage, NotFoundPage)
+    ├── stores/                  # Глобальные Zustand-сторы (useAuthStore.ts)
+    └── types/                   # Общие типы (HistoryAttempt.ts, StudentRecord.ts) и автогенерируемая схема schema.d.ts
 ```
 
 ---
 
 ## 3. Маршрутизация
 
-Маршруты разделены по ролям пользователей. Доступ к защищенным путям контролируется через компонент-обертку ProtectedRoute. Параметры маршрутов (например, :subjectId) являются динамическими, так как данные о предметах и очередях загружаются из базы данных, а не хардкодятся в приложении.
+Конфигурация роутинга описана в `src/app/router/index.tsx` с использованием `createBrowserRouter`. Доступ разграничен через `GuestOnlyRoute` (только для неавторизованных пользователей) и `ProtectedRoute` с проверкой массива разрешенных ролей (`allowedRoles`).
 
-### Таблица маршрутов
-
-| Путь                              | Компонент            | Описание                                                                                                                                            | Доступ  |
-| :-------------------------------- | :------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------- | :------ |
-| /login                            | LoginPage            | Страница входа. Инициация OAuth 2.0 потока через ITMO ID.                                                                                           | Public  |
-| /student                          | StudentDashboard     | Главный экран студента. Отображает список доступных предметов для сдачи.                                                                            | Student |
-| /student/queue/subject/:subjectId | SubjectSelectionPage | Выбор конкретной лабораторной работы и кнопка "Встать в очередь".                                                                                   | Student |
-| /student/my-ticket                | MyTicketPage         | Экран активного талона. Показывает текущую позицию, статус и примерное время ожидания. Обновляется в реальном времени через WebSocket.              | Student |
-| /teacher                          | TeacherDashboard     | Главный экран преподавателя. Список управляемых предметов и статус очередей (Открыта/Закрыта).                                                      | Teacher |
-| /teacher/manage/:queueId          | QueueManagementPage  | Панель управления активной очередью. Список студентов, кнопки "Вызвать", "Пропустить", "Завершить". Обновляется в реальном времени через WebSocket. | Teacher |
-| \*                                | NotFoundPage         | Страница ошибки 404.                                                                                                                                | All     |
-
-### Обоснование решений по маршрутизации
-
-1.  **Динамические параметры (:subjectId, :queueId)**:
-    - Мы избегаем хардкода названий предметов (например, /math или /physics). Вместо этого используется универсальный путь /student/queue/subject/:subjectId.
-    - Это позволяет системе быть гибкой: администратор может добавлять новые предметы в БД без необходимости менять код фронтенда и деплоить новое приложение.
-    - Компонент SubjectSelectionPage считывает subjectId из URL и делает запрос к API за деталями конкретного предмета.
-
-2.  **Разделение неймспейсов (/student vs /teacher)**:
-    - Четкое разделение путей позволяет использовать разные Layout-компоненты. У студента и преподавателя разный набор навигационных элементов и хедеров.
-
-    - Безопасность: Вся ветка /student/_ обернута в проверку роли STUDENT, а /teacher/_ — в TEACHER. Попытка студента перейти по адресу учителя приведет к редиректу на его дашборд.
-
-3.  Интеграция WebSocket на страницах:
-    - На страницах MyTicketPage и QueueManagementPage логика подключения к WebSocket инкапсулирована внутри компонентов или кастомных хуков (например, useQueueSocket).
-    - При монтировании компонента устанавливается соединение с каналом конкретной очереди. При размонтировании (уходе со страницы) соединение корректно закрывается или отписывается, чтобы не нагружать браузер.
-
-4.  Исключение истории сдач:
-    - Маршрут /teacher/history намеренно исключен из MVP. Фокус первого месяца разработки — это корректная работа "живой" очереди. Аналитика и история будут добавлены во второй итерации.
-
-5.  Публичный вход:
-    - Маршрут /login вынесен за пределы защищенных групп, так как он необходим для неавторизованных пользователей для прохождения процедуры Single Sign-On (SSO) через ITMO ID.
+* **Публичные маршруты (`GuestOnlyRoute`):**
+  * `/` и `/auth` — страница входа (`AuthPage`)
+* **Маршруты студента (`ProtectedRoute`, роль `student`, обернуты в `CommonLayout`):**
+  * `/student/me/queues` (а также fallback `/student/me/*` и `/student/*`) — активные очереди текущего студента (`StudentActiveQueuesPage`)
+  * `/student/queues` — список очередей (`StudentQueuesPage`)
+  * `/student/queues/:queueId` — детальная страница очереди (`StudentQueuePage`)
+  * `/student/profile` — профиль пользователя (`Profile`)
+  * `/student/history` — история посещений (`StudentHistoryPage`)
+* **Маршруты преподавателя (`ProtectedRoute`, роль `teacher`, обернуты в `CommonLayout`):**
+  * `/teacher/queues` (а также fallback `/teacher/*`) — список очередей преподавателя (`TeacherQueuesPage`)
+  * `/teacher/queues/:queueId` — управление конкретной очередью (`TeacherQueuePage`)
+  * `/teacher/subjects` — дисциплины преподавателя (`TeacherSubjectsPage`)
+  * `/teacher/profile` — профиль пользователя (`Profile`)
+* **Маршруты администратора (`ProtectedRoute`, роль `admin`, обернуты в `CommonLayout`):**
+  * `/admin/users` (index и fallback `/admin/*`) — список пользователей (`AdminUsersPage`)
+  * `/admin/users/create` — создание нового пользователя (`AdminCreateUserPage`)
+  * `/admin/profile` — профиль пользователя (`Profile`)
+* **UI-песочница (доступна только при `import.meta.env.DEV`):**
+  * `/test/button`, `/test/queue-row`, `/test/checkbox`, `/test/input`, `/test/select`, `/test/alert`, `/test/numberfield`, `/test/dialog`, `/test/parameters`, `/test/queue-card`, `/test/queue-status`, `/test/tab` — стенды для изолированной проверки компонентов.
+* **Обработка несуществующих адресов:**
+  * `*` — страница 404 (`NotFoundPage`).
 
 ---
 
-## 4. Ключевые архитектурные паттерны
+## 4. API
 
-### Работа с состоянием (State Management Strategy)
+Взаимодействие с сервером строится по следующей схеме:
 
-В проекте используется гибридный подход к управлению состоянием:
+1. **Единый контракт типов (`src/types/schema.d.ts`):**
+   Схема типов генерируется напрямую из OpenAPI-спецификации бэкенда командой `pnpm gen:api`. Это гарантирует совпадение моделей данных фронтенда и бэкенда.
+2. **HTTP-клиент (`src/libs/axios.ts`) и доменные модули (`src/app/api/`):**
+   Поверх инстанса Axios реализованы типизированные API-сервисы (`.api.ts` + файлы типов `.api.d.ts`), разбитые по бизнес-сущностям:
+   * `auth/` — авторизация и работа с токенами/сессией
+   * `queues/` — создание, редактирование очередей, управление статусами и участниками
+   * `users/` — получение данных пользователей и управление профилями
+   * `academic/` — учебные данные (дисциплины, группы)
+   * `system/` — системные эндпоинты
+3. **Кэширование и мутации:**
+   Запросы интегрируются с `@tanstack/react-query` для управления состоянием загрузки, кэширования и инвалидации данных.
+4. **Real-time обновления:**
+   Для синхронизации состояния живой очереди в реальном времени используется `socket.io-client`.
 
-1.  Server State (TanStack Query):
-    - Все данные, полученные от бэкенда (список предметов, текущая позиция в очереди, список студентов у преподавателя), хранятся и управляются через TanStack Query.
-    - Это дает автоматическое кеширование, повторные запросы при потере фокуса окна и обработку ошибок "из коробки".
+---
 
-2.  Client State (Zustand):
-    - Используется только для глобальных UI-состояний, не зависящих от сервера: открыт ли сайдбар, какая тема выбрана (светлая/темная), данные текущего пользователя после логина (токен, роль).
-    - Важно: Не дублируйте данные очереди в Zustand. Доверяйте источнику истины (серверу/WS) через TanStack Query.
+## 5. Feature-Sliced Design (разделение на фичи студента и преподавателя)
 
-3.  Real-time Updates (WebSocket + TanStack Query):
-    - При получении сообщения через WebSocket (например, "Студент вызван"), мы используем методы queryClient.setQueryData или queryClient.invalidateQueries из TanStack Query.
-    - Это позволяет обновить UI мгновенно, используя уже существующие механизмы рендеринга React, без необходимости писать сложную логику ручного обновления стора.
+Архитектура папки `src/` организована по принципам **Feature-Sliced Design (FSD)** с четким разделением бизнес-логики по ролям внутри слоя `features/`:
 
-### Безопасность и API
+* **`features/auth`** — общая фича аутентификации: форма входа (`LoginForm.tsx`) с валидацией через React Hook Form + Zod и компонент системных уведомлений (`Alerts.tsx`).
+* **`features/queue-student`** — изолированный модуль для роли студента:
+  * `components/` — интерфейс очереди для студента (`StudentQueue.tsx`).
+  * `types/` — локальные типы данных студенческой очереди (`queue.ts`).
+  * `mocks/` — моки (`queues.ts`) для автономной разработки UI.
+  * `hooks/`, `socket/` — слои для клиентской логики и обработки сокет-событий студента.
+* **`features/queue-teacher`** — расширенный модуль рабочего места преподавателя:
+  * `components/` — управление очередью (`TeacherQueue.tsx`), рабочее место преподавателя и прием работ (`TeacherWorkplace.tsx`, `QueueWorkplace.tsx`), настройки параметров очереди (`QueueSettings.tsx`), управление блокировками (`QueueBans.tsx`), история (`QueueHistory.tsx`), а также модальные окна управления участниками (`QueueParticipantDialog.tsx`, `DialogAbsent.tsx`, `FinishQueueDialog.tsx`, `EmptyQueue.tsx`).
+  * `utils/` — специализированная бизнес-логика: нормализация и обработка ошибок очереди (`queueError.ts`), работа с черновиками настроек (`queueSettingsDraft.ts`).
+  * `types/`, `mocks/` — модели данных преподавателя (`queue.ts`, `StudentRecord.ts`) и полные моки (`FullQueues.ts`).
+* **`features/queue-admin`** — изолированный модуль администратора с локальными API-обертками (`getUsersApi.ts`, `registerUserApi.ts`).
 
-- Axios Interceptors: В файле lib/axios.ts настроен перехватчик запросов, который автоматически добавляет Authorization: Bearer <token> заголовок, если токен есть в useAuthStore.
-- Обработка 401: Если сервер возвращает 401 Unauthorized, интерцептор автоматически очищает стор авторизации и перенаправляет пользователя на /login.
+---
 
-### Стилизация
+## 6. Архитектура проекта
 
-- Используется подход Composition через shadcn/ui. Компоненты копируются в папку src/components/ui.
-- Для кастомизации используется Tailwind CSS классы прямо в JSX.
-- Утилита cn() (из lib/utils.ts) используется для безопасного объединения классов Tailwind и условного применения стилей.
+Приложение построено на строгой иерархии слоев с однонаправленными зависимостями (верхние слои могут импортировать нижние, но не наоборот):
+
+1. **`app` (Инициализация):** Настраивает глобальные провайдеры (`AuthProvider`, `QueryClientProvider`), подключает клиентский стор авторизации (`useAuthStore` на Zustand) и инициализирует `createBrowserRouter`.
+2. **`pages` (Страницы и роутинг):** Тонкие компоненты-контейнеры. Они отвечают за связывание URL-параметров (`:queueId`), общего каркаса `CommonLayout` (включающего `Header`, `Sidebar`, `MyBreadcrumb`) и композицию виджетов из `features/`.
+3. **`features` (Бизнес-фичи):** Содержат всю предметную логику, состояние форм, диалоговые окна и обработку событий для конкретной роли (`queue-student`, `queue-teacher`, `queue-admin`, `auth`). Фичи изолированы друг от друга.
+4. **`components` (UI-кит и общие блоки):**
+   * `components/ui/` — низкоуровневые переиспользуемые примитивы (`UIButton`, `UISelect`, `UIQueueRow`, `UIParticipantStatus`, `UITeacherParameters` и др.), построенные на базе Base UI и Tailwind CSS. Не содержат бизнес-логики.
+   * `components/common/` и `components/layout/` — общие элементы навигации и разметки.
+5. **`libs` и `types` (Инфраструктура):** Базовые утилиты (`cn`), настроенный клиент `axios`, глобальные контракты типов `schema.d.ts`.
