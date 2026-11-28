@@ -22,3 +22,6 @@ dist-ssr
 # env files
 .env.prod
 .env.dev
+
+#pycache
+__pycache__/
