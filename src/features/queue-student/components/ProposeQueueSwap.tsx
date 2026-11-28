@@ -53,9 +53,10 @@ export const ProposeQueueSwap = ( { queue }: { queue: QueueDetail } ) => {
 			aria-label='Обмен местами'
 			className='flex max-w-full flex-col items-start gap-2'
 		>
-			<div className='inline-flex'>
+			<div className='inline-flex w-48 max-w-full'>
 				<UIButton
 					label='Обменяться местами'
+					fullWidth
 					tone={ UIButtonTone.SECONDARY }
 					disabled={ blocked || options.length === 0 || proposal.isPending }
 					onClick={ () => setChoosing( value => ! value ) }

@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import type { ReactNode } from 'react'
 import { useState } from 'react'
 import {
 	getAllWorks,
@@ -110,7 +111,13 @@ const EditForm = ( { queue, works, onClose }: EditFormProps ) => {
 	)
 }
 
-export const EditQueueEntry = ( { queue }: { queue: QueueDetail } ) => {
+export const EditQueueEntry = ( {
+	queue,
+	children
+}: {
+	queue: QueueDetail
+	children: ReactNode
+} ) => {
 	const [ editing, setEditing ] = useState( false )
 	const available =
 		queue.my_entry?.status === 'waiting' && queue.stage !== 'finished'
@@ -126,19 +133,19 @@ export const EditQueueEntry = ( { queue }: { queue: QueueDetail } ) => {
 			work.is_active && queue.works.some( item => item.work_id === work.id )
 	)
 
-	if ( ! available ) {
-		return null
-	}
-
 	return (
 		<div className='flex flex-col gap-4'>
-			{ ! editing ? (
-				<UIButton
-					label='Изменить артефакт'
-					tone={ UIButtonTone.SECONDARY }
-					onClick={ () => setEditing( true ) }
-				/>
-			) : (
+			<div className='flex flex-wrap items-center gap-x-4 gap-y-2'>
+				{ children }
+				{ available && ! editing && (
+					<UIButton
+						label='Изменить артефакт'
+						tone={ UIButtonTone.SECONDARY }
+						onClick={ () => setEditing( true ) }
+					/>
+				) }
+			</div>
+			{ available && editing && (
 				<>
 					<h3 className='text-section'>Редактирование записи</h3>
 					{ worksQuery.isPending && <p>Загрузка работ…</p> }

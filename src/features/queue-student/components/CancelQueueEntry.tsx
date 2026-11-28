@@ -3,7 +3,13 @@ import { cancelMyQueueEntry } from '../../../app/api/queues/queues.api'
 import type { QueueDetail } from '../../../app/api/queues/queues.api.d'
 import { UIButton, UIButtonTone } from '../../../components/ui/UIButton'
 
-export const CancelQueueEntry = ( { queue }: { queue: QueueDetail } ) => {
+export const CancelQueueEntry = ( {
+	queue,
+	compact = false
+}: {
+	queue: QueueDetail
+	compact?: boolean
+} ) => {
 	const queryClient = useQueryClient()
 	const entry = queue.my_entry
 
@@ -33,7 +39,7 @@ export const CancelQueueEntry = ( { queue }: { queue: QueueDetail } ) => {
 				onClick={ () => cancellation.mutate() }
 			/>
 
-			{ blocked && (
+			{ blocked && ! compact && (
 				<p className='text-small text-text-secondary'>
 					Отмена недоступна для топ-3, после вызова или после завершения
 					очереди.
