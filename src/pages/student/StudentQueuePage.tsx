@@ -54,7 +54,9 @@ const QueueParticipantRow = ( {
 					? 'Топ-3'
 					: participant.position !== null && 'Основная группа' }
 		</span>
-		<span className='col-start-2 rounded-control bg-bg-page px-3 py-2 text-center text-small sm:col-start-auto'>
+		<span
+			className={ `col-start-2 rounded-control px-3 py-2 text-center text-small sm:col-start-auto ${ participant.status === 'called' ? 'bg-status-warning-bg text-status-warning' : 'bg-bg-page text-text-secondary' }` }
+		>
 			{ participantStatusLabels[ participant.status ] }
 		</span>
 	</li>

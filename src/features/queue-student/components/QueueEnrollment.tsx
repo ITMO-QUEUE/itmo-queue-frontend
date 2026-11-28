@@ -8,6 +8,16 @@ import type {
 import { UIAlert, UIAlertTone } from '../../../components/ui/UIAlert'
 import { StudentEntryCard } from './StudentEntryCard'
 
+const workPluralRules = new Intl.PluralRules( 'ru-RU' )
+const workLabels = {
+	one: 'работа',
+	few: 'работы',
+	many: 'работ',
+	other: 'работ',
+	zero: 'работ',
+	two: 'работ'
+}
+
 interface EnrollmentProps {
 	queue: QueueDetail
 }
@@ -80,6 +90,14 @@ export const WorkFields = ( {
 	)
 }
 
+const RegistrationClosedAlert = () => (
+	<UIAlert
+		tone={ UIAlertTone.WARNING }
+		title='Запись закрыта'
+		message='На эту защиту больше нельзя записаться.'
+	/>
+)
+
 const EnrollmentForm = ( { queue, works }: EnrollmentFormProps ) => {
 	const [ artifacts, setArtifacts ] = useState< Record< string, string > >( {} )
 	const queryClient = useQueryClient()
@@ -143,6 +161,7 @@ const EnrollmentForm = ( { queue, works }: EnrollmentFormProps ) => {
 					}
 				/>
 			) ) }
+			{ ! registrationOpen && <RegistrationClosedAlert /> }
 			{ registrationOpen && quota !== null && mainCount >= quota && (
 				<UIAlert
 					tone={ UIAlertTone.WARNING }
@@ -169,7 +188,7 @@ const EnrollmentForm = ( { queue, works }: EnrollmentFormProps ) => {
 				{ enrollment.isPending ? (
 					<span>Отправляем…</span>
 				) : selectedCount ? (
-					`Записаться · выбрано работ: ${ selectedCount }`
+					`Записаться · ${ selectedCount } ${ workLabels[ workPluralRules.select( selectedCount ) ] }`
 				) : (
 					'Записаться на защиту'
 				) }
@@ -218,13 +237,6 @@ export const QueueEnrollment = ( { queue }: EnrollmentProps ) => {
 				</button>
 			) }
 			{ data && works.length === 0 && <p>Нет доступных работ.</p> }
-			{ ! registrationOpen && (
-				<UIAlert
-					tone={ UIAlertTone.WARNING }
-					title='Запись закрыта'
-					message='На эту защиту больше нельзя записаться.'
-				/>
-			) }
 			{ ( works.length > 0 || ! registrationOpen ) && (
 				<EnrollmentForm
 					key={ queue.id }
