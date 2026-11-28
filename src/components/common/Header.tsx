@@ -13,11 +13,14 @@ const roleLabels = {
 export const Header = () => {
 	const user = useAuthStore( state => state.user )
 	const isQueuePage = useMatch( '/student/queues/:queueId' )
+	const isMyQueuesPage = useMatch( '/student/me/*' )
 
-	if ( isQueuePage ) {
+	if ( isQueuePage || isMyQueuesPage ) {
 		return (
 			<div className='flex w-full items-center justify-between gap-4 bg-bg-surface px-6 py-4 text-text-primary'>
-				<span className='text-subheading'>Очередь на защиту</span>
+				<span className='text-subheading'>
+					{ isQueuePage ? 'Очередь на защиту' : 'Мои записи' }
+				</span>
 
 				<div className='flex shrink-0 items-center gap-6'>
 					<UIButton

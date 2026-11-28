@@ -3,6 +3,7 @@ import { useEffect, useId, useRef, useState } from 'react'
 import { cancelMyQueueEntry } from '../../../app/api/queues/queues.api'
 import type { QueueDetail } from '../../../app/api/queues/queues.api.d'
 import { UIButton, UIButtonTone } from '../../../components/ui/UIButton'
+import { myQueuesQueryKey } from '../myQueuesQuery'
 
 interface ConfirmationProps {
 	queue: QueueDetail
@@ -106,9 +107,14 @@ export const CancelQueueEntry = ( {
 		mutationFn: () => cancelMyQueueEntry( queue.id ),
 		onSuccess: async () => {
 			setConfirming( false )
-			await queryClient.invalidateQueries( {
-				queryKey: [ 'queue', queue.id ]
-			} )
+			queryClient.setQueriesData< QueueDetail[] >(
+				{ queryKey: myQueuesQueryKey },
+				queues => queues?.filter( item => item.id !== queue.id )
+			)
+			await Promise.all( [
+				queryClient.invalidateQueries( { queryKey: [ 'queue', queue.id ] } ),
+				queryClient.invalidateQueries( { queryKey: myQueuesQueryKey } )
+			] )
 		}
 	} )
 

@@ -2,6 +2,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { moveMyEntryToEnd } from '../../../app/api/queues/queues.api'
 import type { QueueDetail } from '../../../app/api/queues/queues.api.d'
 import { UIButton, UIButtonTone } from '../../../components/ui/UIButton'
+import { myQueuesQueryKey } from '../myQueuesQuery'
 
 export const MoveQueueEntry = ( { queue }: { queue: QueueDetail } ) => {
 	const queryClient = useQueryClient()
@@ -10,9 +11,10 @@ export const MoveQueueEntry = ( { queue }: { queue: QueueDetail } ) => {
 	const movement = useMutation( {
 		mutationFn: () => moveMyEntryToEnd( queue.id ),
 		onSuccess: async () => {
-			await queryClient.invalidateQueries( {
-				queryKey: [ 'queue', queue.id ]
-			} )
+			await Promise.all( [
+				queryClient.invalidateQueries( { queryKey: [ 'queue', queue.id ] } ),
+				queryClient.invalidateQueries( { queryKey: myQueuesQueryKey } )
+			] )
 		}
 	} )
 
