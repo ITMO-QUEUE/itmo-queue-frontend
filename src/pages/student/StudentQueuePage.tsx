@@ -3,6 +3,7 @@ import { useParams } from 'react-router'
 import { getQueueById } from '../../app/api/queues/queues.api'
 import type { QueueDetail } from '../../app/api/queues/queues.api.d'
 import { Page } from '../../components/common/Page'
+import { UIButton, UIButtonTone } from '../../components/ui/UIButton'
 import { QueueCallNotice } from '../../features/queue-student/components/QueueCallNotice'
 import { QueueEnrollment } from '../../features/queue-student/components/QueueEnrollment'
 import { QueueOutgoingSwap } from '../../features/queue-student/components/QueueOutgoingSwap'
@@ -215,13 +216,14 @@ export const StudentQueuePage = () => {
 		return (
 			<div className='flex flex-col items-start gap-3 p-6'>
 				<p>Не удалось загрузить очередь.</p>
-				<button
-					type='button'
-					onClick={ () => refetch() }
-					className='cursor-pointer text-action-primary'
-				>
-					Повторить
-				</button>
+				<UIButton
+					label='Повторить'
+					tone={ UIButtonTone.GHOST }
+					onClick={ () => {
+						void refetch()
+					} }
+					compact
+				/>
 			</div>
 		)
 	}

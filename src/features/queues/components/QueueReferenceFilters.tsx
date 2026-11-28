@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import type { ReactNode } from 'react'
+import { UIButton, UIButtonTone } from '../../../components/ui/UIButton'
 import { UISelect } from '../../../components/ui/UISelect'
 import { getQueueFilterOptions } from '../api/getQueueFilterOptions'
 
@@ -64,13 +65,14 @@ export const QueueReferenceFilters = ( {
 			</div>
 			{ isPending && <p>Загрузка вариантов фильтров…</p> }
 			{ isError && (
-				<button
-					type='button'
-					onClick={ () => refetch() }
-					className='cursor-pointer self-start text-action-primary'
-				>
-					Не удалось загрузить фильтры. Повторить
-				</button>
+				<UIButton
+					label='Повторить загрузку фильтров'
+					tone={ UIButtonTone.GHOST }
+					onClick={ () => {
+						void refetch()
+					} }
+					compact
+				/>
 			) }
 		</div>
 	)

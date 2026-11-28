@@ -1,21 +1,22 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { moveMyEntryToEnd } from '../../../app/api/queues/queues.api'
 import type { QueueDetail } from '../../../app/api/queues/queues.api.d'
+import { UIButton, UIButtonTone } from '../../../components/ui/UIButton'
 
-export const MoveQueueEntry = ({ queue }: { queue: QueueDetail }) => {
+export const MoveQueueEntry = ( { queue }: { queue: QueueDetail } ) => {
 	const queryClient = useQueryClient()
 	const entry = queue.my_entry
 
-	const movement = useMutation({
-		mutationFn: () => moveMyEntryToEnd(queue.id),
+	const movement = useMutation( {
+		mutationFn: () => moveMyEntryToEnd( queue.id ),
 		onSuccess: async () => {
-			await queryClient.invalidateQueries({
-				queryKey: ['queue', queue.id]
-			})
+			await queryClient.invalidateQueries( {
+				queryKey: [ 'queue', queue.id ]
+			} )
 		}
-	})
+	} )
 
-	if (!entry) {
+	if ( ! entry ) {
 		return null
 	}
 
@@ -28,27 +29,29 @@ export const MoveQueueEntry = ({ queue }: { queue: QueueDetail }) => {
 
 	return (
 		<div className='flex flex-col items-start gap-3'>
-			<button
-				type='button'
-				disabled={blocked || movement.isPending}
-				onClick={() => movement.mutate()}
-				className='rounded-control border border-border-control bg-bg-selected px-4 py-2 text-text-primary disabled:cursor-not-allowed disabled:opacity-50'
-			>
-				{movement.isPending ? <span>Переносим…</span> : 'Перейти в конец'}
-			</button>
+			<UIButton
+				label='Перейти в конец'
+				tone={ UIButtonTone.SECONDARY }
+				disabled={ blocked }
+				loading={ movement.isPending }
+				onClick={ () => movement.mutate() }
+			/>
 
-			{alreadyMoved && (
+			{ alreadyMoved && (
 				<p className='text-small text-text-secondary'>
 					Перенос уже использован для этой записи.
 				</p>
-			)}
+			) }
 
-			{movement.isError && (
-				<p role='alert' className='text-small text-status-danger'>
-					Не удалось перенести запись. Обновите страницу:
-					возможно, ваше положение в очереди изменилось.
+			{ movement.isError && (
+				<p
+					role='alert'
+					className='text-small text-status-danger'
+				>
+					Не удалось перенести запись. Обновите страницу: возможно, ваше
+					положение в очереди изменилось.
 				</p>
-			)}
+			) }
 		</div>
 	)
 }

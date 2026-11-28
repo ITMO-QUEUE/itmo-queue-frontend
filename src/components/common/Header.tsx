@@ -1,6 +1,7 @@
 import { Bell, UserRound } from 'lucide-react'
 import { Link, useMatch } from 'react-router'
 import { useAuthStore } from '../../stores/useAuthStore'
+import { UIButton, UIButtonTone } from '../ui/UIButton'
 import { MyBreadcrumb } from './MyBreadcrumb'
 
 const roleLabels = {
@@ -19,16 +20,17 @@ export const Header = () => {
 				<span className='text-subheading'>Очередь на защиту</span>
 
 				<div className='flex shrink-0 items-center gap-6'>
-					<button
-						type='button'
-						aria-label='Уведомления'
-						className='cursor-pointer'
-					>
-						<Bell
-							size={ 20 }
-							aria-hidden='true'
-						/>
-					</button>
+					<UIButton
+						label='Уведомления'
+						tone={ UIButtonTone.GHOST }
+						icon={
+							<Bell
+								size={ 20 }
+								aria-hidden='true'
+							/>
+						}
+						iconOnly
+					/>
 
 					<Link
 						to='/student/profile'
@@ -60,12 +62,11 @@ export const Header = () => {
 			</div>
 
 			<div className='flex items-center justify-end gap-6 text-sm text-text-primary'>
-				<button
-					type='button'
-					className='cursor-pointer'
-				>
-					Уведомления
-				</button>
+				<UIButton
+					label='Уведомления'
+					tone={ UIButtonTone.GHOST }
+					compact
+				/>
 				<div className='flex items-center justify-center rounded-full bg-bg-selected p-2 font-bold'>
 					{ initials }
 				</div>

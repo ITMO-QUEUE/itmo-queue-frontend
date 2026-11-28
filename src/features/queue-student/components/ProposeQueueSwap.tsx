@@ -2,10 +2,12 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
 import { createSwapOffer } from '../../../app/api/queues/queues.api'
 import type { QueueDetail } from '../../../app/api/queues/queues.api.d'
+import { UIButton, UIButtonTone } from '../../../components/ui/UIButton'
 import { UISelect } from '../../../components/ui/UISelect'
 
 export const ProposeQueueSwap = ( { queue }: { queue: QueueDetail } ) => {
 	const [ targetId, setTargetId ] = useState( '' )
+	const [ choosing, setChoosing ] = useState( false )
 	const queryClient = useQueryClient()
 	const entry = queue.my_entry
 
@@ -18,19 +20,19 @@ export const ProposeQueueSwap = ( { queue }: { queue: QueueDetail } ) => {
 		},
 		onSuccess: async () => {
 			setTargetId( '' )
+			setChoosing( false )
 			await queryClient.invalidateQueries( {
 				queryKey: [ 'queue-swaps', queue.id ]
 			} )
 		}
 	} )
 
-	if (
-		entry?.status !== 'waiting' ||
-		entry.is_top3 ||
-		queue.stage === 'finished'
-	) {
+	if ( ! entry ) {
 		return null
 	}
+
+	const blocked =
+		entry.status !== 'waiting' || entry.is_top3 || queue.stage === 'finished'
 
 	const candidates = queue.students.filter(
 		participant =>
@@ -51,9 +53,15 @@ export const ProposeQueueSwap = ( { queue }: { queue: QueueDetail } ) => {
 			aria-label='Обмен местами'
 			className='flex max-w-full flex-col items-start gap-2'
 		>
-			{ options.length === 0 ? (
-				<p className='text-small'>Нет доступных участников для обмена.</p>
-			) : (
+			<div className='inline-flex'>
+				<UIButton
+					label='Обменяться местами'
+					tone={ UIButtonTone.SECONDARY }
+					disabled={ blocked || options.length === 0 || proposal.isPending }
+					onClick={ () => setChoosing( value => ! value ) }
+				/>
+			</div>
+			{ choosing && ! blocked && options.length > 0 && (
 				<div className='flex flex-wrap items-end gap-2'>
 					<div className='w-56 max-w-full'>
 						<UISelect
@@ -69,18 +77,14 @@ export const ProposeQueueSwap = ( { queue }: { queue: QueueDetail } ) => {
 							fullWidth
 						/>
 					</div>
-					<button
-						type='button'
-						disabled={ ! selectedExists || proposal.isPending }
+					<UIButton
+						label='Предложить обмен'
+						tone={ UIButtonTone.SECONDARY }
+						disabled={ blocked || ! selectedExists }
+						loading={ proposal.isPending }
 						onClick={ () => proposal.mutate() }
-						className='rounded-control border border-border-control px-4 py-2 disabled:opacity-50'
-					>
-						{ proposal.isPending ? (
-							<span>Отправляем…</span>
-						) : (
-							'Предложить обмен'
-						) }
-					</button>
+						compact
+					/>
 				</div>
 			) }
 			{ proposal.isSuccess && (

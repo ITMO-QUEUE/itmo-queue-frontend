@@ -2,6 +2,7 @@ import { useQuery } from '@tanstack/react-query'
 import { useId, useState } from 'react'
 import { Outlet, useParams } from 'react-router'
 import { Page } from '../../components/common/Page'
+import { UIButton, UIButtonTone } from '../../components/ui/UIButton'
 import { UISelect } from '../../components/ui/UISelect'
 import {
 	getAvailableQueues,
@@ -58,22 +59,21 @@ const QueueSearch = ( { onSearch, onReset }: QueueSearchProps ) => {
 				className='h-11 w-full rounded-control border border-border-control bg-bg-surface px-3 text-body text-text-primary'
 			/>
 			<div className='flex flex-wrap gap-3'>
-				<button
+				<UIButton
+					label='Найти'
+					tone={ UIButtonTone.PRIMARY }
 					type='submit'
-					className='cursor-pointer rounded-control bg-action-primary px-4 py-2 text-text-inverse'
-				>
-					Найти
-				</button>
-				<button
-					type='button'
+					compact
+				/>
+				<UIButton
+					label='Сбросить фильтры'
+					tone={ UIButtonTone.SECONDARY }
 					onClick={ () => {
 						setInput( '' )
 						onReset()
 					} }
-					className='cursor-pointer rounded-control border border-border-control px-4 py-2'
-				>
-					Сбросить фильтры
-				</button>
+					compact
+				/>
 			</div>
 		</form>
 	)
@@ -136,13 +136,12 @@ const QueueResults = ( { queues, onReset }: QueueResultsProps ) => (
 				<p className='mt-2 text-small text-text-secondary'>
 					Измените запрос или сбросьте фильтры.
 				</p>
-				<button
-					type='button'
+				<UIButton
+					label='Сбросить фильтры'
+					tone={ UIButtonTone.GHOST }
 					onClick={ onReset }
-					className='mt-4 cursor-pointer text-action-primary'
-				>
-					Сбросить фильтры
-				</button>
+					compact
+				/>
 			</div>
 		) }
 		<div className='grid gap-6'>
@@ -218,13 +217,14 @@ const StudentQueueList = () => {
 			</QueueReferenceFilters>
 			{ isPending && <p>Загрузка очередей…</p> }
 			{ isError && (
-				<button
-					type='button'
-					onClick={ () => refetch() }
-					className='cursor-pointer self-start text-action-primary'
-				>
-					Не удалось загрузить очереди. Повторить
-				</button>
+				<UIButton
+					label='Повторить загрузку очередей'
+					tone={ UIButtonTone.GHOST }
+					onClick={ () => {
+						void refetch()
+					} }
+					compact
+				/>
 			) }
 			{ queues && (
 				<QueueResults

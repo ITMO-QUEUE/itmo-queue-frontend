@@ -6,6 +6,7 @@ import type {
 	WorkRead
 } from '../../../app/api/queues/queues.api.d'
 import { UIAlert, UIAlertTone } from '../../../components/ui/UIAlert'
+import { UIButton, UIButtonTone } from '../../../components/ui/UIButton'
 import { StudentEntryCard } from './StudentEntryCard'
 
 const workPluralRules = new Intl.PluralRules( 'ru-RU' )
@@ -178,21 +179,18 @@ const EnrollmentForm = ( { queue, works }: EnrollmentFormProps ) => {
 					записаны. Обновите страницу и повторите попытку.
 				</p>
 			) }
-			<button
-				type='submit'
-				disabled={
-					! registrationOpen || enrollment.isPending || selectedCount === 0
+			<UIButton
+				label={
+					selectedCount
+						? `Записаться · ${ selectedCount } ${ workLabels[ workPluralRules.select( selectedCount ) ] }`
+						: 'Записаться на защиту'
 				}
-				className='min-h-11 self-start rounded-control bg-action-primary px-5 py-2 text-label text-text-inverse enabled:cursor-pointer enabled:hover:bg-action-hover disabled:bg-disabled-bg disabled:text-disabled-text'
-			>
-				{ enrollment.isPending ? (
-					<span>Отправляем…</span>
-				) : selectedCount ? (
-					`Записаться · ${ selectedCount } ${ workLabels[ workPluralRules.select( selectedCount ) ] }`
-				) : (
-					'Записаться на защиту'
-				) }
-			</button>
+				tone={ UIButtonTone.PRIMARY }
+				type='submit'
+				disabled={ ! registrationOpen || selectedCount === 0 }
+				loading={ enrollment.isPending }
+				compact
+			/>
 		</form>
 	)
 }
@@ -229,12 +227,14 @@ export const QueueEnrollment = ( { queue }: EnrollmentProps ) => {
 			</p>
 			{ isPending && <p>Загрузка работ…</p> }
 			{ isError && (
-				<button
-					type='button'
-					onClick={ () => refetch() }
-				>
-					Не удалось загрузить работы. Повторить
-				</button>
+				<UIButton
+					label='Повторить загрузку работ'
+					tone={ UIButtonTone.GHOST }
+					onClick={ () => {
+						void refetch()
+					} }
+					compact
+				/>
 			) }
 			{ data && works.length === 0 && <p>Нет доступных работ.</p> }
 			{ ( works.length > 0 || ! registrationOpen ) && (

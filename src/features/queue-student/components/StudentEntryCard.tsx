@@ -98,7 +98,7 @@ export const StudentEntryCard = ( { queue }: { queue: QueueDetail } ) => {
 				queue={ queue }
 			/>
 
-			<div className='flex flex-wrap items-start gap-3 [&_button]:min-h-11'>
+			<div className='flex flex-wrap items-start gap-3'>
 				<CancelQueueEntry queue={ queue } />
 				<MoveQueueEntry queue={ queue } />
 				<ProposeQueueSwap queue={ queue } />

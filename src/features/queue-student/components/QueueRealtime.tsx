@@ -1,6 +1,7 @@
 import { useQueryClient } from '@tanstack/react-query'
 import { useEffect, useState } from 'react'
 import { createQueueEventSource } from '../../../app/api/system/system.api'
+import { UIButton, UIButtonTone } from '../../../components/ui/UIButton'
 
 type ConnectionStatus = 'connecting' | 'connected' | 'disconnected' | 'auth'
 
@@ -80,13 +81,12 @@ const QueueConnection = ( { queueId, onReconnect }: ConnectionProps ) => {
 					: 'Связь потеряна. Данные могут быть устаревшими. Пробуем восстановить соединение.' }
 			</p>
 			{ status === 'disconnected' && (
-				<button
-					type='button'
+				<UIButton
+					label='Переподключиться'
+					tone={ UIButtonTone.GHOST }
 					onClick={ onReconnect }
-					className='cursor-pointer text-action-primary underline'
-				>
-					Переподключиться
-				</button>
+					compact
+				/>
 			) }
 		</div>
 	)
