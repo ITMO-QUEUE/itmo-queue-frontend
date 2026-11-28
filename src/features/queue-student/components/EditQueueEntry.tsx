@@ -1,0 +1,187 @@
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import type { ReactNode } from 'react'
+import { useState } from 'react'
+import {
+	getAllWorks,
+	updateMyEntryWorks
+} from '../../../app/api/queues/queues.api'
+import type {
+	QueueDetail,
+	WorkRead
+} from '../../../app/api/queues/queues.api.d'
+import { UIButton, UIButtonTone } from '../../../components/ui/UIButton'
+import { WorkFields } from './QueueEnrollment'
+
+interface EditFormProps {
+	queue: QueueDetail
+	works: WorkRead[]
+	onClose: () => void
+}
+
+const EditForm = ( { queue, works, onClose }: EditFormProps ) => {
+	const queryClient = useQueryClient()
+	const [ artifacts, setArtifacts ] = useState< Record< string, string > >(
+		() =>
+			Object.fromEntries(
+				( queue.my_entry?.works ?? [] ).map( work => [
+					work.work_id,
+					work.artifact_url ?? ''
+				] )
+			)
+	)
+
+	const saving = useMutation( {
+		mutationFn: () =>
+			updateMyEntryWorks( queue.id, {
+				works: Object.entries( artifacts ).map( ( [ work_id, url ] ) => ( {
+					work_id,
+					artifact_url: url.trim()
+				} ) )
+			} ),
+		onSuccess: async () => {
+			await queryClient.invalidateQueries( {
+				queryKey: [ 'queue', queue.id ]
+			} )
+			onClose()
+		}
+	} )
+
+	const toggleWork = ( id: string, checked: boolean ) => {
+		setArtifacts( previous => {
+			const next = { ...previous }
+			if ( checked ) next[ id ] = ''
+			else delete next[ id ]
+			return next
+		} )
+	}
+
+	return (
+		<form
+			className='flex flex-col gap-4'
+			onSubmit={ event => {
+				event.preventDefault()
+				if ( Object.keys( artifacts ).length && ! saving.isPending ) {
+					saving.mutate()
+				}
+			} }
+		>
+			{ works.map( work => (
+				<WorkFields
+					key={ work.id }
+					work={ work }
+					priority={
+						queue.works.find( item => item.work_id === work.id )?.priority ?? 0
+					}
+					selected={ Object.hasOwn( artifacts, work.id ) }
+					url={ artifacts[ work.id ] ?? '' }
+					disabled={ saving.isPending }
+					onToggle={ checked => toggleWork( work.id, checked ) }
+					onUrlChange={ value =>
+						setArtifacts( previous => ( { ...previous, [ work.id ]: value } ) )
+					}
+				/>
+			) ) }
+			{ saving.isError && (
+				<p
+					role='alert'
+					className='text-small text-status-danger'
+				>
+					Не удалось сохранить изменения. Возможно, вас уже вызвали или состав
+					доступных работ изменился.
+				</p>
+			) }
+			<div className='flex flex-wrap gap-3'>
+				<UIButton
+					label='Сохранить изменения'
+					tone={ UIButtonTone.PRIMARY }
+					type='submit'
+					loading={ saving.isPending }
+					disabled={ ! Object.keys( artifacts ).length }
+					compact
+				/>
+				<UIButton
+					label='Отмена'
+					tone={ UIButtonTone.SECONDARY }
+					disabled={ saving.isPending }
+					onClick={ onClose }
+					compact
+				/>
+			</div>
+		</form>
+	)
+}
+
+export const EditQueueEntry = ( {
+	queue,
+	children
+}: {
+	queue: QueueDetail
+	children: ReactNode
+} ) => {
+	const [ editing, setEditing ] = useState( false )
+	const available =
+		queue.my_entry?.status === 'waiting' && queue.stage !== 'finished'
+
+	const worksQuery = useQuery( {
+		queryKey: [ 'works' ],
+		queryFn: getAllWorks,
+		enabled: editing && available
+	} )
+
+	const works = ( worksQuery.data ?? [] ).filter(
+		work =>
+			work.is_active && queue.works.some( item => item.work_id === work.id )
+	)
+
+	return (
+		<div className='flex flex-col gap-4'>
+			<div className='flex flex-wrap items-center gap-x-4 gap-y-2'>
+				{ children }
+				{ available && ! editing && (
+					<div className='w-52 max-w-full'>
+						<UIButton
+							label='Изменить артефакт'
+							tone={ UIButtonTone.SECONDARY }
+							onClick={ () => setEditing( true ) }
+							fullWidth
+						/>
+					</div>
+				) }
+			</div>
+			{ available && editing && (
+				<>
+					<h3 className='text-section'>Редактирование записи</h3>
+					{ worksQuery.isPending && <p>Загрузка работ…</p> }
+					{ worksQuery.isError && (
+						<UIButton
+							label='Повторить загрузку работ'
+							tone={ UIButtonTone.GHOST }
+							onClick={ () => {
+								void worksQuery.refetch()
+							} }
+							compact
+						/>
+					) }
+					{ worksQuery.isSuccess && works.length > 0 && (
+						<EditForm
+							queue={ queue }
+							works={ works }
+							onClose={ () => setEditing( false ) }
+						/>
+					) }
+					{ worksQuery.isSuccess && works.length === 0 && (
+						<p>Нет доступных работ для редактирования.</p>
+					) }
+					{ ! worksQuery.isSuccess && (
+						<UIButton
+							label='Закрыть'
+							tone={ UIButtonTone.GHOST }
+							onClick={ () => setEditing( false ) }
+							compact
+						/>
+					) }
+				</>
+			) }
+		</div>
+	)
+}

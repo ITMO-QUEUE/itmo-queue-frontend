@@ -1,9 +1,14 @@
+import type { ReactNode } from 'react'
 import Spinner from '@/assets/icons/Spinner.svg'
 import { tw } from '../../libs/utils'
 
 export interface UIButtonProps {
 	label: string
-	onClick: () => void | Promise< void >
+	onClick?: () => void | Promise< void >
+	type?: 'button' | 'submit'
+	compact?: boolean
+	icon?: ReactNode
+	iconOnly?: boolean
 	tone: UIButtonTone
 	loading?: boolean
 	disabled?: boolean
@@ -60,6 +65,10 @@ const TONE_CLASSES: Record< UIButtonTone, string > = {
 export const UIButton = ( {
 	label,
 	onClick,
+	type = 'button',
+	compact = false,
+	icon,
+	iconOnly = false,
 	tone,
 	disabled = false,
 	loading = false,
@@ -69,13 +78,19 @@ export const UIButton = ( {
 
 	return (
 		<button
-			type='button'
+			type={ type }
 			onClick={ onClick }
 			disabled={ isDisabled }
 			aria-busy={ loading }
 			className={ tw(
 				BASE_CLASSES,
-				fullWidth ? 'w-full' : 'w-56',
+				fullWidth
+					? 'w-full'
+					: iconOnly
+						? 'size-11 p-0'
+						: compact
+							? 'w-auto'
+							: 'w-56',
 				TONE_CLASSES[ tone ]
 			) }
 		>
@@ -94,7 +109,8 @@ export const UIButton = ( {
 					) }
 				</span>
 			) }
-			<span>{ label }</span>
+			{ ! loading && icon }
+			<span className={ iconOnly ? 'sr-only' : undefined }>{ label }</span>
 		</button>
 	)
 }

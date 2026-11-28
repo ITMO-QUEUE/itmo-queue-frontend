@@ -409,7 +409,15 @@ export interface paths {
 		delete: operations[ 'cancelMyEntry' ]
 		options?: never
 		head?: never
-		patch?: never
+		/**
+		 * Update selected works and artifact links without changing queue position
+		 * @description Replace a student's selected works while preserving the queue entry itself.
+		 *
+		 *     The queue row and its ordering fields are intentionally left untouched. Updates are
+		 *     allowed while the entry is waiting; once a student is called, the submitted works
+		 *     are part of the active attempt and cannot be changed.
+		 */
+		patch: operations[ 'updateMyEntryWorks' ]
 		trace?: never
 	}
 	'/api/v1/queues/{queue_id}/entries/{entry_id}': {
@@ -1296,8 +1304,10 @@ export interface components {
 			 * Format: date-time
 			 */
 			planned_end: string
-			/** Location */
-			location?: string | null
+			/** Auditorium */
+			auditorium?: string | null
+			/** Onlinelink */
+			onlineLink?: string | null
 			/**
 			 * Avg Duration Min
 			 * @default 10
@@ -1305,17 +1315,94 @@ export interface components {
 			avg_duration_min: number | null
 			/** Quota */
 			quota?: number | null
-			/** Stream Ids */
-			stream_ids?: string[]
-			/**
-			 * Registration Open
-			 * @default true
-			 */
+			/** Registration Open */
 			registration_open: boolean
 			/** Teacher Ids */
 			teacher_ids: string[]
 			/** Works */
-			works: components[ 'schemas' ][ 'SessionWork' ][]
+			works: components[ 'schemas' ][ 'SessionCreateWork' ][]
+		}
+		/** SessionCreateWork */
+		SessionCreateWork: {
+			/** Title */
+			title: string
+			/** Priority */
+			priority: number
+		}
+		/** SessionCreated */
+		SessionCreated: {
+			/**
+			 * Id
+			 * Format: uuid
+			 */
+			id: string
+			/**
+			 * Discipline Id
+			 * Format: uuid
+			 */
+			discipline_id: string
+			/** Title */
+			title: string
+			/** Description */
+			description: string | null
+			/**
+			 * Planned Start
+			 * Format: date-time
+			 */
+			planned_start: string
+			/**
+			 * Planned End
+			 * Format: date-time
+			 */
+			planned_end: string
+			/** Auditorium */
+			auditorium: string | null
+			/** Onlinelink */
+			onlineLink: string | null
+			/** Avg Duration Min */
+			avg_duration_min: number | null
+			/** Quota */
+			quota: number | null
+			stage: components[ 'schemas' ][ 'QueueStage' ]
+			/** Registration Open */
+			registration_open: boolean
+			/**
+			 * Created At
+			 * Format: date-time
+			 */
+			created_at: string
+			/**
+			 * Updated At
+			 * Format: date-time
+			 */
+			updated_at: string
+			/** Activated At */
+			activated_at: string | null
+			/** Finished At */
+			finished_at: string | null
+			/** Version */
+			version: number
+			/**
+			 * Stream Id
+			 * Format: uuid
+			 */
+			stream_id: string
+			/** Teacher Ids */
+			teacher_ids: string[]
+			/** Works */
+			works: components[ 'schemas' ][ 'SessionCreatedWork' ][]
+		}
+		/** SessionCreatedWork */
+		SessionCreatedWork: {
+			/**
+			 * Work Id
+			 * Format: uuid
+			 */
+			work_id: string
+			/** Priority */
+			priority: number
+			/** Title */
+			title: string
 		}
 		/** SessionOptions */
 		SessionOptions: {
@@ -1323,8 +1410,6 @@ export interface components {
 			disciplines: components[ 'schemas' ][ 'Option' ][]
 			/** Teachers */
 			teachers: components[ 'schemas' ][ 'TeacherOption' ][]
-			/** Stream Id */
-			stream_id: string | null
 		}
 		/** SessionRead */
 		SessionRead: {
@@ -1659,23 +1744,6 @@ export interface components {
 			 * @default true
 			 */
 			is_active: boolean
-		}
-		/** WorkOption */
-		WorkOption: {
-			/**
-			 * Id
-			 * Format: uuid
-			 */
-			id: string
-			/**
-			 * Discipline Id
-			 * Format: uuid
-			 */
-			discipline_id: string
-			/** Title */
-			title: string
-			/** Position No */
-			position_no: number
 		}
 		/** WorkRead */
 		WorkRead: {
@@ -3517,7 +3585,7 @@ export interface operations {
 					[ name: string ]: unknown
 				}
 				content: {
-					'application/json': components[ 'schemas' ][ 'SessionRead' ]
+					'application/json': components[ 'schemas' ][ 'SessionCreated' ]
 				}
 			}
 			/** @description Authentication required */
@@ -4006,6 +4074,77 @@ export interface operations {
 					[ name: string ]: unknown
 				}
 				content?: never
+			}
+			/** @description Authentication required */
+			401: {
+				headers: {
+					[ name: string ]: unknown
+				}
+				content: {
+					'application/json': components[ 'schemas' ][ 'ErrorResponse' ]
+				}
+			}
+			/** @description Action not permitted for this user */
+			403: {
+				headers: {
+					[ name: string ]: unknown
+				}
+				content: {
+					'application/json': components[ 'schemas' ][ 'ErrorResponse' ]
+				}
+			}
+			/** @description Resource not found or unavailable */
+			404: {
+				headers: {
+					[ name: string ]: unknown
+				}
+				content: {
+					'application/json': components[ 'schemas' ][ 'ErrorResponse' ]
+				}
+			}
+			/** @description Conflict with current state */
+			409: {
+				headers: {
+					[ name: string ]: unknown
+				}
+				content: {
+					'application/json': components[ 'schemas' ][ 'ErrorResponse' ]
+				}
+			}
+			/** @description Invalid request */
+			422: {
+				headers: {
+					[ name: string ]: unknown
+				}
+				content: {
+					'application/json': components[ 'schemas' ][ 'ErrorResponse' ]
+				}
+			}
+		}
+	}
+	updateMyEntryWorks: {
+		parameters: {
+			query?: never
+			header?: never
+			path: {
+				queue_id: string
+			}
+			cookie?: never
+		}
+		requestBody: {
+			content: {
+				'application/json': components[ 'schemas' ][ 'Enrollment' ]
+			}
+		}
+		responses: {
+			/** @description Successful Response */
+			200: {
+				headers: {
+					[ name: string ]: unknown
+				}
+				content: {
+					'application/json': components[ 'schemas' ][ 'Participant' ]
+				}
 			}
 			/** @description Authentication required */
 			401: {
