@@ -17,6 +17,13 @@ const LAB_TITLE_PREFIX = /^Лабораторная работа №\s*/iu
 const shortWorkTitle = ( title: string ) =>
 	title.replace( LAB_TITLE_PREFIX, 'ЛР № ' )
 
+const minutes = new Intl.NumberFormat( 'ru-RU', {
+	style: 'unit',
+	unit: 'minute',
+	unitDisplay: 'long'
+} )
+const HTTPS_PREFIX = /^https?:\/\//i
+
 const QueueEntryArtifacts = ( { queue }: { queue: QueueDetail } ) => {
 	const entry = queue.my_entry
 	if ( ! entry ) return null
@@ -47,7 +54,7 @@ const QueueEntryArtifacts = ( { queue }: { queue: QueueDetail } ) => {
 									rel='noopener noreferrer'
 									className='break-all text-action-primary hover:underline focus-visible:underline'
 								>
-									{ work.artifact_url }
+									{ work.artifact_url.replace( HTTPS_PREFIX, '' ) }
 								</a>
 							) : (
 								<span className='text-text-secondary'>Ссылка не указана</span>
@@ -83,18 +90,12 @@ export const StudentEntryCard = ( { queue }: { queue: QueueDetail } ) => {
 
 			<div className='flex flex-wrap items-center gap-4 text-label'>
 				<span
-					className={ `inline-flex min-h-9 w-56 max-w-full items-center justify-center rounded-control px-3 py-1 ${ entry.status === 'called' ? 'bg-status-warning-bg text-status-warning' : 'bg-bg-page text-text-secondary' }` }
+					className={ `inline-flex min-h-9 w-52 max-w-full items-center justify-center rounded-control px-3 py-1 ${ entry.status === 'called' ? 'bg-status-warning-bg text-status-warning' : 'bg-bg-page text-text-secondary' }` }
 				>
 					{ statusLabels[ entry.status ] }
 				</span>
 				{ entry.position !== null && (
-					<span
-						className={
-							entry.is_reserve || entry.is_top3
-								? 'text-action-primary'
-								: 'text-status-warning'
-						}
-					>
+					<span className='text-action-primary'>
 						<span aria-hidden='true'>● </span>
 						{ group }
 					</span>
@@ -116,24 +117,28 @@ export const StudentEntryCard = ( { queue }: { queue: QueueDetail } ) => {
 					Примерное время защиты —{ ' ' }
 					{ queue.avg_duration_min === null
 						? 'не указано'
-						: `${ queue.avg_duration_min } мин` }
+						: `${ minutes.format( queue.avg_duration_min ) }` }
 				</p>
 				<p>
 					Примерное время ожидания —{ ' ' }
 					{ queue.estimated_wait_minutes === null
 						? 'не рассчитано'
-						: `${ queue.estimated_wait_minutes } мин` }
+						: `${ minutes.format( queue.estimated_wait_minutes ) }` }
 				</p>
 			</div>
 
 			<QueueEntryArtifacts queue={ queue } />
 
 			<div className='flex flex-wrap items-start gap-4'>
-				<CancelQueueEntry
-					queue={ queue }
-					compact
-				/>
-				<MoveQueueEntry queue={ queue } />
+				<div className='w-52 max-w-full [&>div>button]:w-full'>
+					<CancelQueueEntry
+						queue={ queue }
+						compact
+					/>
+				</div>
+				<div className='w-52 max-w-full [&>div>button]:w-full'>
+					<MoveQueueEntry queue={ queue } />
+				</div>
 				<ProposeQueueSwap queue={ queue } />
 			</div>
 			{ entry.is_top3 &&
@@ -148,6 +153,14 @@ export const StudentEntryCard = ( { queue }: { queue: QueueDetail } ) => {
 					Перенос, отмена и обмен для этой записи недоступны.
 				</p>
 			) }
+			{ entry.status === 'waiting' &&
+				! entry.is_top3 &&
+				queue.stage !== 'finished' &&
+				entry.self_moves_count === 0 && (
+					<p className='text-caption text-text-secondary'>
+						Перенос в конец доступен один раз.
+					</p>
+				) }
 		</section>
 	)
 }

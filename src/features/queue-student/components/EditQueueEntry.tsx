@@ -138,11 +138,14 @@ export const EditQueueEntry = ( {
 			<div className='flex flex-wrap items-center gap-x-4 gap-y-2'>
 				{ children }
 				{ available && ! editing && (
-					<UIButton
-						label='Изменить артефакт'
-						tone={ UIButtonTone.SECONDARY }
-						onClick={ () => setEditing( true ) }
-					/>
+					<div className='w-52 max-w-full'>
+						<UIButton
+							label='Изменить артефакт'
+							tone={ UIButtonTone.SECONDARY }
+							onClick={ () => setEditing( true ) }
+							fullWidth
+						/>
+					</div>
 				) }
 			</div>
 			{ available && editing && (
