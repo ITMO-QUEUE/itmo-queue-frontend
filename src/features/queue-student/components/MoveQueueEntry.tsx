@@ -21,11 +21,22 @@ export const MoveQueueEntry = ( { queue }: { queue: QueueDetail } ) => {
 	}
 
 	const alreadyMoved = entry.self_moves_count > 0
+
+	const isLast =
+		entry.position !== null &&
+		! queue.students.some(
+			participant =>
+				participant.status === 'waiting' &&
+				participant.position !== null &&
+				participant.position > entry.position!
+		)
+
 	const blocked =
 		queue.stage === 'finished' ||
 		entry.status !== 'waiting' ||
 		entry.is_top3 ||
-		alreadyMoved
+		alreadyMoved ||
+		isLast
 
 	return (
 		<div className='flex flex-col items-start gap-3'>

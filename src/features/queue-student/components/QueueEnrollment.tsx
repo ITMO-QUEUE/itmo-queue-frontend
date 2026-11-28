@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useId, useState } from 'react'
+import CheckIcon from '@/assets/icons/Check.svg'
 import { enrollInQueue, getAllWorks } from '../../../app/api/queues/queues.api'
 import type {
 	QueueDetail,
@@ -7,8 +8,10 @@ import type {
 } from '../../../app/api/queues/queues.api.d'
 import { UIAlert, UIAlertTone } from '../../../components/ui/UIAlert'
 import { UIButton, UIButtonTone } from '../../../components/ui/UIButton'
+import { UICheckbox } from '../../../components/ui/UICheckbox'
 import { StudentEntryCard } from './StudentEntryCard'
 
+const LAB_PREFIX = /^Лабораторная работа №\s*/iu
 const workPluralRules = new Intl.PluralRules( 'ru-RU' )
 const workLabels = {
 	one: 'работа',
@@ -49,19 +52,25 @@ export const WorkFields = ( {
 	const urlId = useId()
 
 	return (
-		<div className='grid items-start gap-3 sm:grid-cols-[minmax(0,1fr)_minmax(0,2fr)]'>
-			<label className='flex cursor-pointer items-start gap-2 py-2 text-small'>
-				<input
-					type='checkbox'
-					className='mt-0.5 size-4 shrink-0 accent-action-primary'
+		<div className='grid w-full max-w-[46rem] items-start gap-3 sm:grid-cols-[13rem_minmax(0,1fr)] sm:gap-4'>
+			<div className='relative flex min-h-6 items-center sm:mt-1'>
+				<UICheckbox
+					label={ `${ work.title.replace( LAB_PREFIX, 'ЛР № ' ) } · приоритет ${ priority }` }
 					checked={ selected }
 					disabled={ disabled }
-					onChange={ event => onToggle( event.target.checked ) }
+					onChange={ onToggle }
 				/>
-				{ work.title } · приоритет { priority }
-			</label>
+				{ selected && (
+					<img
+						src={ CheckIcon }
+						alt=''
+						aria-hidden='true'
+						className='pointer-events-none absolute left-0 size-5 brightness-0 invert'
+					/>
+				) }
+			</div>
 			{ selected && (
-				<div className='flex flex-col gap-2'>
+				<div className='flex min-w-0 flex-col gap-1.5'>
 					<label
 						htmlFor={ urlId }
 						className='text-label'
@@ -167,7 +176,7 @@ const EnrollmentForm = ( { queue, works }: EnrollmentFormProps ) => {
 				<UIAlert
 					tone={ UIAlertTone.WARNING }
 					title='Основная группа заполнена'
-					message={ `Квота: ${ quota }. Новая запись попадёт в резерв. Участие не гарантировано.` }
+					message={ `Квота ${ quota }, уже записаны ${ mainCount } студентов. Вы попадёте в резерв; участие не гарантировано.` }
 				/>
 			) }
 			{ registrationOpen && enrollment.isError && (
@@ -179,18 +188,26 @@ const EnrollmentForm = ( { queue, works }: EnrollmentFormProps ) => {
 					записаны. Обновите страницу и повторите попытку.
 				</p>
 			) }
-			<UIButton
-				label={
-					selectedCount
-						? `Записаться · ${ selectedCount } ${ workLabels[ workPluralRules.select( selectedCount ) ] }`
-						: 'Записаться на защиту'
-				}
-				tone={ UIButtonTone.PRIMARY }
-				type='submit'
-				disabled={ ! registrationOpen || selectedCount === 0 }
-				loading={ enrollment.isPending }
-				compact
-			/>
+			<div className='self-start'>
+				<UIButton
+					label={
+						selectedCount
+							? `Записаться · ${ selectedCount } ${ workLabels[ workPluralRules.select( selectedCount ) ] }`
+							: 'Записаться на защиту'
+					}
+					tone={ UIButtonTone.PRIMARY }
+					type='submit'
+					disabled={ ! registrationOpen || selectedCount === 0 }
+					loading={ enrollment.isPending }
+				/>
+			</div>
+			{ selectedCount > 0 && (
+				<p className='text-caption font-bold text-text-secondary'>
+					{ selectedCount }{ ' ' }
+					{ workLabels[ workPluralRules.select( selectedCount ) ] } выбрано для
+					защиты
+				</p>
+			) }
 		</form>
 	)
 }
@@ -221,7 +238,9 @@ export const QueueEnrollment = ( { queue }: EnrollmentProps ) => {
 
 	return (
 		<section className='flex flex-col gap-4 rounded-card border border-border-subtle bg-bg-surface p-6'>
-			<h2 className='text-section'>Запись на защиту</h2>
+			<h2 className='text-section font-semibold text-text-primary'>
+				Запись на защиту
+			</h2>
 			<p className='text-small text-text-secondary'>
 				Выберите работы и добавьте ссылку на артефакт для каждой.
 			</p>
