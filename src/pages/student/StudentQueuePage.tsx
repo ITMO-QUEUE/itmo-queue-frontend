@@ -4,13 +4,27 @@ import { getQueueById } from '../../app/api/queues/queues.api'
 import type { QueueDetail } from '../../app/api/queues/queues.api.d'
 import { Page } from '../../components/common/Page'
 import { UIButton, UIButtonTone } from '../../components/ui/UIButton'
+import { UIParticipantStatus } from '../../components/ui/UIParticipantStatus'
 import { QueueCallNotice } from '../../features/queue-student/components/QueueCallNotice'
 import { QueueEnrollment } from '../../features/queue-student/components/QueueEnrollment'
 import { QueueOutgoingSwap } from '../../features/queue-student/components/QueueOutgoingSwap'
 import { QueueRealtime } from '../../features/queue-student/components/QueueRealtime'
 import { QueueSwapInbox } from '../../features/queue-student/components/QueueSwapInbox'
+import { ParticipantStatus } from '../../types/StudentRecord'
 
 type Participant = QueueDetail[ 'students' ][ number ]
+
+const statusAppearance: Record<
+	QueueDetail[ 'students' ][ number ][ 'status' ],
+	ParticipantStatus
+> = {
+	waiting: ParticipantStatus.WAITING,
+	called: ParticipantStatus.CALLED,
+	in_defense: ParticipantStatus.IN_DEFENSE,
+	completed: ParticipantStatus.COMPLETED,
+	cancelled: ParticipantStatus.CANCELLED,
+	removed: ParticipantStatus.REMOVED
+}
 
 const participantStatusLabels = {
 	waiting: 'Ожидает',
@@ -55,11 +69,12 @@ const QueueParticipantRow = ( {
 					? 'Топ-3'
 					: participant.position !== null && 'Основная группа' }
 		</span>
-		<span
-			className={ `col-start-2 rounded-control px-3 py-2 text-center text-small sm:col-start-auto ${ participant.status === 'called' ? 'bg-status-warning-bg text-status-warning' : 'bg-bg-page text-text-secondary' }` }
-		>
-			{ participantStatusLabels[ participant.status ] }
-		</span>
+		<div className='col-start-2 sm:col-start-auto [&>span]:w-full'>
+			<UIParticipantStatus
+				status={ statusAppearance[ participant.status ] }
+				label={ participantStatusLabels[ participant.status ] }
+			/>
+		</div>
 	</li>
 )
 
